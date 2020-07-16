@@ -90,10 +90,12 @@ document.getElementById('launch_button').addEventListener('click', function(e){
     
     // Deletus le mods
     const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
-    fs.readdirSync(modPath).forEach((file) => {
-        fs.unlinkSync(path.join(modPath, file))
-    })
-
+    if (fs.existsSync(modPath)) {
+        fs.readdirSync(modPath).forEach((file) => {
+            fs.unlinkSync(path.join(modPath, file))
+        })
+    }
+    
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
     if(jExe == null){
