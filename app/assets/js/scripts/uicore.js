@@ -29,6 +29,7 @@ remote.getCurrentWebContents().on('devtools-opened', () => {
     console.log('%cThe console is dark and full of terrors.', 'color: white; -webkit-text-stroke: 4px #a02d2a; font-size: 60px; font-weight: bold')
     console.log('%cIf you\'ve been told to paste something here, you\'re being scammed.', 'font-size: 16px')
     console.log('%cUnless you know exactly what you\'re doing, close this window.', 'font-size: 16px')
+    console.error('%cSome people can extract information from the launcher if you enter anything in here. Do not trust outsides sources.', 'font-size: 16px')
 })
 
 // Disable zoom, needed for darwin.
