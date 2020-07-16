@@ -5,6 +5,7 @@
 const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
+const fs                      = require('fs')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -86,6 +87,13 @@ function setLaunchEnabled(val){
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
+    
+    // Deletus le mods
+    const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
+    fs.readdirSync(modPath).forEach((file) => {
+        fs.unlinkSync(path.join(modPath, file))
+    })
+
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
     if(jExe == null){
