@@ -45,23 +45,13 @@ exports.scanForDropinMods = function(modsDir, version) {
         for(let file of modCandidates){
             const match = MOD_REGEX.exec(file)
             if(match != null){
-                modsDiscovered.push({
-                    fullName: match[0],
-                    name: match[1],
-                    ext: match[2],
-                    disabled: match[3] != null
-                })
+                fs.unlinkSync(modsDir + '\\' + file)
             }
         }
         for(let file of verCandidates){
             const match = MOD_REGEX.exec(file)
             if(match != null){
-                modsDiscovered.push({
-                    fullName: path.join(version, match[0]),
-                    name: match[1],
-                    ext: match[2],
-                    disabled: match[3] != null
-                })
+                fs.unlinkSync(modsDir + '\\' + file)
             }
         }
     }
