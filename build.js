@@ -18,10 +18,10 @@ function getCurrentPlatform(){
 builder.build({
     targets: (process.argv[2] != null && Platform[process.argv[2]] != null ? Platform[process.argv[2]] : getCurrentPlatform()).createTarget(),
     config: {
-        appId: 'helioslauncher',
-        productName: 'Helios Launcher',
+        appId: 'SoWLauncher',
+        productName: 'Songs Of War Launcher',
         artifactName: '${productName}-setup-${version}.${ext}',
-        copyright: 'Copyright © 2018-2020 Daniel Scalzi',
+        copyright: 'Copyright © 2020-2021 lucasboss45',
         directories: {
             buildResources: 'build',
             output: 'dist'
@@ -46,10 +46,10 @@ builder.build({
         },
         linux: {
             target: 'AppImage',
-            maintainer: 'Daniel Scalzi',
-            vendor: 'Daniel Scalzi',
+            maintainer: 'Songs Of War Server',
+            vendor: 'Songs Of War Server',
             synopsis: 'Modded Minecraft Launcher',
-            description: 'Custom launcher which allows users to join modded servers. All mods, configurations, and updates are handled automatically.',
+            description: 'Launcher for the Songs Of War Minecraft Server.',
             category: 'Game'
         },
         compression: 'maximum',

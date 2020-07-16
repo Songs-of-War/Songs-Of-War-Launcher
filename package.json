@@ -1,14 +1,11 @@
 {
-  "name": "helioslauncher",
+  "name": "songs-of-war-launcher",
   "version": "1.7.0",
-  "productName": "Helios Launcher",
+  "productName": "Songs Of War Launcher",
   "description": "Modded Minecraft Launcher",
-  "author": "Daniel Scalzi (https://github.com/dscalzi/)",
+  "author": "Daniel Scalzi",
   "license": "UNLICENSED",
-  "homepage": "https://github.com/dscalzi/HeliosLauncher",
-  "bugs": {
-    "url": "https://github.com/dscalzi/HeliosLauncher/issues"
-  },
+  "homepage": "https://songs-of-war.com",
   "private": true,
   "main": "index.js",
   "scripts": {
