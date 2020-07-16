@@ -3755,7 +3755,7 @@ input:checked + .toggleSwitchSlider:before {
 
 /* Rotating image for the spinner. */
 #loadSpinnerImage {
-    width: 280px;
+    width: 140px;
     height: auto;
     z-index: 400;
 }
