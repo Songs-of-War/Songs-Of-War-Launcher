@@ -675,7 +675,7 @@ exports.setLaunchDetached = function(launchDetached){
  * @returns {boolean} Whether or not the launcher should download prerelease versions.
  */
 exports.getAllowPrerelease = function(def = false){
-    return !def ? config.settings.launcher.allowPrerelease : DEFAULT_CONFIG.settings.launcher.allowPrerelease
+    return false
 }
 
 /**
