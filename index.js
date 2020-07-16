@@ -11,12 +11,8 @@ const url                           = require('url')
 // Setup auto updater.
 function initAutoUpdater(event, data) {
 
-    if(data){
-        autoUpdater.allowPrerelease = false
-    } else {
-        // Defaults to true if application version contains prerelease components (e.g. 0.12.1-alpha.1)
-        // autoUpdater.allowPrerelease = true
-    }
+
+    autoUpdater.allowPrerelease = false
     
     if(isDev){
         autoUpdater.autoInstallOnAppQuit = false
@@ -60,7 +56,7 @@ ipcMain.on('autoUpdateAction', (event, arg, data) => {
             if(!data){
                 const preRelComp = semver.prerelease(app.getVersion())
                 if(preRelComp != null && preRelComp.length > 0){
-                    autoUpdater.allowPrerelease = true
+                    autoUpdater.allowPrerelease = false
                 } else {
                     autoUpdater.allowPrerelease = data
                 }
