@@ -86,7 +86,7 @@ function setLaunchEnabled(val){
 
 const defaultConfig = 
 `version:2230
-autoJump:true
+autoJump:false
 autoSuggestions:true
 chatColors:true
 chatLinks:true
@@ -97,7 +97,7 @@ forceUnicodeFont:false
 discrete_mouse_scroll:false
 invertYMouse:false
 realmsNotifications:true
-reducedDebugInfo:false
+reducedDebugInfo:true
 snooperEnabled:false
 showSubtitles:false
 touchscreen:false
@@ -180,7 +180,7 @@ key_key.hotbar.8:key.keyboard.8
 key_key.hotbar.9:key.keyboard.9
 key_of.key.zoom:key.keyboard.c
 soundCategory_master:1.0
-soundCategory_music:1.0
+soundCategory_music:0.0
 soundCategory_record:1.0
 soundCategory_weather:1.0
 soundCategory_block:1.0
@@ -218,6 +218,7 @@ document.getElementById('launch_button').addEventListener('click', function(e){
     } else {
         let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
         data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
+        data[101] = 'soundCategory_music:0.0'
         fs.writeFileSync(optionsPath, data.join('\n'))
     }
 
