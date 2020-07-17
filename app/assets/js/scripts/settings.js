@@ -305,7 +305,7 @@ settingsNavDone.onclick = () => {
     saveSettingsValues()
     saveModConfiguration()
     ConfigManager.save()
-    saveDropinModConfiguration()
+    //saveDropinModConfiguration()
     saveShaderpackSettings()
     switchView(getCurrentView(), VIEWS.landing)
 }
@@ -678,7 +678,7 @@ function resolveDropinModsForUI(){
                 </div>`
     }
 
-    document.getElementById('settingsDropinModsContent').innerHTML = dropinMods
+    //document.getElementById('settingsDropinModsContent').innerHTML = dropinMods
 }
 
 /**
@@ -709,7 +709,7 @@ function bindDropinModsRemoveButton(){
  * Bind functionality to the file system button for the selected
  * server configuration.
  */
-function bindDropinModFileSystemButton(){
+/*function bindDropinModFileSystemButton(){
     const fsBtn = document.getElementById('settingsDropinFileSystemButton')
     fsBtn.onclick = () => {
         DropinModUtil.validateDir(CACHE_SETTINGS_MODS_DIR)
@@ -734,13 +734,13 @@ function bindDropinModFileSystemButton(){
         DropinModUtil.addDropinMods(e.dataTransfer.files, CACHE_SETTINGS_MODS_DIR)
         reloadDropinMods()
     }
-}
+}*/
 
 /**
  * Save drop-in mod states. Enabling and disabling is just a matter
  * of adding/removing the .disabled extension.
  */
-function saveDropinModConfiguration(){
+/*function saveDropinModConfiguration(){
     for(dropin of CACHE_DROPIN_MODS){
         const dropinUI = document.getElementById(dropin.fullName)
         if(dropinUI != null){
@@ -760,7 +760,7 @@ function saveDropinModConfiguration(){
             }
         }
     }
-}
+}*/
 
 // Refresh the drop-in mods when F5 is pressed.
 // Only active on the mods tab.
@@ -923,10 +923,10 @@ function animateModsTabRefresh(){
  */
 function prepareModsTab(first){
     resolveModsForUI()
-    resolveDropinModsForUI()
+    //resolveDropinModsForUI()
     resolveShaderpacksForUI()
-    bindDropinModsRemoveButton()
-    bindDropinModFileSystemButton()
+    //bindDropinModsRemoveButton()
+    //bindDropinModFileSystemButton()
     bindShaderpackButton()
     bindModsToggleSwitch()
     loadSelectedServerOnModsTab()
