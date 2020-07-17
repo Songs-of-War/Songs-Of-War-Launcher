@@ -117,7 +117,7 @@ fancyGraphics:true
 ao:2
 biomeBlendRadius:2
 renderClouds:true
-resourcePacks:["vanilla", "programmer_art", "file/SoWPack"]
+resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]
 incompatibleResourcePacks:[]
 lastServer:
 lang:en_us
@@ -206,7 +206,7 @@ document.getElementById('launch_button').addEventListener('click', function(e){
     const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
     if (fs.existsSync(modPath)) {
         fs.readdirSync(modPath).forEach((file) => {
-            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) {
+            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { //Prevent optifine to be deleted here because of Java Path issues
                 fs.unlinkSync(path.join(modPath, file))
             }
         })
@@ -217,7 +217,7 @@ document.getElementById('launch_button').addEventListener('click', function(e){
         fs.writeFileSync(optionsPath, defaultConfig)
     } else {
         let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
-        data[32] = 'resourcePacks:["vanilla","programmer_art","file/SoWPack"]'
+        data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
         fs.writeFileSync(optionsPath, data.join('\n'))
     }
 
