@@ -19,7 +19,7 @@ builder.build({
     targets: (process.argv[2] != null && Platform[process.argv[2]] != null ? Platform[process.argv[2]] : getCurrentPlatform()).createTarget(),
     config: {
         appId: 'SoWLauncher',
-        productName: 'Songs Of War Launcher',
+        productName: 'Songs of War Launcher',
         artifactName: '${productName}-setup-${version}.${ext}',
         copyright: 'Copyright © 2020-2021 lucasboss45',
         directories: {
@@ -46,10 +46,10 @@ builder.build({
         },
         linux: {
             target: 'AppImage',
-            maintainer: 'Songs Of War Server',
-            vendor: 'Songs Of War Server',
+            maintainer: 'Songs of War Server',
+            vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
-            description: 'Launcher for the Songs Of War Minecraft Server.',
+            description: 'Launcher for the Songs of War Minecraft Server.',
             category: 'Game'
         },
         compression: 'maximum',
