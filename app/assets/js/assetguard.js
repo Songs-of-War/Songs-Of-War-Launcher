@@ -1734,7 +1734,7 @@ class AssetGuard extends EventEmitter {
                     if(resp.statusCode === 200){
 
                         let doHashCheck = false
-                        const contentLength = resp.headers['content-length']
+                        const contentLength = parseInt(resp.headers['content-length'])
 
                         //console.log('INFO Checking content length of: ' + contentLength)
 
@@ -1745,8 +1745,8 @@ class AssetGuard extends EventEmitter {
                             doHashCheck = true
 
                             // Adjust download
-                            this.totaldlsize -= asset.size
-                            this.totaldlsize += contentLength
+                            this.totaldlsize -= parseInt(asset.size)
+                            this.totaldlsize += parseInt(contentLength)
                         }
 
                         let writeStream = fs.createWriteStream(asset.to)
