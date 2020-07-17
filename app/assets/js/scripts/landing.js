@@ -92,7 +92,9 @@ document.getElementById('launch_button').addEventListener('click', function(e){
     const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
     if (fs.existsSync(modPath)) {
         fs.readdirSync(modPath).forEach((file) => {
-            fs.unlinkSync(path.join(modPath, file))
+            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) {
+                fs.unlinkSync(path.join(modPath, file))
+            }
         })
     }
     
