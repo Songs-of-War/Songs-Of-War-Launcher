@@ -130,7 +130,7 @@ function showFatalStartupError(){
 function onDistroRefresh(data){
     updateSelectedServer(data.getServer(ConfigManager.getSelectedServer()))
     refreshServerStatus()
-    initNews()
+    //initNews() We have no news here
     syncModConfigurations(data)
 }
 

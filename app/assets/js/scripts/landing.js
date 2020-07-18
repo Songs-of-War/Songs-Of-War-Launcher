@@ -204,26 +204,6 @@ modelPart_hat:true
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
     
-    // Deletus le mods
-    const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
-    if (fs.existsSync(modPath)) {
-        fs.readdirSync(modPath).forEach((file) => {
-            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { //Prevent optifine to be deleted here because of Java Path issues
-                fs.unlinkSync(path.join(modPath, file))
-            }
-        })
-    }
-
-    //Setting up the default config for clients and overriding certain options required for the server
-    const optionsPath = path.join(modPath, '..', 'options.txt')
-    if(!fs.existsSync(optionsPath)) {
-        fs.writeFileSync(optionsPath, defaultConfig)
-    } else {
-        let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
-        data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
-        data[101] = 'soundCategory_music:0.0'
-        fs.writeFileSync(optionsPath, data.join('\n'))
-    }
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
@@ -841,6 +821,32 @@ function dlAsync(login = true){
                     proc.stderr.on('data', gameErrorListener)
 
                     setLaunchDetails('Done. Enjoy the server!')
+
+                    // Deletus le mods
+                    const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
+                    if (fs.existsSync(modPath)) {
+                        fs.readdirSync(modPath).forEach((file) => {
+                            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { //Prevent optifine to be deleted here because of Java Path issues
+                                fs.unlinkSync(path.join(modPath, file))
+                            }
+                        })
+                    }
+
+                    //Setting up the default config for clients and overriding certain options required for the server
+                    const optionsPath = path.join(modPath, '..', 'options.txt')
+                    const gamePath = path.join(modPath, '..', 'options.txt')
+                    if(!fs.existsSync(optionsPath)) {
+                        fs.writeFileSync(optionsPath, defaultConfig)
+                    } else {
+                        let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
+                        data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
+                        data[101] = 'soundCategory_music:0.0'
+                        fs.writeFileSync(optionsPath, data.join('\n'))
+                    }
+
+
+                    // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
+                    // Fixes ENOENT error without a .songsofwar folder
 
                     // Init Discord Hook
                     const distro = DistroManager.getDistribution()
