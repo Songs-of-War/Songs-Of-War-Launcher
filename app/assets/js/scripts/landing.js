@@ -84,6 +84,8 @@ function setLaunchEnabled(val){
     document.getElementById('launch_button').disabled = !val
 }
 
+
+//Default config data
 const defaultConfig = 
 `version:2230
 autoJump:false
@@ -212,6 +214,7 @@ document.getElementById('launch_button').addEventListener('click', function(e){
         })
     }
 
+    //Setting up the default config for clients and overriding certain options required for the server
     const optionsPath = path.join(modPath, '..', 'options.txt')
     if(!fs.existsSync(optionsPath)) {
         fs.writeFileSync(optionsPath, defaultConfig)
