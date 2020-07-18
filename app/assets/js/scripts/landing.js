@@ -967,7 +967,7 @@ function slide_(up){
 }
 
 // Bind news button.
-document.getElementById('newsButton').onclick = () => {
+/*document.getElementById('newsButton').onclick = () => {
     // Toggle tabbing.
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
@@ -984,7 +984,7 @@ document.getElementById('newsButton').onclick = () => {
     }
     slide_(!newsActive)
     newsActive = !newsActive
-}
+}*/ //News button doesn't exist so yeet
 
 // Array to store article meta.
 let newsArr = null
@@ -997,7 +997,7 @@ let newsLoadingListener = null
  * 
  * @param {boolean} val True to set loading animation, otherwise false.
  */
-function setNewsLoading(val){
+/*function setNewsLoading(val){
     if(val){
         const nLStr = 'Checking for News'
         let dotStr = '..'
@@ -1016,7 +1016,7 @@ function setNewsLoading(val){
             newsLoadingListener = null
         }
     }
-}
+}*/ //News disabled no use for us
 
 // Bind retry button.
 newsErrorRetry.onclick = () => {
@@ -1068,7 +1068,7 @@ function showNewsAlert(){
  * @returns {Promise.<void>} A promise which resolves when the news
  * content has finished loading and transitioning.
  */
-function initNews(){
+/*function initNews(){
 
     return new Promise((resolve, reject) => {
         setNewsLoading(true)
@@ -1168,7 +1168,7 @@ function initNews(){
         })
         
     })
-}
+}*/ //Disable news, no use for us
 
 /**
  * Add keyboard controls to the news UI. Left and right arrows toggle
