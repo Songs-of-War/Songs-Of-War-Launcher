@@ -91,7 +91,7 @@ exports.status = function(){
         request.get('https://status.mojang.com/check',
             {
                 json: true,
-                timeout: 2500
+                timeout: 10000
             },
             function(error, response, body){
 
