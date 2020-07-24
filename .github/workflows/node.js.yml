@@ -10,23 +10,93 @@ on:
       logLevel:
         description: 'Log level'     
         required: true
-        default: 'warning'
+        default: 'info'
       tags:
         description: 'Test scenario tags'
-  
 jobs:
   build:
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+        operating-system: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Setup node 12
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: npm run dist
-      - name: Verify no unstaged changes
-        if: runner.os != 'windows'
-        run: __tests__/verify-no-unstaged-changes.sh
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
+      - run: npm install
+      - run: npm run dist:linux
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: latest-linux.yml
+          path: dist/latest-linux.yml
+  build_2:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        operating-system: [macos-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
+      - run: npm install
+      - run: npm run dist:mac
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+      - name: Upload Builded Things 3
+        uses: actions/upload-artifact@v2
+        with:
+          name: latest-mac.yml
+          path: dist/latest-mac.yml
+  build_3:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        operating-system: [windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
+      - run: npm install
+      - run: npm run dist:win
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+      - name: Upload Builded Things 3
+        uses: actions/upload-artifact@v2
+        with:
+          name: latest.yml
+          path: dist/latest.yml
+
