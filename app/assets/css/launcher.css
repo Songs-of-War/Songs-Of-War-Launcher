@@ -2907,6 +2907,19 @@ input:checked + .toggleSwitchSlider:before {
     height: 23px;
 }
 
+/* Screenshots icon colors. */
+#screenshotsSVG {
+    stroke: #ffffff;
+    height: 12px;
+}
+
+.mediaButton:hover #screenshotsSVG,
+.mediaButton:focus #screenshotsSVG,
+.mediaButton:active #screenshotsSVG {
+    height: 21px;
+}
+
+
 /* Settings tooltip styles. */
 #settingsTooltip {
     visibility: hidden;
