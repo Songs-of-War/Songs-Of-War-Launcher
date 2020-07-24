@@ -15,10 +15,10 @@ on:
         description: 'Test scenario tags'
 jobs:
   build:
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+        operating-system: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Setup node 12
@@ -27,18 +27,73 @@ jobs:
           node-version: 12.x
       
       - run: npm install
-      - if: matrix.operating-system == 'ubuntu-latest'
-        run: |
-          npm run dist:linux
-          uses: actions/upload-artifact@v2
-          with:
-            name: Upload AppImage
-            path: dist/Songs-of-War-Launcher-setup-1.7.2.AppImage
-      - if: matrix.operating-system == 'windows-latest'
-        run: |
-          npm run dist:win
-      - if: matrix.operating-system == 'macos-latest'
-        run: |
-          npm run dist:mac
-        
+      - run: npm run dist:linux
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: AppImage
+          path: dist/Songs-of-War-Launcher-setup-1.7.2.AppImage
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: LatestFileLinux
+          path: dist/latest-linux.yml
+  build_2:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        operating-system: [macos-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      
+      - run: npm install
+      - run: npm run dist:mac
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: dmg
+          path: dist/Songs-of-War-Launcher-setup-1.7.2.dmg
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: dmgBlockMap
+          path: dist/Songs-of-War-Launcher-setup-1.7.2.dmg.blockmap
+      - name: Upload Builded Things 3
+        uses: actions/upload-artifact@v2
+        with:
+          name: LatestFileMac
+          path: dist/latest-mac.yml
+  build_3:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        operating-system: [windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      
+      - run: npm install
+      - run: npm run dist:win
+      - name: Upload Builded Things 1
+        uses: actions/upload-artifact@v2
+        with:
+          name: Exe
+          path: dist/Songs-of-War-Launcher-setup-1.7.2.exe
+      - name: Upload Builded Things 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: ExeBlockMap
+          path: dist/Songs-of-War-Launcher-setup-1.7.2.exe.blockmap
+      - name: Upload Builded Things 3
+        uses: actions/upload-artifact@v2
+        with:
+          name: LatestFileWin
+          path: dist/latest.yml
 
