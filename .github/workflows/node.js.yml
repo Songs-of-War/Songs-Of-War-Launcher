@@ -25,16 +25,15 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
       - run: npm install
       - run: npm run dist:linux
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.AppImage
-          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.AppImage
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
@@ -51,21 +50,20 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
       - run: npm install
       - run: npm run dist:mac
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg
-          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg.blockmap
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:
@@ -82,21 +80,20 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
+      - name: package-version
+        uses: nyaascii/package-version@1.0.2-pre
       - run: npm install
       - run: npm run dist:win
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe
-          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe.blockmap
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:
