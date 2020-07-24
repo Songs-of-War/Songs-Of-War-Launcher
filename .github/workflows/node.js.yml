@@ -25,8 +25,16 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      
       - run: npm install
-      - run: npm run dist:linux
-      - name: Verify no unstaged changes
-        if: runner.os != 'windows'
-        run: __tests__/verify-no-unstaged-changes.sh
+      - if: matrix.operating-system == 'ubuntu-latest'
+        run: |
+          npm run dist:linux
+      - if: matrix.operating-system == 'windows-latest'
+        run: |
+          npm run dist:win
+      - if: matrix.operating-system == 'macos-latest'
+        run: |
+          npm run dist:mac
+        
+
