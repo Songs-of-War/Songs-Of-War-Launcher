@@ -70,10 +70,10 @@ jobs:
           name: latest-mac.yml
           path: dist/latest-mac.yml
   build_3:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
-        operating-system: [ubuntu-latest]
+        operating-system: [windows-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Setup node 12
