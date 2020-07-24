@@ -10,7 +10,7 @@ on:
       logLevel:
         description: 'Log level'     
         required: true
-        default: 'warning'
+        default: 'info'
       tags:
         description: 'Test scenario tags'
 P      
@@ -21,12 +21,5 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup node 12
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
+      - run: npm install
       - run: npm run dist
-      - name: Verify no unstaged changes
-        if: runner.os != 'windows'
-        run: __tests__/verify-no-unstaged-changes.sh
