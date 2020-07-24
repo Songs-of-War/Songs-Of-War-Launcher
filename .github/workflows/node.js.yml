@@ -1,15 +1,4 @@
 name: build-test
-
-on:
-  pull_request:
-    paths-ignore:
-      - '**.md'    
-  push:    
-    branches:
-      - main
-      - releases/*
-    paths-ignore:
-      - '**.md'
       
 jobs:
   build:
