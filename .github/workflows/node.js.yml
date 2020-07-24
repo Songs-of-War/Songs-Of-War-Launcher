@@ -25,18 +25,20 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - run: npm install
       - run: npm run dist:linux
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: AppImage
-          path: dist/Songs-of-War-Launcher-setup-1.7.2.AppImage
+          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.AppImage
+          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.AppImage
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: LatestFileLinux
+          name: latest-linux.yml
           path: dist/latest-linux.yml
   build_2:
     runs-on: macos-latest
@@ -49,23 +51,25 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - run: npm install
       - run: npm run dist:mac
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: dmg
-          path: dist/Songs-of-War-Launcher-setup-1.7.2.dmg
+          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg
+          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: dmgBlockMap
-          path: dist/Songs-of-War-Launcher-setup-1.7.2.dmg.blockmap
+          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.dmg.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:
-          name: LatestFileMac
+          name: latest-mac.yml
           path: dist/latest-mac.yml
   build_3:
     runs-on: windows-latest
@@ -78,22 +82,24 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - run: npm install
       - run: npm run dist:win
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Exe
-          path: dist/Songs-of-War-Launcher-setup-1.7.2.exe
+          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe
+          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: ExeBlockMap
-          path: dist/Songs-of-War-Launcher-setup-1.7.2.exe.blockmap
+          name: Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe.blockmap
+          path: dist/Songs-of-War-Launcher-setup-${{ steps.package-version.outputs.current-version}}.exe.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:
-          name: LatestFileWin
+          name: latest.yml
           path: dist/latest.yml
 
