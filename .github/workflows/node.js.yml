@@ -30,7 +30,6 @@ jobs:
       - if: matrix.operating-system == 'ubuntu-latest'
         run: |
           npm run dist:linux
-          - name: Upload AppImage
           uses: actions/upload-artifact@v2
           with:
             name: Upload AppImage
