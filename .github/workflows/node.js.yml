@@ -10,7 +10,7 @@ on:
       logLevel:
         description: 'Log level'     
         required: true
-        default: 'warning'
+        default: 'info'
       tags:
         description: 'Test scenario tags'
 jobs:
@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 12.x
       - run: npm install
-      - run: npm run dist
+      - run: npm run dist:linux
       - name: Verify no unstaged changes
         if: runner.os != 'windows'
         run: __tests__/verify-no-unstaged-changes.sh
