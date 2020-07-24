@@ -30,6 +30,11 @@ jobs:
       - if: matrix.operating-system == 'ubuntu-latest'
         run: |
           npm run dist:linux
+          - name: Upload AppImage
+          uses: actions/upload-artifact@v2
+          with:
+            name: Upload AppImage
+            path: dist/Songs-of-War-Launcher-setup-1.7.2.AppImage
       - if: matrix.operating-system == 'windows-latest'
         run: |
           npm run dist:win
