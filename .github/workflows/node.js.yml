@@ -13,7 +13,6 @@ on:
         default: 'warning'
       tags:
         description: 'Test scenario tags'
-P      
 jobs:
   build:
     runs-on: ${{ matrix.operating-system }}
