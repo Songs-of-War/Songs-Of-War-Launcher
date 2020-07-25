@@ -85,121 +85,6 @@ function setLaunchEnabled(val){
 }
 
 
-//Default config data
-const defaultConfig = 
-`version:2230
-autoJump:false
-autoSuggestions:true
-chatColors:true
-chatLinks:true
-chatLinksPrompt:true
-enableVsync:true
-entityShadows:true
-forceUnicodeFont:false
-discrete_mouse_scroll:false
-invertYMouse:false
-realmsNotifications:true
-reducedDebugInfo:true
-snooperEnabled:false
-showSubtitles:false
-touchscreen:false
-fullscreen:false
-bobView:true
-toggleCrouch:false
-toggleSprint:false
-mouseSensitivity:0.5
-fov:0.0
-gamma:0.0
-renderDistance:8
-guiScale:0
-particles:0
-maxFps:260
-difficulty:2
-fancyGraphics:true
-ao:2
-biomeBlendRadius:2
-renderClouds:true
-resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]
-incompatibleResourcePacks:[]
-lastServer:
-lang:en_us
-chatVisibility:0
-chatOpacity:1.0
-textBackgroundOpacity:0.5
-backgroundForChatOnly:true
-hideServerAddress:false
-advancedItemTooltips:false
-pauseOnLostFocus:true
-overrideWidth:0
-overrideHeight:0
-heldItemTooltips:true
-chatHeightFocused:1.0
-chatHeightUnfocused:0.44366195797920227
-chatScale:1.0
-chatWidth:1.0
-mipmapLevels:4
-useNativeTransport:true
-mainHand:right
-attackIndicator:1
-narrator:0
-tutorialStep:movement
-mouseWheelSensitivity:1.0
-rawMouseInput:true
-glDebugVerbosity:1
-skipMultiplayerWarning:false
-key_key.attack:key.mouse.left
-key_key.use:key.mouse.right
-key_key.forward:key.keyboard.w
-key_key.left:key.keyboard.a
-key_key.back:key.keyboard.s
-key_key.right:key.keyboard.d
-key_key.jump:key.keyboard.space
-key_key.sneak:key.keyboard.left.shift
-key_key.sprint:key.keyboard.left.control
-key_key.drop:key.keyboard.q
-key_key.inventory:key.keyboard.e
-key_key.chat:key.keyboard.t
-key_key.playerlist:key.keyboard.tab
-key_key.pickItem:key.mouse.middle
-key_key.command:key.keyboard.slash
-key_key.screenshot:key.keyboard.f2
-key_key.togglePerspective:key.keyboard.f5
-key_key.smoothCamera:key.keyboard.unknown
-key_key.fullscreen:key.keyboard.f11
-key_key.spectatorOutlines:key.keyboard.unknown
-key_key.swapHands:key.keyboard.f
-key_key.saveToolbarActivator:key.keyboard.unknown
-key_key.loadToolbarActivator:key.keyboard.x
-key_key.advancements:key.keyboard.l
-key_key.hotbar.1:key.keyboard.1
-key_key.hotbar.2:key.keyboard.2
-key_key.hotbar.3:key.keyboard.3
-key_key.hotbar.4:key.keyboard.4
-key_key.hotbar.5:key.keyboard.5
-key_key.hotbar.6:key.keyboard.6
-key_key.hotbar.7:key.keyboard.7
-key_key.hotbar.8:key.keyboard.8
-key_key.hotbar.9:key.keyboard.9
-key_of.key.zoom:key.keyboard.c
-soundCategory_master:1.0
-soundCategory_music:0.0
-soundCategory_record:1.0
-soundCategory_weather:1.0
-soundCategory_block:1.0
-soundCategory_hostile:1.0
-soundCategory_neutral:1.0
-soundCategory_player:1.0
-soundCategory_ambient:1.0
-soundCategory_voice:1.0
-modelPart_cape:true
-modelPart_jacket:true
-modelPart_left_sleeve:true
-modelPart_right_sleeve:true
-modelPart_left_pants_leg:true
-modelPart_right_pants_leg:true
-modelPart_hat:true
-`
-
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
@@ -231,6 +116,23 @@ document.getElementById('launch_button').addEventListener('click', function(e){
 document.getElementById('settingsMediaButton').onclick = (e) => {
     prepareSettings()
     switchView(getCurrentView(), VIEWS.settings)
+}
+
+// Bind screnshots button
+document.getElementById('screenshotsMediaButton').onclick = (e) => {
+    const screenshotsPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'screenshots')
+    
+    if(fs.existsSync(screenshotsPath)) {
+        shell.openPath(screenshotsPath)
+    } else {
+        setOverlayContent(
+            'File Error',
+            'The screenshots folder could not be found. Try taking your first screenshot before attempting to open it.',
+            'Okay'
+        )
+        setOverlayHandler(null)
+        toggleOverlay(true)
+    }
 }
 
 // Bind avatar overlay button.
@@ -831,7 +733,7 @@ function dlAsync(login = true){
                     const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
                     if (fs.existsSync(modPath)) {
                         fs.readdirSync(modPath).forEach((file) => {
-                            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { //Prevent optifine to be deleted here because of Java Path issues
+                            if(!file.includes('OptiFine')) { //Prevent optifine to be deleted here because of Java Path issues
                                 fs.unlinkSync(path.join(modPath, file))
                             }
                         })
@@ -839,16 +741,21 @@ function dlAsync(login = true){
 
                     //Setting up the default config for clients and overriding certain options required for the server
                     const optionsPath = path.join(modPath, '..', 'options.txt')
-                    const gamePath = path.join(modPath, '..', 'options.txt')
-                    if(!fs.existsSync(optionsPath)) {
-                        fs.writeFileSync(optionsPath, defaultConfig)
-                    } else {
+
+                    if(fs.existsSync(optionsPath)) {
                         let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
                         data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
                         data[101] = 'soundCategory_music:0.0'
                         fs.writeFileSync(optionsPath, data.join('\n'))
-                    }
+                    } else {
 
+                        // Low end or high end
+                        if(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer()) {
+                            fs.copyFileSync(path.join(__dirname, 'assets/txt/options.txt'), optionsPath)
+                        } else {
+                            fs.copyFileSync(path.join(__dirname, 'assets/txt/options_highend.txt'), optionsPath)
+                        }
+                    }
 
                     // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                     // Fixes ENOENT error without a .songsofwar folder

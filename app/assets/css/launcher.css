@@ -2907,8 +2907,21 @@ input:checked + .toggleSwitchSlider:before {
     height: 23px;
 }
 
+/* Screenshots icon colors. */
+#screenshotsSVG {
+    stroke: #ffffff;
+    height: 12px;
+}
+
+.mediaButton:hover #screenshotsSVG,
+.mediaButton:focus #screenshotsSVG,
+.mediaButton:active #screenshotsSVG {
+    height: 21px;
+}
+
+
 /* Settings tooltip styles. */
-#settingsTooltip {
+.mediaTooltip {
     visibility: hidden;
     opacity: 0;
     width: 75px;
@@ -2923,7 +2936,7 @@ input:checked + .toggleSwitchSlider:before {
     line-height: 20px;
     transition: visibility 0s linear 0.25s, opacity 0.25s ease;
 }
-#settingsTooltip::after {
+.mediaTooltip::after {
     content: " ";
     position: absolute;
     top: 50%;
@@ -2933,9 +2946,9 @@ input:checked + .toggleSwitchSlider:before {
     border-style: solid;
     border-color: transparent transparent transparent rgba(0, 0, 0, 0.75);
 }
-.mediaButton:hover #settingsTooltip,
-.mediaButton:focus #settingsTooltip,
-.mediaButton:active #settingsTooltip {
+.mediaButton:hover .mediaTooltip,
+.mediaButton:focus .mediaTooltip,
+.mediaButton:active .mediaTooltip {
     visibility: visible;
     opacity: 1;
     transition-delay:0s;
