@@ -581,6 +581,16 @@ function dlAsync(login = true){
                     loggerLaunchSuite.log('Library validation complete.')
                     setLaunchDetails('Validating miscellaneous file integrity..')
                     break
+                case 'forge1':
+                    setLaunchPercentage(35, 100)
+                    loggerLaunchSuite.log('Misc file loaded.')
+                    setLaunchDetails('Downloading Forge..')
+                    break
+                case 'forge2':
+                    setLaunchPercentage(80, 100)
+                    loggerLaunchSuite.log('Forge loaded.')
+                    setLaunchDetails('Setting up Forge..')
+                    break
                 case 'files':
                     setLaunchPercentage(100, 100)
                     loggerLaunchSuite.log('File validation complete.')
