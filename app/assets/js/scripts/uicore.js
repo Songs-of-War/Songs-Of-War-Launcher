@@ -49,7 +49,7 @@ if(!isDev){
                 loggerAutoUpdaterSuccess.log('New update available', info.version)
                 
                 if(process.platform === 'darwin'){
-                    info.darwindownload = `https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/helioslauncher-setup-${info.version}.dmg`
+                    info.darwindownload = `https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg`
                     showUpdateUI(info)
                 }
                 
