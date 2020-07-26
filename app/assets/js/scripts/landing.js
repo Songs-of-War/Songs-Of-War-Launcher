@@ -743,7 +743,7 @@ function dlAsync(login = true){
                     const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
                     if (fs.existsSync(modPath)) {
                         fs.readdirSync(modPath).forEach((file) => {
-                            if(!file.includes('OptiFine')) { //Prevent optifine to be deleted here because of Java Path issues
+                            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
                                 fs.unlinkSync(path.join(modPath, file))
                             }
                         })
