@@ -2913,9 +2913,7 @@ input:checked + .toggleSwitchSlider:before {
     height: 12px;
 }
 
-.mediaButton:hover #screenshotsSVG,
-.mediaButton:focus #screenshotsSVG,
-.mediaButton:active #screenshotsSVG {
+.mediaButton:hover #screenshotsSVG {
     height: 21px;
 }
 
@@ -2924,7 +2922,8 @@ input:checked + .toggleSwitchSlider:before {
 .mediaTooltip {
     visibility: hidden;
     opacity: 0;
-    width: 75px;
+    padding-left: 10px;
+    padding-right: 10px;
     height: 20px;
     background-color: rgba(0, 0, 0, 0.75);
     text-align: center;
@@ -2946,31 +2945,24 @@ input:checked + .toggleSwitchSlider:before {
     border-style: solid;
     border-color: transparent transparent transparent rgba(0, 0, 0, 0.75);
 }
-.mediaButton:hover .mediaTooltip,
-.mediaButton:focus .mediaTooltip,
-.mediaButton:active .mediaTooltip {
+.mediaButton:hover .mediaTooltip {
     visibility: visible;
     opacity: 1;
     transition-delay:0s;
 }
 
-/* Twitter icon colors. */
-#twitterSVG:hover,
-#twitterURL:focus #twitterSVG {
-    fill: #1da1f2;
-}
-#twitterSVG:active {
-    fill: #1b8dd4;
+#websiteSVG {
+    stroke: #ffffff;
 }
 
-/* Instagram icon colors. */
-#instagramSVG:hover,
-#instagramURL:focus #instagramSVG {
-    fill: url('#instaFill')
-    /*fill: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); */
+/* Website icon colors. */
+#websiteSVG:hover,
+#websiteURL:focus #websiteSVG {
+    stroke: #24baff;
 }
-#instagramSVG:active {
-    fill: url('#instaFill')
+
+#websiteSVG:active {
+    stroke: #22a8e6;
 }
 
 /* Youtube icon colors. */
