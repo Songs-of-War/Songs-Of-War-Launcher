@@ -2951,20 +2951,6 @@ input:checked + .toggleSwitchSlider:before {
     transition-delay:0s;
 }
 
-#websiteSVG {
-    stroke: #ffffff;
-}
-
-/* Website icon colors. */
-#websiteSVG:hover,
-#websiteURL:focus #websiteSVG {
-    stroke: #24baff;
-}
-
-#websiteSVG:active {
-    stroke: #22a8e6;
-}
-
 /* Youtube icon colors. */
 #youtubeSVG:hover,
 #youtubeURL:focus #youtubeSVG {
