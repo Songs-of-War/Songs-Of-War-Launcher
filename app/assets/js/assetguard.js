@@ -15,6 +15,7 @@ const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
 const loggerutil = require('./loggerutil')
+const { type } = require('jquery')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1346,6 +1347,8 @@ class AssetGuard extends EventEmitter {
             const libDlQueue = []
             let dlSize = 0
 
+            console.log('Starting lib check')
+
             //Check validity of each library. If the hashs don't match, download the library.
             async.eachLimit(libArr, 5, (lib, cb) => {
                 if(Library.validateRules(lib.rules, lib.natives)){
@@ -1359,35 +1362,8 @@ class AssetGuard extends EventEmitter {
                 cb()
             }, (err) => {
                 self.libraries = new DLTracker(libDlQueue, dlSize)
+                resolve()
             })
-            if(!fs.existsSync(path.join(commonPath + 'sow-installer-31.2.31.jar'))) {
-                let file = fs.createWriteStream(path.join(commonPath + 'sow-installer-31.2.31.jar'))
-                let stream = request({
-                    uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
-                    gzip: true
-                })
-                    .pipe(file)
-                    .on('finish', () => {
-                        console.log('Downloaded forge')
-                        const jExe = ConfigManager.getJavaExecutable()
-                        if(jExe == null){
-                            console.error('Java installation not found')
-                            reject()
-                        } else {
-                            let exec = require('child_process').exec, child
-                            child = exec(path.join(ConfigManager.getJavaExecutable() + 'sow-installer-31.2.31.jar --installClient')),
-                            function(error, stdout, stderr) {
-                                console.log('stdout: ' + stdout)
-                                console.log('stderr: ' + stderr)
-                                if(error !== null) {
-                                    console.log('exec error: ' + error)
-                                    reject()
-                                }
-                            }
-                        }
-                        resolve()
-                    })
-            }
         })
     }
 
@@ -1890,7 +1866,7 @@ class AssetGuard extends EventEmitter {
         })
     }
 
-    async validateEverything(serverid, dev = false){
+    async validateEverything(serverid, dev = false) {
 
         try {
             if(!ConfigManager.isLoaded()){
@@ -1902,7 +1878,7 @@ class AssetGuard extends EventEmitter {
             const server = dI.getServer(serverid)
     
             // Validate Everything
-    
+
             await this.validateDistribution(server)
             this.emit('validate', 'distribution')
             const versionData = await this.loadVersionData(server.getMinecraftVersion())
@@ -1911,10 +1887,51 @@ class AssetGuard extends EventEmitter {
             this.emit('validate', 'assets')
             await this.validateLibraries(versionData)
             this.emit('validate', 'libraries')
+            console.log('Downloading forge')
+            await new Promise((resolve, reject) => {
+                let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar'))
+                let stream = request({
+                    uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
+                    headers: {
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8,ro;q=0.7,ru;q=0.6,la;q=0.5,pt;q=0.4,de;q=0.3',
+                        'Cache-Control': 'max-age=0',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1',
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
+                    },
+                    gzip: false
+                })
+                    .pipe(file)
+                    .on('finish', async () => {
+                        file.close()
+                        console.log('Downloaded forge')
+                        console.log('Starting install')
+                        const jExe = ConfigManager.getJavaExecutable()
+                        if(jExe == null){
+                            console.log('No java found')
+                            reject()
+                        } else {
+                            console.log('Installing forge')
+                            console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
+                            // eslint-disable-next-line no-unused-vars
+                            let child = await child_process.exec('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"'), async (error, stdout, stderr) => {
+                                console.log('stdout: ' + stdout)
+                                console.log('stderr: ' + stderr)
+                                if(error !== null) {
+                                    console.error('Process failed ' + error)
+                                    reject()
+                                }
+                                resolve()
+                            })
+                        }
+                    })
+            })
             await this.validateMiscellaneous(versionData)
             this.emit('validate', 'files')
-            await this.processDlQueues()
             //this.emit('complete', 'download')
+            await this.processDlQueues()
             const forgeData = await this.loadForgeData(server)
         
             return {
@@ -1923,6 +1940,7 @@ class AssetGuard extends EventEmitter {
             }
 
         } catch (err){
+            console.error(err)
             return {
                 versionData: null,
                 forgeData: null,
