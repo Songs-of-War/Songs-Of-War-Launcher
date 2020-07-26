@@ -14,6 +14,7 @@ const zlib          = require('zlib')
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+const loggerutil = require('./loggerutil')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1340,6 +1341,7 @@ class AssetGuard extends EventEmitter {
 
             const libArr = versionData.libraries
             const libPath = path.join(self.commonPath, 'libraries')
+            const commonPath = self.commonPath
 
             const libDlQueue = []
             let dlSize = 0
@@ -1357,8 +1359,35 @@ class AssetGuard extends EventEmitter {
                 cb()
             }, (err) => {
                 self.libraries = new DLTracker(libDlQueue, dlSize)
-                resolve()
             })
+            if(!fs.existsSync(path.join(commonPath + 'sow-installer-31.2.31.jar'))) {
+                let file = fs.createWriteStream(path.join(commonPath + 'sow-installer-31.2.31.jar'))
+                let stream = request({
+                    uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
+                    gzip: true
+                })
+                    .pipe(file)
+                    .on('finish', () => {
+                        console.log('Downloaded forge')
+                        const jExe = ConfigManager.getJavaExecutable()
+                        if(jExe == null){
+                            console.error('Java installation not found')
+                            reject()
+                        } else {
+                            let exec = require('child_process').exec, child
+                            child = exec(path.join(ConfigManager.getJavaExecutable() + 'sow-installer-31.2.31.jar --installClient')),
+                            function(error, stdout, stderr) {
+                                console.log('stdout: ' + stdout)
+                                console.log('stderr: ' + stderr)
+                                if(error !== null) {
+                                    console.log('exec error: ' + error)
+                                    reject()
+                                }
+                            }
+                        }
+                        resolve()
+                    })
+            }
         })
     }
 
