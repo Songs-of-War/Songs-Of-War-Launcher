@@ -30,28 +30,42 @@ function onDistroLoad(data){
     ipcRenderer.send('distributionIndexDone', data != null)
 }
 
+try {
+    got('https://mysql.songs-of-war.com/maintenance').then(result => {
+        if(result.body == 'true') {
+            onDistroLoad(null)
+            console.log('Server maintenance true')
+        } else {
+            console.log('Server maintenance false')
 
+            // Ensure Distribution is downloaded and cached.
+            DistroManager.pullRemote().then((data) => {
 
-// Ensure Distribution is downloaded and cached.
-DistroManager.pullRemote().then((data) => {
+                logger.log('Loaded distribution index.')
 
-    logger.log('Loaded distribution index.')
+                onDistroLoad(data)
 
-    onDistroLoad(data)
+            }).catch((err) => {
+                logger.log('Failed to load distribution index.')
+                logger.error(err)
 
-}).catch((err) => {
-    logger.log('Failed to load distribution index.')
-    logger.error(err)
+                onDistroLoad(null)
 
+            })
+
+            // Clean up temp dir incase previous launches ended unexpectedly. 
+            fs.remove(path.join(os.tmpdir(), ConfigManager.getTempNativeFolder()), (err) => {
+                if(err){
+                    logger.warn('Error while cleaning natives directory', err)
+                } else {
+                    logger.log('Cleaned natives directory.')
+                }
+            })
+        }
+    })
+} catch(error) {
+    console.error(error)
     onDistroLoad(null)
+}
 
-})
 
-// Clean up temp dir incase previous launches ended unexpectedly. 
-fs.remove(path.join(os.tmpdir(), ConfigManager.getTempNativeFolder()), (err) => {
-    if(err){
-        logger.warn('Error while cleaning natives directory', err)
-    } else {
-        logger.log('Cleaned natives directory.')
-    }
-})

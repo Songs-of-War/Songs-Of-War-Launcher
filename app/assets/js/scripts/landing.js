@@ -521,16 +521,17 @@ function dlAsync(login = true){
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
-    (async () => {
-        try {
-            let response = await got('https://mysql.songs-of-war.com/maintenance')
-            if(response == 'true') {
-                showLaunchFailure('Server Unavailable', 'The download server is currently in maintenance. Please try again in a little while.')
+    try {
+        got('https://mysql.songs-of-war.com/maintenance').then(result => {
+            if(result.body == 'true') {
+                showLaunchFailure('Our data server is currently in maintenance.\nLikely because of an update.\nPlease try again later.')
+                error('Server unavailable')
             }
-        } catch(error) {
-            console.error(error.response.body)
-        }
-    })
+        })
+    } catch(error) {
+        error(error)
+    }
+
 
     const loggerAEx = LoggerUtil('%c[AEx]', 'color: #353232; font-weight: bold')
     const loggerLaunchSuite = LoggerUtil('%c[LaunchSuite]', 'color: #000668; font-weight: bold')
