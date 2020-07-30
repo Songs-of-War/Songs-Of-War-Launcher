@@ -2,6 +2,7 @@ const {ipcRenderer} = require('electron')
 const fs            = require('fs-extra')
 const os            = require('os')
 const path          = require('path')
+const got = require('got')
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
@@ -29,8 +30,11 @@ function onDistroLoad(data){
     ipcRenderer.send('distributionIndexDone', data != null)
 }
 
+
+
 // Ensure Distribution is downloaded and cached.
 DistroManager.pullRemote().then((data) => {
+
     logger.log('Loaded distribution index.')
 
     onDistroLoad(data)
@@ -39,23 +43,7 @@ DistroManager.pullRemote().then((data) => {
     logger.log('Failed to load distribution index.')
     logger.error(err)
 
-    logger.log('Attempting to load an older version of the distribution index.')
-    // Try getting a local copy, better than nothing.
-    DistroManager.pullLocal().then((data) => {
-        logger.log('Successfully loaded an older version of the distribution index.')
-
-        onDistroLoad(data)
-
-
-    }).catch((err) => {
-
-        logger.log('Failed to load an older version of the distribution index.')
-        logger.log('Application cannot run.')
-        logger.error(err)
-
-        onDistroLoad(null)
-
-    })
+    onDistroLoad(null)
 
 })
 

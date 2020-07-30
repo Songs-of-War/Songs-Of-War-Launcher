@@ -59,7 +59,7 @@ function showMainUI(data){
 
     if(!isDev){
         loggerAutoUpdater.log('Initializing..')
-        ipcRenderer.send('autoUpdateAction', 'initAutoUpdater', ConfigManager.getAllowPrerelease())
+        ipcRenderer.send('autoUpdateAction', 'initAutoUpdater', false)
     }
 
     prepareSettings(true)
@@ -110,7 +110,25 @@ function showFatalStartupError(){
             document.getElementById('overlayContainer').style.background = 'none'
             setOverlayContent(
                 'Fatal Error: Unable to Load Distribution Index',
-                'A connection could not be established to our servers to download the distribution index. No local copies were available to load. <br><br>The distribution index is an essential file which provides the latest server information. The launcher is unable to start without it. Ensure you are connected to the internet and relaunch the application.',
+                'A connection could not be established to our servers to download the distribution index. <br><br>The distribution index is an essential file which provides the latest server information. The launcher is unable to start without it. Ensure you are connected to the internet and relaunch the application.',
+                'Close'
+            )
+            setOverlayHandler(() => {
+                const window = remote.getCurrentWindow()
+                window.close()
+            })
+            toggleOverlay(true)
+        })
+    }, 750)
+}
+
+function showFatalStartupErrorServerMaintenance(){
+    setTimeout(() => {
+        $('#loadingContainer').fadeOut(250, () => {
+            document.getElementById('overlayContainer').style.background = 'none'
+            setOverlayContent(
+                'Fatal Error: Server in maintenance',
+                'Our data server is currently in maintenance.\nLikely because of an update.\nPlease try again later.',
                 'Close'
             )
             setOverlayHandler(() => {
@@ -391,7 +409,20 @@ document.addEventListener('readystatechange', function(){
                 const data = DistroManager.getDistribution()
                 showMainUI(data)
             } else {
-                showFatalStartupError()
+                try {
+                    got('https://mysql.songs-of-war.com/maintenance').then(result => {
+                        if(result.body == 'true') {
+                            showFatalStartupErrorServerMaintenance()
+                            console.log('Server maintenance true')
+                        } else {
+                            showFatalStartupError()
+                            console.log('Server maintenance false')
+                        }
+                    })
+                } catch(error) {
+                    console.error(error)
+                    showFatalStartupError()
+                }
             }
         } 
     }
@@ -411,7 +442,21 @@ ipcRenderer.on('distributionIndexDone', (event, res) => {
     } else {
         fatalStartupError = true
         if(document.readyState === 'interactive' || document.readyState === 'complete'){
-            showFatalStartupError()
+            try {
+                got('https://mysql.songs-of-war.com/maintenance').then(result => {
+                    if(result.body == 'true') {
+                        showFatalStartupErrorServerMaintenance()
+                        console.log('Server maintenance true')
+                    } else {
+                        showFatalStartupError()
+                        console.log('Server maintenance false')
+                        console.log(result)
+                    }
+                })
+            } catch(error) {
+                console.error(error)
+                showFatalStartupError()
+            }
         } else {
             rscShouldLoad = true
         }

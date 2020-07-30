@@ -6,6 +6,7 @@ const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
+const got = require('got')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -519,6 +520,17 @@ function dlAsync(login = true){
     setLaunchDetails('Please wait..')
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
+
+    (async () => {
+        try {
+            let response = await got('https://mysql.songs-of-war.com/maintenance')
+            if(response == 'true') {
+                showLaunchFailure('Server Unavailable', 'The download server is currently in maintenance. Please try again in a little while.')
+            }
+        } catch(error) {
+            console.error(error.response.body)
+        }
+    })
 
     const loggerAEx = LoggerUtil('%c[AEx]', 'color: #353232; font-weight: bold')
     const loggerLaunchSuite = LoggerUtil('%c[LaunchSuite]', 'color: #000668; font-weight: bold')
