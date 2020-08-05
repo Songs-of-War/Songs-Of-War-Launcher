@@ -1,5 +1,6 @@
 const {ipcRenderer} = require('electron')
 const fs            = require('fs-extra')
+const fsold = require('fs')
 const os            = require('os')
 const path          = require('path')
 const got = require('got')
@@ -7,9 +8,12 @@ const got = require('got')
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const LangLoader    = require('./langloader')
-const logger        = require('./loggerutil')('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
+const LoggerUtils = require('./loggerutil')
+const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
 
 logger.log('Loading..')
+
+fsold.unlinkSync(ConfigManager.getLauncherDirectory() + '/latest.log')
 
 // Load ConfigManager
 ConfigManager.load()

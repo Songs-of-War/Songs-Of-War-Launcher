@@ -1,3 +1,6 @@
+const LoggerUtil = require('./loggerutil')
+const logger = LoggerUtil('%c[AssetExec]', 'color: #003996; font-weight: bold')
+
 let target = require('./assetguard')[process.argv[2]]
 if(target == null){
     process.send({context: 'error', data: null, error: 'Invalid class name'})
@@ -9,10 +12,10 @@ let tracker = new target(...(process.argv.splice(3)))
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 //const tracker = new AssetGuard(process.argv[2], process.argv[3])
-console.log('AssetExec Started')
+logger.log('AssetExec Started')
 
 // Temporary for debug purposes.
-process.on('unhandledRejection', r => console.log(r))
+process.on('unhandledRejection', r => logger.log(r))
 
 let percent = 0
 function assignListeners(){
@@ -68,6 +71,6 @@ process.on('message', (msg) => {
 })
 
 process.on('disconnect', () => {
-    console.log('AssetExec Disconnected')
+    logger.log('AssetExec Disconnected')
     process.exit(0)
 })

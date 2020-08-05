@@ -135,6 +135,19 @@ function setOverlayContent(title, description, acknowledge, dismiss = 'Dismiss')
     document.getElementById('overlayDesc').innerHTML = description
     document.getElementById('overlayAcknowledge').innerHTML = acknowledge
     document.getElementById('overlayDismiss').innerHTML = dismiss
+    document.getElementById('overlayAcknowledge').style.display = ''
+}
+
+/**
+ * Set the content of the overlay.
+ * 
+ * @param {string} title Overlay title text.
+ * @param {string} description Overlay description text.
+ */
+function setOverlayContentNoButton(title, description){
+    document.getElementById('overlayTitle').innerHTML = title
+    document.getElementById('overlayDesc').innerHTML = description
+    document.getElementById('overlayAcknowledge').style.display = 'none'
 }
 
 /**

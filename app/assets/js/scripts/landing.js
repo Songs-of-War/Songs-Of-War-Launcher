@@ -13,6 +13,7 @@ const DiscordWrapper          = require('./assets/js/discordwrapper')
 const Mojang                  = require('./assets/js/mojang')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 const ServerStatus            = require('./assets/js/serverstatus')
+const { report } = require('process')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -22,6 +23,7 @@ const launch_progress_label   = document.getElementById('launch_progress_label')
 const launch_details_text     = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
 const user_text               = document.getElementById('user_text')
+
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
@@ -299,6 +301,22 @@ function showLaunchFailure(title, desc){
     toggleLaunchArea(false)
 }
 
+/**
+ * Shows a non closable overlay
+ * 
+ * @param {string} title The overlay title.
+ * @param {string} desc The overlay description.
+ */
+function showNotClosableMessage(title, desc){
+    setOverlayContentNoButton(
+        title,
+        desc,
+    )
+    setOverlayHandler(null)
+    toggleOverlay(true)
+    toggleLaunchArea(false)
+}
+
 /* System (Java) Scan */
 
 let sysAEx
@@ -560,12 +578,64 @@ function dlAsync(login = true){
     })
     aEx.on('error', (err) => {
         loggerLaunchSuite.error('Error during launch', err)
-        showLaunchFailure('Error During Launch', err.message || 'See console (CTRL + Shift + i) for more details.')
+        showNotClosableMessage(
+            'Please wait...',
+            'The launcher is currently gathering information, this won\'t take long!'
+        )
+
+        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+
+        (async function() {
+            await new Promise((resolve, reject) => {
+                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+            })
+            try {
+                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                    form: {
+                        ReportData: reportdata
+                    },
+                }).json()
+                if(body['message'] == 'Success') {
+                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                } else {
+                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                }
+            } catch(err) {
+                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+            }
+        })()
+        
     })
     aEx.on('close', (code, signal) => {
         if(code !== 0){
             loggerLaunchSuite.error(`AssetExec exited with code ${code}, assuming error.`)
-            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.')
+            showNotClosableMessage(
+                'Please wait...',
+                'The launcher is currently gathering information, this won\'t take long!'
+            )
+
+            let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+
+            (async function() {
+                await new Promise((resolve, reject) => {
+                    setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                })
+                try {
+                    let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                        form: {
+                            ReportData: reportdata
+                        },
+                    }).json()
+                    if(body['message'] == 'Success') {
+                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                    } else {
+                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                    }
+                } catch(err) {
+                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically. ' + err)
+                }
+            })()
+            
         }
     })
 
@@ -652,7 +722,7 @@ function dlAsync(login = true){
                     setLaunchDetails('Preparing to launch..')
                     break
             }
-        } else if(m.context === 'error'){
+        } else if(m.context !== 'error'){
             switch(m.data){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
@@ -663,10 +733,32 @@ function dlAsync(login = true){
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
                     } else {
-                        showLaunchFailure(
-                            'Download Error',
-                            'Check the console (CTRL + Shift + i) for more details. Please try again.'
+                        showNotClosableMessage(
+                            'Please wait...',
+                            'The launcher is currently gathering information, this won\'t take long!'
                         )
+                
+                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+                
+                        (async function() {
+                            await new Promise((resolve, reject) => {
+                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                            })
+                            try {
+                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                    form: {
+                                        ReportData: reportdata
+                                    },
+                                }).json()
+                                if(body['message'] == 'Success') {
+                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                } else {
+                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                }
+                            } catch(err) {
+                                showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                            }
+                        })()                        
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)
