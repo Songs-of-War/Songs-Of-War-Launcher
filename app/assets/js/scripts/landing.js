@@ -664,15 +664,35 @@ function dlAsync(login = true){
                     loggerLaunchSuite.log('Library validation complete.')
                     setLaunchDetails('Validating miscellaneous file integrity..')
                     break
-                case 'forge1':
+                case 'dlforge':
                     setLaunchPercentage(35, 100)
                     loggerLaunchSuite.log('Misc file loaded.')
                     setLaunchDetails('Downloading Forge..')
                     break
-                case 'forge2':
-                    setLaunchPercentage(80, 100)
+                case 'dlforgelibs':
+                    setLaunchPercentage(40, 100)
                     loggerLaunchSuite.log('Forge loaded.')
-                    setLaunchDetails('Setting up Forge..')
+                    setLaunchDetails('Downloading libraries..')
+                    break
+                case 'buildingforge':
+                    setLaunchPercentage(50, 100)
+                    loggerLaunchSuite.log('Building forge.')
+                    setLaunchDetails('Building Forge..')
+                    break
+                case 'buildingforge2':
+                    setLaunchPercentage(60, 100)
+                    loggerLaunchSuite.log('Building Forge 2.')
+                    setLaunchDetails('Building forge..')
+                    break
+                case 'forgeremap':
+                    setLaunchPercentage(80, 100)
+                    loggerLaunchSuite.log('Remapping jar.')
+                    setLaunchDetails('Remapping forge..')
+                    break
+                case 'forgepatch':
+                    setLaunchPercentage(80, 100)
+                    loggerLaunchSuite.log('Patch jar.')
+                    setLaunchDetails('Patching Forge..')
                     break
                 case 'files':
                     setLaunchPercentage(100, 100)
