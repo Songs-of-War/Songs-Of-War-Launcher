@@ -14,8 +14,6 @@ const zlib          = require('zlib')
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
-const loggerutil = require('./loggerutil')
-const { type } = require('jquery')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1342,7 +1340,6 @@ class AssetGuard extends EventEmitter {
 
             const libArr = versionData.libraries
             const libPath = path.join(self.commonPath, 'libraries')
-            const commonPath = self.commonPath
 
             const libDlQueue = []
             let dlSize = 0
@@ -1896,7 +1893,7 @@ class AssetGuard extends EventEmitter {
                 this.emit('validate', 'forge1')
                 await new Promise((resolve, reject) => {
                     let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar'))
-                    let stream = request({
+                    request({
                         uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
                         headers: {
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
