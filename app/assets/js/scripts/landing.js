@@ -758,7 +758,7 @@ function dlAsync(login = true){
                             } catch(err) {
                                 showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
                             }
-                        })()                        
+                        })()
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)
@@ -775,8 +775,26 @@ function dlAsync(login = true){
             if(m.result.forgeData == null || m.result.versionData == null){
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
-                loggerLaunchSuite.error('Error during launch', m.result.error)
-                showLaunchFailure('Error During Launch', 'Please check the console (CTRL + Shift + i) for more details.')
+                loggerLaunchSuite.error('Error during launch', m.result.error);
+                (async function() {
+                    await new Promise((resolve, reject) => {
+                        setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                    })
+                    try {
+                        let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                            form: {
+                                ReportData: reportdata
+                            },
+                        }).json()
+                        if(body['message'] == 'Success') {
+                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                        } else {
+                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                        }
+                    } catch(err) {
+                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                    }
+                })()
 
                 allGood = false
             }
@@ -830,13 +848,33 @@ function dlAsync(login = true){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
                         loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
-                        showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. We\'ll contact them and try to straighten things out.')
+                        (async function() {
+                            await new Promise((resolve, reject) => {
+                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                            })
+                            try {
+                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                    form: {
+                                        ReportData: reportdata
+                                    },
+                                }).json()
+                                if(body['message'] == 'Success') {
+                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                } else {
+                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.')
+                                }
+                            } catch(err) {
+                                showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.' + err)
+                            }
+                        })()
                     }
                 }
 
                 try {
                     // Build Minecraft process.
                     proc = pb.build()
+
+                    
 
                     // Bind listeners to stdout.
                     proc.stdout.on('data', tempListener)
@@ -888,10 +926,62 @@ function dlAsync(login = true){
                         })
                     }
 
+
+                    //Receive crash message
+                    proc.on('message', (data) => {
+                        if(data == 'Crashed') {
+                            showNotClosableMessage(
+                                'Please wait...',
+                                'The launcher is currently gathering information, this won\'t take long!'
+                            )
+                    
+                            let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+                    
+                            (async function() {
+                                await new Promise((resolve, reject) => {
+                                    setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                })
+                                try {
+                                    let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                        form: {
+                                            ReportData: reportdata
+                                        },
+                                    }).json()
+                                    if(body['message'] == 'Success') {
+                                        showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                    } else {
+                                        showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                    }
+                                } catch(err) {
+                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                }
+                            })()
+                        }
+                    })
+                    
+
                 } catch(err) {
 
                     loggerLaunchSuite.error('Error during launch', err)
-                    showLaunchFailure('Error During Launch', 'Please check the console (CTRL + Shift + i) for more details.')
+                    (async function() {
+                        await new Promise((resolve, reject) => {
+                            setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                        })
+                        try {
+                            let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                form: {
+                                    ReportData: reportdata
+                                },
+                            }).json()
+                            if(body['message'] == 'Success') {
+                                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                            } else {
+                                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                            }
+                        } catch(err) {
+                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                        }
+                    })()
 
                 }
             }

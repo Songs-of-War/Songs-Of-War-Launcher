@@ -13,6 +13,7 @@ const LoggerUtil               = require('./loggerutil')
 
 const logger = LoggerUtil('%c[ProcessBuilder]', 'color: #003996; font-weight: bold')
 
+
 class ProcessBuilder {
 
     constructor(distroServer, versionData, forgeData, authUser, launcherVersion){
@@ -30,6 +31,7 @@ class ProcessBuilder {
         this.usingLiteLoader = false
         this.llPath = null
     }
+
     
     /**
      * Convienence method to run the functions typically used to build a process.
@@ -61,12 +63,8 @@ class ProcessBuilder {
 
         const child = child_process.spawn(ConfigManager.getJavaExecutable(), args, {
             cwd: this.gameDir,
-            detached: ConfigManager.getLaunchDetached()
+            detached: false,
         })
-
-        if(ConfigManager.getLaunchDetached()){
-            child.unref()
-        }
 
         child.stdout.setEncoding('utf8')
         child.stderr.setEncoding('utf8')
@@ -74,8 +72,13 @@ class ProcessBuilder {
         const loggerMCstdout = LoggerUtil('%c[Minecraft]', 'color: #36b030; font-weight: bold')
         const loggerMCstderr = LoggerUtil('%c[Minecraft]', 'color: #b03030; font-weight: bold')
 
+        let hasstoppednormally = false
+
         child.stdout.on('data', (data) => {
             loggerMCstdout.log(data)
+            if(data.includes('[Render thread/INFO]: Stopping!')) {
+                hasstoppednormally = true
+            }
         })
         child.stderr.on('data', (data) => {
             loggerMCstderr.log(data)
@@ -89,6 +92,9 @@ class ProcessBuilder {
                     logger.log('Temp dir deleted successfully.')
                 }
             })
+            if(!hasstoppednormally) {
+                child.emit('message', 'Crashed')
+            }
         })
 
         return child
