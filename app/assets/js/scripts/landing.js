@@ -722,7 +722,7 @@ function dlAsync(login = true){
                     setLaunchDetails('Preparing to launch..')
                     break
             }
-        } else if(m.context !== 'error'){
+        } else if(m.context === 'error'){
             switch(m.data){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
