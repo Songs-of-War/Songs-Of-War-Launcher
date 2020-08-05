@@ -914,21 +914,57 @@ function dlAsync(login = true){
 
                     //Setting up the default config for clients and overriding certain options required for the server
                     const optionsPath = path.join(modPath, '..', 'options.txt')
+                    let needDefaultOptions = false
 
-                    if(fs.existsSync(optionsPath)) {
-                        let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
-                        data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
-                        data[101] = 'soundCategory_music:0.0'
-                        fs.writeFileSync(optionsPath, data.join('\n'))
-                    } else {
+                    // If there aren't any options set so far
+                    if(!fs.existsSync(optionsPath)) {
+                        console.log('No instance options')
 
-                        // Low end or high end
+                        // Try to yoink .minecraft/options.txt                 
+                        const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
+                        if(fs.existsSync(oldOptionsPath)) {
+
+                            // Check for a recent version of Minecraft
+                            const oldOptions = fs.readFileSync(oldOptionsPath, 'utf8')
+                            if(oldOptions.includes('resourcePacks:') && oldOptions.includes('autoJump:') && oldOptions.includes('soundCategory_music:')) {
+                                fs.copyFileSync(oldOptionsPath, optionsPath)
+                                console.log('Copied options from MC')
+
+                            // If the latest-launched Minecraft version is too old
+                            } else {
+                                console.log('Could not yoink MC defaults')
+                                needDefaultOptions = true
+                            }
+
+                        // If .minecraft/options.txt doesn't even exist
+                        } else {
+                            console.log('MC defaults not found')
+                            needDefaultOptions = true
+                        }
+                        
+                    }
+
+                    if(needDefaultOptions) {
+                        console.log('Yeeting launcher defaults')
                         if(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer()) {
                             fs.copyFileSync(path.join(__dirname, 'assets/txt/options.txt'), optionsPath)
                         } else {
                             fs.copyFileSync(path.join(__dirname, 'assets/txt/options_highend.txt'), optionsPath)
                         }
                     }
+
+                    // Read the launcher options.txt regardless
+                    let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
+                    data.forEach((element, index) => {
+                        if(element.includes('resourcePacks:')) {
+                            data[index] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
+                        } else if(element.includes('autoJump:')) {
+                            data[index] = 'autoJump:false'
+                        } else if(element.includes('soundCategory_music:')) {
+                            data[index] = 'soundCategory_music:0.0'
+                        }
+                    })
+                    fs.writeFileSync(optionsPath, data.join('\n'))
 
                     // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                     // Fixes ENOENT error without a .songsofwar folder

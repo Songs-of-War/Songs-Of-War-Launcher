@@ -19,6 +19,19 @@ exports.getLauncherDirectory = function(){
 }
 
 /**
+ * Retrieve the absolute path of the default Minecraft directory regardless of its existence.
+ * 
+ * @returns {string} The absolute path of the Minecraft directory.
+ */
+exports.getMinecraftDirectory = function(){
+    if(process.platform == 'darwin') {
+        return path.join(sysRoot, 'minecraft')
+    } else {
+        return path.join(sysRoot, '.minecraft')
+    }
+}
+
+/**
  * Get the launcher's data directory. This is where all files related
  * to game launch are installed (common, instances, java, etc).
  * 
