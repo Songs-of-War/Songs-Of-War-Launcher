@@ -2,6 +2,8 @@
 
 <h1 align="center">Songs of War Launcher</h1>
 
-
+Master
 ![Build](https://github.com/Songs-of-War/Songs-Of-War-Launcher/workflows/Build/badge.svg?branch=master)
 
+Dev
+![Build](https://github.com/Songs-of-War/Songs-Of-War-Launcher/workflows/Build/badge.svg?branch=dev)
