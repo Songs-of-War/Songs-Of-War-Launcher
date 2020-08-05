@@ -847,7 +847,7 @@ function dlAsync(login = true){
                 const gameErrorListener = function(data){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
-                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
+                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
                         (async function() {
                             await new Promise((resolve, reject) => {
                                 setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
@@ -962,7 +962,7 @@ function dlAsync(login = true){
 
                 } catch(err) {
 
-                    loggerLaunchSuite.error('Error during launch', err)
+                    loggerLaunchSuite.error('Error during launch', err);
                     (async function() {
                         await new Promise((resolve, reject) => {
                             setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
