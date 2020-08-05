@@ -1,14 +1,19 @@
 const {ipcRenderer} = require('electron')
 const fs            = require('fs-extra')
+const fsold = require('fs')
 const os            = require('os')
 const path          = require('path')
+const got = require('got')
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const LangLoader    = require('./langloader')
-const logger        = require('./loggerutil')('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
+const LoggerUtils = require('./loggerutil')
+const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
 
 logger.log('Loading..')
+
+fsold.unlinkSync(ConfigManager.getLauncherDirectory() + '/latest.log')
 
 // Load ConfigManager
 ConfigManager.load()
@@ -29,41 +34,42 @@ function onDistroLoad(data){
     ipcRenderer.send('distributionIndexDone', data != null)
 }
 
-// Ensure Distribution is downloaded and cached.
-DistroManager.pullRemote().then((data) => {
-    logger.log('Loaded distribution index.')
+try {
+    got('https://mysql.songs-of-war.com/maintenance').then(result => {
+        if(result.body == 'true') {
+            onDistroLoad(null)
+            console.log('Server maintenance true')
+        } else {
+            console.log('Server maintenance false')
 
-    onDistroLoad(data)
+            // Ensure Distribution is downloaded and cached.
+            DistroManager.pullRemote().then((data) => {
 
-}).catch((err) => {
-    logger.log('Failed to load distribution index.')
-    logger.error(err)
+                logger.log('Loaded distribution index.')
 
-    logger.log('Attempting to load an older version of the distribution index.')
-    // Try getting a local copy, better than nothing.
-    DistroManager.pullLocal().then((data) => {
-        logger.log('Successfully loaded an older version of the distribution index.')
+                onDistroLoad(data)
 
-        onDistroLoad(data)
+            }).catch((err) => {
+                logger.log('Failed to load distribution index.')
+                logger.error(err)
 
+                onDistroLoad(null)
 
-    }).catch((err) => {
+            })
 
-        logger.log('Failed to load an older version of the distribution index.')
-        logger.log('Application cannot run.')
-        logger.error(err)
-
-        onDistroLoad(null)
-
+            // Clean up temp dir incase previous launches ended unexpectedly. 
+            fs.remove(path.join(os.tmpdir(), ConfigManager.getTempNativeFolder()), (err) => {
+                if(err){
+                    logger.warn('Error while cleaning natives directory', err)
+                } else {
+                    logger.log('Cleaned natives directory.')
+                }
+            })
+        }
     })
+} catch(error) {
+    console.error(error)
+    onDistroLoad(null)
+}
 
-})
 
-// Clean up temp dir incase previous launches ended unexpectedly. 
-fs.remove(path.join(os.tmpdir(), ConfigManager.getTempNativeFolder()), (err) => {
-    if(err){
-        logger.warn('Error while cleaning natives directory', err)
-    } else {
-        logger.log('Cleaned natives directory.')
-    }
-})

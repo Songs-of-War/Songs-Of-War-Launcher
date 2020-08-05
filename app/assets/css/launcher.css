@@ -2896,6 +2896,10 @@ input:checked + .toggleSwitchSlider:before {
     position: relative;
 }
 
+#screenshotsMediaContainer {
+    position: relative;
+}
+
 /* Settings icon colors. */
 #settingsSVG {
     stroke: #ffffff;

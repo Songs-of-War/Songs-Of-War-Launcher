@@ -2,5 +2,8 @@
 
 <h1 align="center">Songs of War Launcher</h1>
 
+Master<br>
+![Build](https://github.com/Songs-of-War/Songs-Of-War-Launcher/workflows/Build/badge.svg?branch=master)
 
-![Node.js CI](https://github.com/Songs-of-War/Songs-Of-War-Launcher/workflows/Node.js%20CI/badge.svg)
+Dev<br>
+![Build](https://github.com/Songs-of-War/Songs-Of-War-Launcher/workflows/Build/badge.svg?branch=dev)

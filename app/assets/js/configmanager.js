@@ -2,8 +2,6 @@ const fs   = require('fs-extra')
 const os   = require('os')
 const path = require('path')
 
-const logger = require('./loggerutil')('%c[ConfigManager]', 'color: #a02d2a; font-weight: bold')
-
 const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
 // TODO change
 const dataPath = path.join(sysRoot, '.songsofwar')
@@ -143,9 +141,9 @@ exports.load = function(){
             config = JSON.parse(fs.readFileSync(configPath, 'UTF-8'))
             doValidate = true
         } catch (err){
-            logger.error(err)
-            logger.log('Configuration file contains malformed JSON or is corrupt.')
-            logger.log('Generating a new configuration file.')
+            console.error(err)
+            console.log('Configuration file contains malformed JSON or is corrupt.')
+            console.log('Generating a new configuration file.')
             fs.ensureDirSync(path.join(configPath, '..'))
             config = DEFAULT_CONFIG
             exports.save()
@@ -155,7 +153,7 @@ exports.load = function(){
             exports.save()
         }
     }
-    logger.log('Successfully Loaded')
+    console.log('Successfully Loaded')
 }
 
 /**
