@@ -1919,13 +1919,13 @@ class AssetGuard extends EventEmitter {
                             } else {
                                 console.log('Installing forge')
                                 console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
-                                let fuckingargs = [ 
+                                let launcharguments = [ 
                                     '-jar',
                                     ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar',
                                     '-installClient',
                                     ConfigManager.getCommonDirectory()                            
                                 ]
-                                const forgeinstaller = child_process.spawn(path.join(ConfigManager.getJavaExecutable()), fuckingargs, {
+                                const forgeinstaller = child_process.spawn(path.join(ConfigManager.getJavaExecutable()), launcharguments, {
                                     detached: false
                                 })
 
