@@ -523,6 +523,19 @@ let forgeData
 
 let progressListener
 
+/**
+ * Use a default options.txt that comes with the launcher.
+ * 
+ * @param {string} optionsPath - Path to instance options.txt
+ */
+function useDefaultOptions(optionsPath) {
+    if(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer()) {
+        fs.copyFileSync(path.join(__dirname, 'assets/txt/options.txt'), optionsPath)
+    } else {
+        fs.copyFileSync(path.join(__dirname, 'assets/txt/options_highend.txt'), optionsPath)
+    }
+}
+
 function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -664,15 +677,35 @@ function dlAsync(login = true){
                     loggerLaunchSuite.log('Library validation complete.')
                     setLaunchDetails('Validating miscellaneous file integrity..')
                     break
-                case 'forge1':
+                case 'dlforge':
                     setLaunchPercentage(35, 100)
                     loggerLaunchSuite.log('Misc file loaded.')
                     setLaunchDetails('Downloading Forge..')
                     break
-                case 'forge2':
-                    setLaunchPercentage(80, 100)
+                case 'dlforgelibs':
+                    setLaunchPercentage(40, 100)
                     loggerLaunchSuite.log('Forge loaded.')
-                    setLaunchDetails('Setting up Forge..')
+                    setLaunchDetails('Downloading libraries..')
+                    break
+                case 'buildingforge':
+                    setLaunchPercentage(50, 100)
+                    loggerLaunchSuite.log('Building forge.')
+                    setLaunchDetails('Building Forge..')
+                    break
+                case 'buildingforge2':
+                    setLaunchPercentage(60, 100)
+                    loggerLaunchSuite.log('Building Forge 2.')
+                    setLaunchDetails('Building forge..')
+                    break
+                case 'forgeremap':
+                    setLaunchPercentage(80, 100)
+                    loggerLaunchSuite.log('Remapping jar.')
+                    setLaunchDetails('Remapping forge..')
+                    break
+                case 'forgepatch':
+                    setLaunchPercentage(80, 100)
+                    loggerLaunchSuite.log('Patch jar.')
+                    setLaunchDetails('Patching Forge..')
                     break
                 case 'files':
                     setLaunchPercentage(100, 100)
@@ -895,21 +928,74 @@ function dlAsync(login = true){
                     //Setting up the default config for clients and overriding certain options required for the server
                     const optionsPath = path.join(modPath, '..', 'options.txt')
 
-                    if(fs.existsSync(optionsPath)) {
-                        let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
-                        data[32] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
-                        data[101] = 'soundCategory_music:0.0'
-                        fs.writeFileSync(optionsPath, data.join('\n'))
-                    } else {
+                    // If there aren't any options set so far
+                    if(!fs.existsSync(optionsPath)) {
+                        loggerLaunchSuite.log('Could not find options.txt in instance directory.')
 
-                        // Low end or high end
-                        if(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer()) {
-                            fs.copyFileSync(path.join(__dirname, 'assets/txt/options.txt'), optionsPath)
+                        // Try to grab .minecraft/options.txt                 
+                        const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
+                        loggerLaunchSuite.log('Attempting to find ' + oldOptionsPath)
+                        if(fs.existsSync(oldOptionsPath)) {
+                            loggerLaunchSuite.log('Found! Attempting to copy.')
+                            fs.copyFileSync(oldOptionsPath, optionsPath)
+
+                        // If it doesn't exist
                         } else {
-                            fs.copyFileSync(path.join(__dirname, 'assets/txt/options_highend.txt'), optionsPath)
+                            useDefaultOptions(optionsPath)
+                            loggerLaunchSuite.log('Couldn\'t find options.txt in Minecraft or launcher instance. Launcher defaults used.')
                         }
+                        
                     }
 
+                    // Loop through our options.txt and attempt to override
+                    loggerLaunchSuite.log('Validating options...')
+                    let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
+                    let packOn = false, musicOff = false
+
+                    data.forEach((element, index) => {
+                        if(element.startsWith('resourcePacks:')) {
+                            data[index] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
+                            packOn = true
+                        } else if(element.startsWith('soundCategory_music:')) {
+                            data[index] = 'soundCategory_music:0.0'
+                            musicOff = true
+                        }
+                    })
+
+                    // If override successful
+                    if(packOn && musicOff) {
+                        fs.writeFileSync(optionsPath, data.join('\n'))
+                        loggerLaunchSuite.log('Options validated.')
+                    } else {
+                        useDefaultOptions(optionsPath)
+                        loggerLaunchSuite.log('Couldn\'t validate options. Launcher defaults used.')
+                    }
+
+
+                    // Grab shaders while we're at it as well
+                    const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
+                    const shadersPath = path.join(optionsPath, '..', 'shaderpacks')
+
+                    // Check if there's a place to get shaders and a place to put them
+                    if(fs.existsSync(shadersPath) && fs.existsSync(oldShadersPath)) {
+
+                        // Find shaders in .minecraft/shaderpacks that instance doesn't have
+                        let shadersArr = fs.readdirSync(shadersPath)
+                        fs.readdirSync(oldShadersPath)
+                            .filter(element => !shadersArr.includes(element))
+                            .forEach(element => {
+
+                                // Attempt to copy shader
+                                try{
+                                    fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
+                                    loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
+                                } catch(error) {
+                                    loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                                }
+                            })
+
+                    }
+                    
                     // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                     // Fixes ENOENT error without a .songsofwar folder
 

@@ -1890,7 +1890,7 @@ class AssetGuard extends EventEmitter {
             if(wasran) {
                 console.log('Downloading forge')
                 await fs.writeFile(ConfigManager.getCommonDirectory() + '/launcher_profiles.json', '{}')
-                this.emit('validate', 'forge1')
+                this.emit('validate', 'dlforge')
                 await new Promise((resolve, reject) => {
                     let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar'))
                     request({
@@ -1909,7 +1909,7 @@ class AssetGuard extends EventEmitter {
                         .pipe(file)
                         .on('finish', async () => {
                             file.close()
-                            this.emit('validate', 'forge2')
+                            this.emit('validate', 'dlforgelibs')
                             console.log('Downloaded forge')
                             console.log('Starting install')
                             const jExe = ConfigManager.getJavaExecutable()
@@ -1919,16 +1919,55 @@ class AssetGuard extends EventEmitter {
                             } else {
                                 console.log('Installing forge')
                                 console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
-                                // eslint-disable-next-line no-unused-vars
-                                let child = await child_process.exec('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"'), async (error, stdout, stderr) => {
-                                    console.log('stdout: ' + stdout)
-                                    console.log('stderr: ' + stderr)
-                                    if(error !== null) {
-                                        console.error('Process failed ' + error)
-                                        reject()
+                                let launcharguments = [ 
+                                    '-jar',
+                                    ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar',
+                                    '-installClient',
+                                    ConfigManager.getCommonDirectory()                            
+                                ]
+                                const forgeinstaller = child_process.spawn(path.join(ConfigManager.getJavaExecutable()), launcharguments, {
+                                    detached: false
+                                })
+
+                                forgeinstaller.stdout.setEncoding('utf-8')
+                                forgeinstaller.stderr.setEncoding('utf-8')
+
+                                let buildforge2 = false
+                                let forgemapping = false
+                                let forgepatching = false
+
+                                forgeinstaller.stdout.on('data', (data) => {
+                                    console.log(data)
+                                    if(data.startsWith('Building Processors')) {
+                                        this.emit('validate', 'buildingforge')
                                     }
+                                    if(data.startsWith('Data') && !buildforge2) {
+                                        buildforge2 = true
+                                        this.emit('validate', 'buildingforge2')
+                                    }
+                                    if(data.startsWith('Loading mappings') && !forgemapping) {
+                                        forgemapping = true
+                                        this.emit('validate', 'forgeremap')
+                                    }
+                                    if(data.startsWith('Patches:') && !forgepatching) {
+                                        forgepatching = true
+                                        this.emit('validate', 'forgepatch')
+                                    }
+                                })
+                                forgeinstaller.stderr.on('data', (data) => {
+                                    console.error(data)
+                                })
+                                forgeinstaller.on('exit', (code, signal) => {
+                                    console.log('Forge installer exited with code ' + code)
+                                })
+                                forgeinstaller.on('error', (err) => {
+                                    console.error(err)
+                                })
+
+                                forgeinstaller.on('close', (code, signal) => {
                                     resolve()
                                 })
+                                
                             }
                         })
                 })
