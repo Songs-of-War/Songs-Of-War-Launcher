@@ -930,28 +930,33 @@ function dlAsync(login = true){
 
                     // If there aren't any options set so far
                     if(!fs.existsSync(optionsPath)) {
+                        loggerLaunchSuite.log('Could not find options.txt in instance directory.')
 
                         // Try to grab .minecraft/options.txt                 
                         const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
+                        loggerLaunchSuite.log('Attempting to find ' + oldOptionsPath)
                         if(fs.existsSync(oldOptionsPath)) {
+                            loggerLaunchSuite.log('Found! Attempting to copy.')
                             fs.copyFileSync(oldOptionsPath, optionsPath)
 
                         // If it doesn't exist
                         } else {
                             useDefaultOptions(optionsPath)
+                            loggerLaunchSuite.log('Couldn\'t find options.txt in Minecraft or launcher instance. Launcher defaults used.')
                         }
                         
                     }
 
                     // Loop through our options.txt and attempt to override
+                    loggerLaunchSuite.log('Validating options...')
                     let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
                     let packOn = false, musicOff = false
 
                     data.forEach((element, index) => {
-                        if(element.includes('resourcePacks:')) {
+                        if(element.startsWith('resourcePacks:')) {
                             data[index] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
                             packOn = true
-                        } else if(element.includes('soundCategory_music:')) {
+                        } else if(element.startsWith('soundCategory_music:')) {
                             data[index] = 'soundCategory_music:0.0'
                             musicOff = true
                         }
@@ -960,8 +965,10 @@ function dlAsync(login = true){
                     // If override successful
                     if(packOn && musicOff) {
                         fs.writeFileSync(optionsPath, data.join('\n'))
+                        loggerLaunchSuite.log('Options validated.')
                     } else {
                         useDefaultOptions(optionsPath)
+                        loggerLaunchSuite.log('Couldn\'t validate options. Launcher defaults used.')
                     }
 
 
@@ -972,12 +979,19 @@ function dlAsync(login = true){
                     // Check if there's a place to get shaders and a place to put them
                     if(fs.existsSync(shadersPath) && fs.existsSync(oldShadersPath)) {
 
-                        // Now, add shaders in .minecraft/shaderpacks that instance doesn't have
+                        // Find shaders in .minecraft/shaderpacks that instance doesn't have
                         let shadersArr = fs.readdirSync(shadersPath)
                         fs.readdirSync(oldShadersPath)
                             .filter(element => !shadersArr.includes(element))
                             .forEach(element => {
-                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
+
+                                // Attempt to copy shader
+                                try{
+                                    fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
+                                    loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
+                                } catch(error) {
+                                    loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                                }
                             })
 
                     }
