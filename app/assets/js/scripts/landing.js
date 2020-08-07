@@ -897,7 +897,7 @@ function dlAsync(login = true){
                 try {
                     got('https://mysql.songs-of-war.com/maintenance').then(result => {
                         if(result.body == 'true') {
-                            showLaunchFailure('Server in maintance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
+                            showLaunchFailure('Server in maintenance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
                             try {
                                 // Build Minecraft process.
