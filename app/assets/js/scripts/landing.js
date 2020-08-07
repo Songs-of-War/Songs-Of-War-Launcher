@@ -7,6 +7,7 @@ const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
 const got = require('got')
+const { app } = require('electron')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -552,17 +553,6 @@ function dlAsync(login = true){
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
-    try {
-        got('https://mysql.songs-of-war.com/maintenance').then(result => {
-            if(result.body == 'true') {
-                showLaunchFailure('Our data server is currently in maintenance.\nLikely because of an update.\nPlease try again later.')
-                error('Server unavailable')
-            }
-        })
-    } catch(error) {
-        error(error)
-    }
-
 
     const loggerAEx = LoggerUtil('%c[AEx]', 'color: #353232; font-weight: bold')
     const loggerLaunchSuite = LoggerUtil('%c[LaunchSuite]', 'color: #000668; font-weight: bold')
@@ -903,172 +893,183 @@ function dlAsync(login = true){
                     }
                 }
 
+
                 try {
-                    // Build Minecraft process.
-                    proc = pb.build()
-
-                    
-
-                    // Bind listeners to stdout.
-                    proc.stdout.on('data', tempListener)
-                    proc.stderr.on('data', gameErrorListener)
-
-                    setLaunchDetails('Done. Enjoy the server!')
-
-                    // Deletus le mods
-                    const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
-                    if (fs.existsSync(modPath)) {
-                        fs.readdirSync(modPath).forEach((file) => {
-                            if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
-                                fs.unlinkSync(path.join(modPath, file))
-                            }
-                        })
-                    }
-
-                    //Setting up the default config for clients and overriding certain options required for the server
-                    const optionsPath = path.join(modPath, '..', 'options.txt')
-
-                    // If there aren't any options set so far
-                    if(!fs.existsSync(optionsPath)) {
-                        loggerLaunchSuite.log('Could not find options.txt in instance directory.')
-
-                        // Try to grab .minecraft/options.txt                 
-                        const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
-                        loggerLaunchSuite.log('Attempting to find ' + oldOptionsPath)
-                        if(fs.existsSync(oldOptionsPath)) {
-                            loggerLaunchSuite.log('Found! Attempting to copy.')
-                            fs.copyFileSync(oldOptionsPath, optionsPath)
-
-                        // If it doesn't exist
+                    got('https://mysql.songs-of-war.com/maintenance').then(result => {
+                        if(result.body == 'true') {
+                            showLaunchFailure('Server in maintance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
-                            useDefaultOptions(optionsPath)
-                            loggerLaunchSuite.log('Couldn\'t find options.txt in Minecraft or launcher instance. Launcher defaults used.')
-                        }
-                        
-                    }
-
-                    // Loop through our options.txt and attempt to override
-                    loggerLaunchSuite.log('Validating options...')
-                    let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
-                    let packOn = false, musicOff = false
-
-                    data.forEach((element, index) => {
-                        if(element.startsWith('resourcePacks:')) {
-                            data[index] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
-                            packOn = true
-                        } else if(element.startsWith('soundCategory_music:')) {
-                            data[index] = 'soundCategory_music:0.0'
-                            musicOff = true
-                        }
-                    })
-
-                    // If override successful
-                    if(packOn && musicOff) {
-                        fs.writeFileSync(optionsPath, data.join('\n'))
-                        loggerLaunchSuite.log('Options validated.')
-                    } else {
-                        useDefaultOptions(optionsPath)
-                        loggerLaunchSuite.log('Couldn\'t validate options. Launcher defaults used.')
-                    }
-
-
-                    // Grab shaders while we're at it as well
-                    const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
-                    const shadersPath = path.join(optionsPath, '..', 'shaderpacks')
-
-                    // Check if there's a place to get shaders and a place to put them
-                    if(fs.existsSync(shadersPath) && fs.existsSync(oldShadersPath)) {
-
-                        // Find shaders in .minecraft/shaderpacks that instance doesn't have
-                        let shadersArr = fs.readdirSync(shadersPath)
-                        fs.readdirSync(oldShadersPath)
-                            .filter(element => !shadersArr.includes(element))
-                            .forEach(element => {
-
-                                // Attempt to copy shader
-                                try{
-                                    fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
-                                    loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
-                                } catch(error) {
-                                    loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                            try {
+                                // Build Minecraft process.
+                                proc = pb.build()
+        
+                                
+        
+                                // Bind listeners to stdout.
+                                proc.stdout.on('data', tempListener)
+                                proc.stderr.on('data', gameErrorListener)
+        
+                                setLaunchDetails('Done. Enjoy the server!')
+        
+                                // Deletus le mods
+                                const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
+                                if (fs.existsSync(modPath)) {
+                                    fs.readdirSync(modPath).forEach((file) => {
+                                        if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
+                                            fs.unlinkSync(path.join(modPath, file))
+                                        }
+                                    })
                                 }
-                            })
-
-                    }
-                    
-                    // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
-                    // Fixes ENOENT error without a .songsofwar folder
-
-                    // Init Discord Hook
-                    const distro = DistroManager.getDistribution()
-                    if(distro.discord != null && serv.discord != null){
-                        DiscordWrapper.initRPC(distro.discord, serv.discord)
-                        hasRPC = true
-                        proc.on('close', (code, signal) => {
-                            loggerLaunchSuite.log('Shutting down Discord Rich Presence..')
-                            DiscordWrapper.shutdownRPC()
-                            hasRPC = false
-                            proc = null
-                        })
-                    }
-
-
-                    //Receive crash message
-                    proc.on('message', (data) => {
-                        if(data == 'Crashed') {
-                            showNotClosableMessage(
-                                'Please wait...',
-                                'The launcher is currently gathering information, this won\'t take long!'
-                            )
-                    
-                            let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                    
-                            (async function() {
-                                await new Promise((resolve, reject) => {
-                                    setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                                })
-                                try {
-                                    let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                        form: {
-                                            ReportData: reportdata
-                                        },
-                                    }).json()
-                                    if(body['message'] == 'Success') {
-                                        showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+        
+                                //Setting up the default config for clients and overriding certain options required for the server
+                                const optionsPath = path.join(modPath, '..', 'options.txt')
+        
+                                // If there aren't any options set so far
+                                if(!fs.existsSync(optionsPath)) {
+                                    loggerLaunchSuite.log('Could not find options.txt in instance directory.')
+        
+                                    // Try to grab .minecraft/options.txt                 
+                                    const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
+                                    loggerLaunchSuite.log('Attempting to find ' + oldOptionsPath)
+                                    if(fs.existsSync(oldOptionsPath)) {
+                                        loggerLaunchSuite.log('Found! Attempting to copy.')
+                                        fs.copyFileSync(oldOptionsPath, optionsPath)
+        
+                                    // If it doesn't exist
                                     } else {
-                                        showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                        useDefaultOptions(optionsPath)
+                                        loggerLaunchSuite.log('Couldn\'t find options.txt in Minecraft or launcher instance. Launcher defaults used.')
                                     }
-                                } catch(err) {
-                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                    
                                 }
-                            })()
+        
+                                // Loop through our options.txt and attempt to override
+                                loggerLaunchSuite.log('Validating options...')
+                                let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
+                                let packOn = false, musicOff = false
+        
+                                data.forEach((element, index) => {
+                                    if(element.startsWith('resourcePacks:')) {
+                                        data[index] = 'resourcePacks:["mod_resources","vanilla","programer_art","file/SoWPack"]'
+                                        packOn = true
+                                    } else if(element.startsWith('soundCategory_music:')) {
+                                        data[index] = 'soundCategory_music:0.0'
+                                        musicOff = true
+                                    }
+                                })
+        
+                                // If override successful
+                                if(packOn && musicOff) {
+                                    fs.writeFileSync(optionsPath, data.join('\n'))
+                                    loggerLaunchSuite.log('Options validated.')
+                                } else {
+                                    useDefaultOptions(optionsPath)
+                                    loggerLaunchSuite.log('Couldn\'t validate options. Launcher defaults used.')
+                                }
+        
+        
+                                // Grab shaders while we're at it as well
+                                const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
+                                const shadersPath = path.join(optionsPath, '..', 'shaderpacks')
+        
+                                // Check if there's a place to get shaders and a place to put them
+                                if(fs.existsSync(shadersPath) && fs.existsSync(oldShadersPath)) {
+        
+                                    // Find shaders in .minecraft/shaderpacks that instance doesn't have
+                                    let shadersArr = fs.readdirSync(shadersPath)
+                                    fs.readdirSync(oldShadersPath)
+                                        .filter(element => !shadersArr.includes(element))
+                                        .forEach(element => {
+        
+                                            // Attempt to copy shader
+                                            try{
+                                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
+                                                loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
+                                            } catch(error) {
+                                                loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                                            }
+                                        })
+        
+                                }
+                                
+                                // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
+                                // Fixes ENOENT error without a .songsofwar folder
+        
+                                // Init Discord Hook
+                                const distro = DistroManager.getDistribution()
+                                if(distro.discord != null && serv.discord != null){
+                                    DiscordWrapper.initRPC(distro.discord, serv.discord)
+                                    hasRPC = true
+                                    proc.on('close', (code, signal) => {
+                                        loggerLaunchSuite.log('Shutting down Discord Rich Presence..')
+                                        DiscordWrapper.shutdownRPC()
+                                        hasRPC = false
+                                        proc = null
+                                    })
+                                }
+        
+        
+                                //Receive crash message
+                                proc.on('message', (data) => {
+                                    if(data == 'Crashed') {
+                                        showNotClosableMessage(
+                                            'Please wait...',
+                                            'The launcher is currently gathering information, this won\'t take long!'
+                                        )
+                                
+                                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+                                
+                                        (async function() {
+                                            await new Promise((resolve, reject) => {
+                                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                            })
+                                            try {
+                                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                                    form: {
+                                                        ReportData: reportdata
+                                                    },
+                                                }).json()
+                                                if(body['message'] == 'Success') {
+                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                                } else {
+                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                                }
+                                            } catch(err) {
+                                                showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                            }
+                                        })()
+                                    }
+                                })
+                                
+        
+                            } catch(err) {
+        
+                                loggerLaunchSuite.error('Error during launch', err);
+                                (async function() {
+                                    await new Promise((resolve, reject) => {
+                                        setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                    })
+                                    try {
+                                        let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                            form: {
+                                                ReportData: reportdata
+                                            },
+                                        }).json()
+                                        if(body['message'] == 'Success') {
+                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                        } else {
+                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                        }
+                                    } catch(err) {
+                                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                    }
+                                })()
+        
+                            }
                         }
                     })
-                    
-
-                } catch(err) {
-
-                    loggerLaunchSuite.error('Error during launch', err);
-                    (async function() {
-                        await new Promise((resolve, reject) => {
-                            setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                        })
-                        try {
-                            let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                form: {
-                                    ReportData: reportdata
-                                },
-                            }).json()
-                            if(body['message'] == 'Success') {
-                                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                            } else {
-                                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
-                            }
-                        } catch(err) {
-                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
-                        }
-                    })()
-
+                } catch(error) {
+                    error(error)
                 }
             }
 
