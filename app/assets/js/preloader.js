@@ -10,6 +10,7 @@ const DistroManager = require('./distromanager')
 const LangLoader    = require('./langloader')
 const LoggerUtils = require('./loggerutil')
 const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
+const DiscordWrapper = require('./discordwrapper')
 
 logger.log('Loading..')
 
@@ -32,7 +33,12 @@ function onDistroLoad(data){
         }
     }
     ipcRenderer.send('distributionIndexDone', data != null)
+    const distro = DistroManager.getDistribution()
+    if(distro.discord != null) {
+        DiscordWrapper.initRPC(distro.discord, 'In the Launcher', new Date().getTime())
+    }
 }
+
 
 try {
     got('https://mysql.songs-of-war.com/maintenance').then(result => {

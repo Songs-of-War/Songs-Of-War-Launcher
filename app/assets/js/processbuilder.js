@@ -10,6 +10,7 @@ const { Util, Library }  = require('./assetguard')
 const ConfigManager            = require('./configmanager')
 const DistroManager            = require('./distromanager')
 const LoggerUtil               = require('./loggerutil')
+const DiscordWrapper = require('./discordwrapper')
 
 const logger = LoggerUtil('%c[ProcessBuilder]', 'color: #003996; font-weight: bold')
 
@@ -84,6 +85,8 @@ class ProcessBuilder {
             loggerMCstderr.log(data)
         })
         child.on('close', (code, signal) => {
+            // Update discord RPC and check if the game shuts down cleanly
+            DiscordWrapper.updateDetails('In the Launcher')
             logger.log('Exited with code', code)
             fs.remove(tempNativePath, (err) => {
                 if(err){

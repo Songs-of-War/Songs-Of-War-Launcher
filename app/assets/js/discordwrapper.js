@@ -2,28 +2,43 @@
 const logger = require('./loggerutil')('%c[DiscordWrapper]', 'color: #7289da; font-weight: bold')
 
 const {Client} = require('discord-rpc')
+let LastDate = null
+let isRPCEnabled = false
 
 let client
 let activity
 
-exports.initRPC = function(genSettings, servSettings, initialDetails = 'Waiting for Client..'){
+
+exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', startTimestampDate = null){
     client = new Client({ transport: 'ipc' })
+
+    // Male sure to not reset the time when the argument isn't passed
+    if(startTimestampDate != null) {
+        LastDate = startTimestampDate
+    }
 
     activity = {
         details: initialDetails,
-        state: 'Server: ' + servSettings.shortId, //Server name
-        largeImageKey: servSettings.largeImageKey,
-        largeImageText: servSettings.largeImageText,
+        state: 'Server', //Server name
+        largeImageKey: 'sealcircle',
+        largeImageText: 'Songs of War Server',
         smallImageKey: genSettings.smallImageKey,
         smallImageText: genSettings.smallImageText,
-        startTimestamp: new Date().getTime(),
+        partySize: 0,
+        partyMax: 0,
+        startTimestamp: LastDate,
         instance: false
     }
 
     client.on('ready', () => {
         logger.log('Discord RPC Connected')
         client.setActivity(activity)
+        isRPCEnabled = true
+       
     })
+
+    
+    
     
     client.login({clientId: genSettings.clientId}).catch(error => {
         if(error.message.includes('ENOENT')) {
@@ -32,10 +47,20 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = 'Waiting 
             logger.log('Unable to initialize Discord Rich Presence: ' + error.message, error)
         }
     })
+
+    
 }
 
 exports.updateDetails = function(details){
+    if(!isRPCEnabled) return
     activity.details = details
+    client.setActivity(activity)
+}
+
+exports.updatePartySize = function(curPlayers = 0, maxPlayers = 0){
+    if(!isRPCEnabled) return
+    activity.partyMax = maxPlayers
+    activity.partySize = curPlayers
     client.setActivity(activity)
 }
 
