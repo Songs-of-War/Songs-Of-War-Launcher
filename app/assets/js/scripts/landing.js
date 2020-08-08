@@ -92,6 +92,7 @@ function setLaunchEnabled(val){
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
+    DiscordWrapper.updateDetails('Preparing to launch...')
     
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
@@ -259,11 +260,11 @@ const refreshServerStatus = async function(fade = false){
         if(servStat.online){
             pLabel = 'PLAYERS'
             pVal = servStat.onlinePlayers + '/' + servStat.maxPlayers
+            DiscordWrapper.updatePartySize(parseInt(servStat.onlinePlayers), parseInt(servStat.maxPlayers))
         }
 
     } catch (err) {
-        loggerLanding.warn('Unable to refresh server status, assuming offline.')
-        loggerLanding.debug(err)
+        loggerLanding.warn('Unable to refresh server status, assuming offline. ' + err)
     }
     if(fade){
         $('#server_status_wrapper').fadeOut(250, () => {
@@ -283,7 +284,8 @@ refreshMojangStatuses()
 
 // Set refresh rate to once every 5 minutes.
 let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
-let serverStatusListener = setInterval(() => refreshServerStatus(true), 300000)
+// Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
+let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
 
 /**
  * Shows an error overlay, toggles off the launch area.
@@ -509,10 +511,9 @@ function asyncSystemScan(mcVersion, launchAfter = true){
 // Keep reference to Minecraft Process
 let proc
 // Is DiscordRPC enabled
-let hasRPC = false
 // Joined server regex
 // Change this if your server uses something different.
-const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
+const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] \[\+\] [a-zA-Z0-9_]{1,16} has entered Ardonia/
 const GAME_JOINED_REGEX = /\[.+\]: Sound engine started/
 const GAME_LAUNCH_REGEX = /^\[.+\]: (?:MinecraftForge .+ Initialized|ModLauncher .+ starting: .+)$/
 const MIN_LINGER = 5000
@@ -550,6 +551,7 @@ function dlAsync(login = true){
     }
 
     setLaunchDetails('Please wait..')
+    DiscordWrapper.updateDetails('Preparing to launch...')
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
@@ -581,6 +583,7 @@ function dlAsync(login = true){
     })
     aEx.on('error', (err) => {
         loggerLaunchSuite.error('Error during launch', err)
+        DiscordWrapper.updateDetails('In the Launcher')
         showNotClosableMessage(
             'Please wait...',
             'The launcher is currently gathering information, this won\'t take long!'
@@ -612,6 +615,7 @@ function dlAsync(login = true){
     aEx.on('close', (code, signal) => {
         if(code !== 0){
             loggerLaunchSuite.error(`AssetExec exited with code ${code}, assuming error.`)
+            DiscordWrapper.updateDetails('In the Launcher')
             showNotClosableMessage(
                 'Please wait...',
                 'The launcher is currently gathering information, this won\'t take long!'
@@ -649,7 +653,7 @@ function dlAsync(login = true){
             switch(m.data){
                 case 'distribution':
                     setLaunchPercentage(20, 100)
-                    loggerLaunchSuite.log('Validated distibution index.')
+                    loggerLaunchSuite.log('Validated distribution index.')
                     setLaunchDetails('Loading version information..')
                     break
                 case 'version':
@@ -743,13 +747,14 @@ function dlAsync(login = true){
                     }
 
                     setLaunchDetails('Preparing to launch..')
+                    DiscordWrapper.updateDetails('Game launching...')
                     break
             }
         } else if(m.context === 'error'){
             switch(m.data){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
-                    
+                    DiscordWrapper.updateDetails('In the Launcher')
                     if(m.error.code === 'ENOENT'){
                         showLaunchFailure(
                             'Download Error',
@@ -798,6 +803,7 @@ function dlAsync(login = true){
             if(m.result.forgeData == null || m.result.versionData == null){
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
+                DiscordWrapper.updateDetails('In the Launcher')
                 loggerLaunchSuite.error('Error during launch', m.result.error);
                 (async function() {
                     await new Promise((resolve, reject) => {
@@ -833,9 +839,7 @@ function dlAsync(login = true){
 
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
-                    if(hasRPC){
-                        DiscordWrapper.updateDetails('Loading game..')
-                    }
+                    DiscordWrapper.updateDetails('Loading game...')
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
                     proc.stderr.removeListener('data', gameErrorListener)
@@ -861,15 +865,16 @@ function dlAsync(login = true){
                 const gameStateChange = function(data){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Exploring the Realm!')
+                        DiscordWrapper.updateDetails('Playing on the server!')
                     } else if(GAME_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Songs of War')
+                        DiscordWrapper.updateDetails('In the Main Menu')
                     }
                 }
 
                 const gameErrorListener = function(data){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
+                        DiscordWrapper.updateDetails('In the Launcher')
                         loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
                         (async function() {
                             await new Promise((resolve, reject) => {
@@ -897,7 +902,7 @@ function dlAsync(login = true){
                 try {
                     got('https://mysql.songs-of-war.com/maintenance').then(result => {
                         if(result.body == 'true') {
-                            showLaunchFailure('Server in maintance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
+                            showLaunchFailure('Server in maintenance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
                             try {
                                 // Build Minecraft process.
@@ -994,20 +999,9 @@ function dlAsync(login = true){
                                 
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                                 // Fixes ENOENT error without a .songsofwar folder
+                                       
         
-                                // Init Discord Hook
-                                const distro = DistroManager.getDistribution()
-                                if(distro.discord != null && serv.discord != null){
-                                    DiscordWrapper.initRPC(distro.discord, serv.discord)
-                                    hasRPC = true
-                                    proc.on('close', (code, signal) => {
-                                        loggerLaunchSuite.log('Shutting down Discord Rich Presence..')
-                                        DiscordWrapper.shutdownRPC()
-                                        hasRPC = false
-                                        proc = null
-                                    })
-                                }
-        
+
         
                                 //Receive crash message
                                 proc.on('message', (data) => {
@@ -1044,6 +1038,7 @@ function dlAsync(login = true){
         
                             } catch(err) {
         
+                                DiscordWrapper.updateDetails('In the Launcher')
                                 loggerLaunchSuite.error('Error during launch', err);
                                 (async function() {
                                     await new Promise((resolve, reject) => {
