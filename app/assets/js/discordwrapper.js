@@ -51,6 +51,13 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
     
 }
 
+exports.updateOC = function(ocName, ocSpecies, imageKey) {
+    if(!isRPCEnabled) return
+    activity.smallImageKey = imageKey
+    activity.smallImageText = ocSpecies + ' OC: ' + ocName
+    client.setActivity(activity)
+}
+
 exports.updateDetails = function(details){
     if(!isRPCEnabled) return
     activity.details = details
