@@ -593,6 +593,8 @@ function useDefaultOptions(optionsPath) {
     fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'optionsof.txt'), path.join(path.dirname(optionsPath), 'optionsof.txt'))
 }
 
+
+let GameInstanceStarted = false
 function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -604,6 +606,15 @@ function dlAsync(login = true){
             return
         }
     }
+
+    if(GameInstanceStarted) {
+        setLaunchEnabled(false)
+        toggleLaunchArea(false)
+        return
+    }
+
+    
+
 
     setLaunchDetails('Please wait..')
     DiscordWrapper.updateDetails('Preparing to launch...')
@@ -971,6 +982,7 @@ function dlAsync(login = true){
                                 proc.stderr.on('data', gameErrorListener)
         
                                 setLaunchDetails('Done. Enjoy the server!')
+                                setLaunchEnabled(false)
 
                                 // Get the game instance
                                 const gamePath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID())
@@ -1062,11 +1074,15 @@ function dlAsync(login = true){
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                                 // Fixes ENOENT error without a .songsofwar folder
                                        
+                                
         
                                 proc.on('message', (data) => {
                                     if(data == 'MinecraftShutdown') {
                                         setLaunchEnabled(true)
                                         joinedServer = false
+                                        GameInstanceStarted = false
+                                    } else if(data == 'GameStarted') {
+                                        GameInstanceStarted = true
                                     }
                                 })
         
