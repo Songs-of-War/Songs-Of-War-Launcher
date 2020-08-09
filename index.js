@@ -8,6 +8,26 @@ const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
 
+let myWindow = null
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+    app.quit()
+} else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (myWindow) {
+            if (myWindow.isMinimized()) myWindow.restore()
+            myWindow.focus()
+        }
+    })
+
+    // Create myWindow, load the rest of the app, etc...
+    app.on('ready', createWindow)
+    app.on('ready', createMenu)
+}
+
 // Setup auto updater.
 function initAutoUpdater(event, data) {
 
@@ -102,6 +122,8 @@ function createWindow() {
         },
         backgroundColor: '#171614'
     })
+
+    myWindow = win
 
     ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
 
@@ -204,8 +226,7 @@ function getPlatformIcon(filename){
     return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
 
-app.on('ready', createWindow)
-app.on('ready', createMenu)
+
 
 app.on('window-all-closed', () => {
     // On macOS it is common for applications and their menu bar
