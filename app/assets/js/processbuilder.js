@@ -88,7 +88,7 @@ class ProcessBuilder {
         })
         child.on('close', (code, signal) => {
             // Update discord RPC and check if the game shuts down cleanly
-            DiscordWrapper.updateDetails('In the Launcher')
+            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
             logger.log('Exited with code', code)
             child.emit('message', 'MinecraftShutdown')
             fs.remove(tempNativePath, (err) => {

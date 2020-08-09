@@ -65,9 +65,13 @@ exports.resetOC = function() {
     client.setActivity(activity)
 }
 
-exports.updateDetails = function(details){
+exports.updateDetails = function(details, startimestamp = null){
     if(!isRPCEnabled) return
     activity.details = details
+    if(startimestamp != null) {
+        LastDate = startimestamp
+    }
+    activity.startTimestamp = LastDate
     client.setActivity(activity)
 }
 

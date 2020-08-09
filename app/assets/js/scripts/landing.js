@@ -94,7 +94,7 @@ function setLaunchEnabled(val){
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
-    DiscordWrapper.updateDetails('Preparing to launch...')
+    DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
     
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
@@ -321,7 +321,7 @@ const refreshRPC = async function() {
                 //Check if user left server, since there is no way to do it through the minecraft logs this will have to do.
                 if(joinedServer) {
                     joinedServer = false
-                    DiscordWrapper.updateDetails('In the main menu')
+                    DiscordWrapper.updateDetails('In the main menu', new Date().getTime())
                     DiscordWrapper.resetOC()
                 }
             }
@@ -617,7 +617,7 @@ function dlAsync(login = true){
 
 
     setLaunchDetails('Please wait..')
-    DiscordWrapper.updateDetails('Preparing to launch...')
+    DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
@@ -649,7 +649,7 @@ function dlAsync(login = true){
     })
     aEx.on('error', (err) => {
         loggerLaunchSuite.error('Error during launch', err)
-        DiscordWrapper.updateDetails('In the Launcher')
+        DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
         showNotClosableMessage(
             'Please wait...',
             'The launcher is currently gathering information, this won\'t take long!'
@@ -681,7 +681,7 @@ function dlAsync(login = true){
     aEx.on('close', (code, signal) => {
         if(code !== 0){
             loggerLaunchSuite.error(`AssetExec exited with code ${code}, assuming error.`)
-            DiscordWrapper.updateDetails('In the Launcher')
+            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
             showNotClosableMessage(
                 'Please wait...',
                 'The launcher is currently gathering information, this won\'t take long!'
@@ -813,14 +813,14 @@ function dlAsync(login = true){
                     }
 
                     setLaunchDetails('Preparing to launch..')
-                    DiscordWrapper.updateDetails('Game launching...')
+                    DiscordWrapper.updateDetails('Game launching...', new Date().getTime())
                     break
             }
         } else if(m.context === 'error'){
             switch(m.data){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
-                    DiscordWrapper.updateDetails('In the Launcher')
+                    DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                     if(m.error.code === 'ENOENT'){
                         showLaunchFailure(
                             'Download Error',
@@ -869,7 +869,7 @@ function dlAsync(login = true){
             if(m.result.forgeData == null || m.result.versionData == null){
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
-                DiscordWrapper.updateDetails('In the Launcher')
+                DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                 loggerLaunchSuite.error('Error during launch', m.result.error);
                 (async function() {
                     await new Promise((resolve, reject) => {
@@ -905,7 +905,7 @@ function dlAsync(login = true){
 
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
-                    DiscordWrapper.updateDetails('Loading game...')
+                    DiscordWrapper.updateDetails('Loading game...', new Date().getTime())
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
                     proc.stderr.removeListener('data', gameErrorListener)
@@ -931,17 +931,17 @@ function dlAsync(login = true){
                 const gameStateChange = function(data){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Playing on the server!')
+                        DiscordWrapper.updateDetails('Playing on the server!', new Date().getTime())
                         joinedServer = true
                     } else if(GAME_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('In the Main Menu')
+                        DiscordWrapper.updateDetails('In the Main Menu', new Date().getTime())
                     }
                 }
 
                 const gameErrorListener = function(data){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
-                        DiscordWrapper.updateDetails('In the Launcher')
+                        DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                         loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
                         (async function() {
                             await new Promise((resolve, reject) => {
@@ -1122,7 +1122,7 @@ function dlAsync(login = true){
                                 })
                             } catch(err) {
         
-                                DiscordWrapper.updateDetails('In the Launcher')
+                                DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                                 setLaunchEnabled(true)
                                 joinedServer = false
                                 loggerLaunchSuite.error('Error during launch', err);
