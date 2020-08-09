@@ -111,6 +111,8 @@ let win
 function createWindow() {
 
     win = new BrowserWindow({
+        resizable: false,
+        darkTheme: true,
         width: 980,
         height: 552,
         icon: getPlatformIcon('SealCircle'),
@@ -118,7 +120,10 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            devTools: false,
+            resizable: false,
+            
         },
         backgroundColor: '#171614'
     })
