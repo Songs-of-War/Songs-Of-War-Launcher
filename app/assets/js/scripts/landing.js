@@ -25,6 +25,7 @@ const launch_details_text     = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
 const user_text               = document.getElementById('user_text')
 
+let joinedServer = false
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
@@ -279,6 +280,39 @@ const refreshServerStatus = async function(fade = false){
     
 }
 
+const refreshRPC = async function() {
+
+    // Grab hyphenated UUID
+    let uuid = ConfigManager.getSelectedAccount().uuid
+    uuid = uuid.substring(0, 8) + '-' + uuid.substring(8, 12) + '-' + uuid.substring(12, 16) + '-' + uuid.substring(16, 20) + '-' + uuid.substring(20, 32)
+    if(uuid.length !== 36) {return}
+    
+    try {
+        // Call API
+        let response = await got('https://mysql.songs-of-war.com/api/index.php?PlayerUUID=' + uuid)
+        response = await JSON.parse(response.body)
+
+        if(response.message === 'success') {
+            // Set OC
+            let imageKey = response.Species
+            let species = response.Species
+            if(typeof response.Clan === 'string') {
+                imageKey += '_' + response.Clan
+                species = response.Clan
+            }
+            imageKey = imageKey.toLowerCase()
+            DiscordWrapper.updateOC(response.Name, species, imageKey)
+
+            // Set location
+            if(typeof response.CurrentPosition === 'string') {
+                DiscordWrapper.updateDetails('In ' + response.CurrentPosition)
+            }
+        }
+    } catch(error) {
+        return
+    }
+}
+
 refreshMojangStatuses()
 // Server Status is refreshed in uibinder.js on distributionIndexDone.
 
@@ -286,6 +320,7 @@ refreshMojangStatuses()
 let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
 // Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
+// Set refresh rate to every 30 seconds.
 
 /**
  * Shows an error overlay, toggles off the launch area.
@@ -865,6 +900,7 @@ function dlAsync(login = true){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
                         DiscordWrapper.updateDetails('Playing on the server!')
+                        joinedServer = true
                     } else if(GAME_JOINED_REGEX.test(data)){
                         DiscordWrapper.updateDetails('In the Main Menu')
                     }
@@ -1009,6 +1045,7 @@ function dlAsync(login = true){
                                 proc.on('message', (data) => {
                                     if(data == 'MinecraftShutdown') {
                                         setLaunchEnabled(true)
+                                        joinedServer = false
                                     }
                                 })
         
@@ -1051,6 +1088,7 @@ function dlAsync(login = true){
         
                                 DiscordWrapper.updateDetails('In the Launcher')
                                 setLaunchEnabled(true)
+                                joinedServer = false
                                 loggerLaunchSuite.error('Error during launch', err);
                                 (async function() {
                                     await new Promise((resolve, reject) => {
