@@ -531,11 +531,10 @@ let progressListener
  * @param {string} optionsPath - Path to instance options.txt
  */
 function useDefaultOptions(optionsPath) {
-    if(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer()) {
-        fs.copyFileSync(path.join(__dirname, 'assets/txt/options.txt'), optionsPath)
-    } else {
-        fs.copyFileSync(path.join(__dirname, 'assets/txt/options_highend.txt'), optionsPath)
-    }
+    let setting = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer() ? 'normal' : 'high'
+
+    fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'options.txt'), optionsPath)
+    fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'optionsof.txt'), path.join(path.dirname(optionsPath), 'optionsof.txt'))
 }
 
 function dlAsync(login = true){
@@ -916,23 +915,28 @@ function dlAsync(login = true){
         
                                 setLaunchDetails('Done. Enjoy the server!')
 
-                                setLaunchEnabled(false)
+                                // Get the game instance
+                                const gamePath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID())
         
+                                const paths = {
+                                    mods: path.join(gamePath, 'mods'),
+                                    options: path.join(gamePath, 'options.txt'),
+                                    shaderpacks: path.join(gamePath, 'shaderpacks')
+                                }
+
                                 // Delete forbidden mods
-                                const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
-                                if (fs.existsSync(modPath)) {
-                                    fs.readdirSync(modPath).forEach((file) => {
+                                if (fs.existsSync(paths.mods)) {
+                                    fs.readdirSync(paths.mods).forEach((file) => {
                                         if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
-                                            fs.unlinkSync(path.join(modPath, file))
+                                            fs.unlinkSync(path.join(paths.mods, file))
                                         }
                                     })
                                 }
         
                                 //Setting up the default config for clients and overriding certain options required for the server
-                                const optionsPath = path.join(modPath, '..', 'options.txt')
         
                                 // If there aren't any options set so far
-                                if(!fs.existsSync(optionsPath)) {
+                                if(!fs.existsSync(paths.options) || !fs.existsSync(path.join(gamePath, 'optionsof.txt'))) {
                                     loggerLaunchSuite.log('Could not find options.txt in instance directory.')
         
                                     // Try to grab .minecraft/options.txt                 
@@ -940,11 +944,11 @@ function dlAsync(login = true){
                                     loggerLaunchSuite.log('Attempting to find ' + oldOptionsPath)
                                     if(fs.existsSync(oldOptionsPath)) {
                                         loggerLaunchSuite.log('Found! Attempting to copy.')
-                                        fs.copyFileSync(oldOptionsPath, optionsPath)
+                                        fs.copyFileSync(oldOptionsPath, paths.options)
         
                                     // If it doesn't exist
                                     } else {
-                                        useDefaultOptions(optionsPath)
+                                        useDefaultOptions(paths.options)
                                         loggerLaunchSuite.log('Couldn\'t find options.txt in Minecraft or launcher instance. Launcher defaults used.')
                                     }
                                     
@@ -952,7 +956,7 @@ function dlAsync(login = true){
         
                                 // Loop through our options.txt and attempt to override
                                 loggerLaunchSuite.log('Validating options...')
-                                let data = fs.readFileSync(optionsPath, 'utf8').split('\n')
+                                let data = fs.readFileSync(paths.options, 'utf8').split('\n')
                                 let packOn = false, musicOff = false
         
                                 data.forEach((element, index) => {
@@ -967,30 +971,29 @@ function dlAsync(login = true){
         
                                 // If override successful
                                 if(packOn && musicOff) {
-                                    fs.writeFileSync(optionsPath, data.join('\n'))
+                                    fs.writeFileSync(paths.options, data.join('\n'))
                                     loggerLaunchSuite.log('Options validated.')
                                 } else {
-                                    useDefaultOptions(optionsPath)
+                                    useDefaultOptions(paths.options)
                                     loggerLaunchSuite.log('Couldn\'t validate options. Launcher defaults used.')
                                 }
         
         
                                 // Grab shaders while we're at it as well
                                 const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
-                                const shadersPath = path.join(optionsPath, '..', 'shaderpacks')
         
                                 // Check if there's a place to get shaders and a place to put them
-                                if(fs.existsSync(shadersPath) && fs.existsSync(oldShadersPath)) {
+                                if(fs.existsSync(paths.shaderpacks) && fs.existsSync(oldShadersPath)) {
         
                                     // Find shaders in .minecraft/shaderpacks that instance doesn't have
-                                    let shadersArr = fs.readdirSync(shadersPath)
+                                    let shadersArr = fs.readdirSync(paths.shaderpacks)
                                     fs.readdirSync(oldShadersPath)
                                         .filter(element => !shadersArr.includes(element))
                                         .forEach(element => {
         
                                             // Attempt to copy shader
                                             try{
-                                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(shadersPath, element))
+                                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(paths.shaderpacks, element))
                                                 loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
                                             } catch(error) {
                                                 loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
