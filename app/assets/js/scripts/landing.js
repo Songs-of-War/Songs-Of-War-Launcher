@@ -7,7 +7,7 @@ const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
 const got = require('got')
-const { app } = require('electron')
+const { app, ipcMain } = require('electron')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -281,7 +281,12 @@ const refreshServerStatus = async function(fade = false){
     
 }
 
+
+let responsecache
 const refreshRPC = async function() {
+
+    if(!joinedServer) return
+
 
     // Grab hyphenated UUID
     let uuid = ConfigManager.getSelectedAccount().uuid
@@ -292,6 +297,8 @@ const refreshRPC = async function() {
         // Call API
         let response = await got('https://mysql.songs-of-war.com/api/index.php?PlayerUUID=' + uuid)
         response = await JSON.parse(response.body)
+        if(response === responsecache) return
+        responsecache = response
 
         if(response.message === 'success') {
             // Set OC
@@ -302,12 +309,24 @@ const refreshRPC = async function() {
                 species = response.Clan
             }
             imageKey = imageKey.toLowerCase()
-            DiscordWrapper.updateOC(response.Name, species, imageKey)
+            if(response.Name !== null) {
+                DiscordWrapper.updateOC(response.Name, species, imageKey)
+            }
 
             // Set location
             if(typeof response.CurrentPosition === 'string') {
                 DiscordWrapper.updateDetails('In ' + response.CurrentPosition)
+                
+            } else {
+                //Check if user left server, since there is no way to do it through the minecraft logs this will have to do.
+                if(joinedServer) {
+                    joinedServer = false
+                    DiscordWrapper.updateDetails('In the main menu')
+                    DiscordWrapper.resetOC()
+                }
             }
+
+            
         }
     } catch(error) {
         return
@@ -321,8 +340,8 @@ refreshMojangStatuses()
 let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
 // Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
-// Set refresh rate to every 30 seconds.
-let APIPlayerInfoListener = setInterval(() => refreshRPC(true), 30000)
+// Set refresh rate to every 15 seconds.
+let APIPlayerInfoListener = setInterval(() => refreshRPC(true), 15000)
 
 /**
  * Shows an error overlay, toggles off the launch area.
@@ -1085,8 +1104,6 @@ function dlAsync(login = true){
                                         })()
                                     }
                                 })
-                                
-        
                             } catch(err) {
         
                                 DiscordWrapper.updateDetails('In the Launcher')

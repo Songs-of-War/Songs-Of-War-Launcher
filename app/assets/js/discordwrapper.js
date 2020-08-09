@@ -58,6 +58,13 @@ exports.updateOC = function(ocName, ocSpecies, imageKey) {
     client.setActivity(activity)
 }
 
+exports.resetOC = function() {
+    if(!isRPCEnabled) return
+    activity.smallImageKey = 'mainlogo'
+    activity.smallImageText = 'Songs of War'
+    client.setActivity(activity)
+}
+
 exports.updateDetails = function(details){
     if(!isRPCEnabled) return
     activity.details = details
