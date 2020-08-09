@@ -25,6 +25,7 @@ const launch_details_text     = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
 const user_text               = document.getElementById('user_text')
 
+// Variable for checking if the user joined the server
 let joinedServer = false
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
@@ -321,6 +322,7 @@ let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000
 // Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
 // Set refresh rate to every 30 seconds.
+let APIPlayerInfoListener = setInterval(() => refreshRPC(true), 30000)
 
 /**
  * Shows an error overlay, toggles off the launch area.
@@ -1053,6 +1055,7 @@ function dlAsync(login = true){
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
                                         setLaunchEnabled(true)
+                                        joinedServer = false
                                         showNotClosableMessage(
                                             'Please wait...',
                                             'The launcher is currently gathering information, this won\'t take long!'
