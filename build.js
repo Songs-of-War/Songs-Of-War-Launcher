@@ -19,7 +19,7 @@ builder.build({
     targets: (process.argv[2] != null && Platform[process.argv[2]] != null ? Platform[process.argv[2]] : getCurrentPlatform()).createTarget(),
     config: {
         appId: 'SoWLauncher',
-        productName: 'Songs-of-War-Launcher',
+        productName: 'Songs of War Launcher',
         artifactName: '${productName}-setup-${version}.${ext}',
         copyright: 'Copyright © 2020-2021 lucasboss45',
         directories: {
