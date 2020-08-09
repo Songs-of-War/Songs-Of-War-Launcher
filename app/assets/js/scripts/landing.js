@@ -668,12 +668,12 @@ function dlAsync(login = true){
                     },
                 }).json()
                 if(body['message'] == 'Success') {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                    showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                 } else {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                    showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                 }
             } catch(err) {
-                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
             }
         })()
         
@@ -700,12 +700,12 @@ function dlAsync(login = true){
                         },
                     }).json()
                     if(body['message'] == 'Success') {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                        showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                     } else {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                        showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                     }
                 } catch(err) {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically. ' + err)
+                    showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically. ' + err)
                 }
             })()
             
@@ -845,12 +845,12 @@ function dlAsync(login = true){
                                     },
                                 }).json()
                                 if(body['message'] == 'Success') {
-                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                    showLaunchFailure('Download Error', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                                 } else {
-                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                    showLaunchFailure('Download Error', ' \nWe were not able to make an error report automatically.')
                                 }
                             } catch(err) {
-                                showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                showLaunchFailure('Download Error', '\nWe were not able to make an error report automatically.' + err)
                             }
                         })()
                     }
@@ -882,12 +882,12 @@ function dlAsync(login = true){
                             },
                         }).json()
                         if(body['message'] == 'Success') {
-                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                            showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                         } else {
-                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                            showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                         }
                     } catch(err) {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                        showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
                     }
                 })()
 
@@ -1110,12 +1110,12 @@ function dlAsync(login = true){
                                                     },
                                                 }).json()
                                                 if(body['message'] == 'Success') {
-                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                                    showLaunchFailure('Game crashed', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                                                 } else {
-                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                                    showLaunchFailure('Game crashed', ' \nWe were not able to make an error report automatically.')
                                                 }
                                             } catch(err) {
-                                                showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                                showLaunchFailure('Game crashed', '\nWe were not able to make an error report automatically.' + err)
                                             }
                                         })()
                                     }
@@ -1137,12 +1137,12 @@ function dlAsync(login = true){
                                             },
                                         }).json()
                                         if(body['message'] == 'Success') {
-                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                            showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                                         } else {
-                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                            showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                                         }
                                     } catch(err) {
-                                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                        showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
                                     }
                                 })()
         
@@ -1180,7 +1180,7 @@ function dlAsync(login = true){
         }, (err) => {
             loggerLaunchSuite.error('Unable to refresh distribution index.', err)
             if(DistroManager.getDistribution() == null){
-                showLaunchFailure('Fatal Error', 'Could not load a copy of the distribution index. See the console (CTRL + Shift + i) for more details.')
+                showLaunchFailure('Fatal Error', 'Could not load a copy of the distribution index.')
 
                 // Disconnect from AssetExec
                 aEx.disconnect()
