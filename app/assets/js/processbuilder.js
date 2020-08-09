@@ -88,6 +88,7 @@ class ProcessBuilder {
             // Update discord RPC and check if the game shuts down cleanly
             DiscordWrapper.updateDetails('In the Launcher')
             logger.log('Exited with code', code)
+            child.emit('message', 'MinecraftShutdown')
             fs.remove(tempNativePath, (err) => {
                 if(err){
                     logger.warn('Error while deleting temp dir', err)

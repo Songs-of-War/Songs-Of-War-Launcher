@@ -915,8 +915,10 @@ function dlAsync(login = true){
                                 proc.stderr.on('data', gameErrorListener)
         
                                 setLaunchDetails('Done. Enjoy the server!')
+
+                                setLaunchEnabled(false)
         
-                                // Deletus le mods
+                                // Delete forbidden mods
                                 const modPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'mods')
                                 if (fs.existsSync(modPath)) {
                                     fs.readdirSync(modPath).forEach((file) => {
@@ -1001,11 +1003,16 @@ function dlAsync(login = true){
                                 // Fixes ENOENT error without a .songsofwar folder
                                        
         
-
+                                proc.on('message', (data) => {
+                                    if(data == 'MinecraftShutdown') {
+                                        setLaunchEnabled(true)
+                                    }
+                                })
         
                                 //Receive crash message
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
+                                        setLaunchEnabled(true)
                                         showNotClosableMessage(
                                             'Please wait...',
                                             'The launcher is currently gathering information, this won\'t take long!'
@@ -1013,6 +1020,7 @@ function dlAsync(login = true){
                                 
                                         let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                 
+                                        
                                         (async function() {
                                             await new Promise((resolve, reject) => {
                                                 setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
@@ -1039,6 +1047,7 @@ function dlAsync(login = true){
                             } catch(err) {
         
                                 DiscordWrapper.updateDetails('In the Launcher')
+                                setLaunchEnabled(true)
                                 loggerLaunchSuite.error('Error during launch', err);
                                 (async function() {
                                     await new Promise((resolve, reject) => {
@@ -1065,11 +1074,13 @@ function dlAsync(login = true){
                     })
                 } catch(error) {
                     error(error)
+                    setLaunchEnabled(true)
                 }
             }
 
             // Disconnect from AssetExec
             aEx.disconnect()
+            setLaunchEnabled(true)
 
         }
     })
