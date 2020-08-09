@@ -21,7 +21,7 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
         details: initialDetails,
         state: 'Server', //Server name
         largeImageKey: 'sealcircle',
-        largeImageText: 'Songs of War Server',
+        largeImageText: 'songs-of-war.com',
         smallImageKey: genSettings.smallImageKey,
         smallImageText: genSettings.smallImageText,
         partySize: 0,
