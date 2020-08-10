@@ -1182,9 +1182,12 @@ function dlAsync(login = true){
                                     proc.kill()
                                 })
                                 CommonWatcher.on('change', (event, filename) => {
-                                    loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
+                                    // Minecraft caches the skins in the asset folder causing runtime errors on edits
+                                    if(!filename.startsWith('assets')) {
+                                        loggerLanding.log('File edit: ' + filename)
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
                                 })
                                 ResourcePackWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
@@ -1193,8 +1196,8 @@ function dlAsync(login = true){
                                 })
                                 ConfigWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
+                                    /*ModifyError = true
+                                    proc.kill()*/
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
