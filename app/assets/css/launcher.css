@@ -1110,9 +1110,22 @@ body, button {
 }
 
 /*Shader only overrides*/
-div#settingsShaderContainer {
-    width: 75px;
+div#settingsShadersContainer {
+    width: 75%;
     padding-right: 0px;
+}
+
+.settingsShaderFieldContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0px;
+    width: 100%;
+    
+}
+
+.settingsShaderFieldRight {
+    padding-right: 10px;
 }
 
 /* Toggle Switch */

@@ -111,7 +111,6 @@ let win
 function createWindow() {
 
     win = new BrowserWindow({
-        resizable: false,
         darkTheme: true,
         width: 980,
         height: 552,
@@ -121,7 +120,6 @@ function createWindow() {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
             nodeIntegration: true,
             contextIsolation: false,
-            resizable: false,
             
         },
         backgroundColor: '#171614'
