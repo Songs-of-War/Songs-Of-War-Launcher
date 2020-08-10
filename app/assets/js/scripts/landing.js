@@ -1037,9 +1037,22 @@ function dlAsync(login = true){
                                         musicOff = true
                                     }
                                 })
+
+                                let optifineOverrides = false
+
+                                if(fs.existsSync(path.join(gamePath, 'optionsof.txt'))) {
+                                    loggerLaunchSuite.log('Validating optifine settings')
+                                    let dataof = fs.readFileSync(path.join(gamePath, 'optionsof.txt'), 'utf-8').split('\n')
+                                    dataof.forEach((element, index) => {
+                                        if(element.startsWith('ofShowCapes:')) {
+                                            data[index] = 'ofShowCapes:false'
+                                            optifineOverrides = true
+                                        }
+                                    })
+                                }
         
                                 // If override successful
-                                if(packOn && musicOff) {
+                                if(packOn && musicOff && optifineOverrides) {
                                     fs.writeFileSync(paths.options, data.join('\n'))
                                     loggerLaunchSuite.log('Options validated.')
                                 } else {
