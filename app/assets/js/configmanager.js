@@ -94,15 +94,16 @@ const DEFAULT_CONFIG = {
             ],
         },
         game: {
-            resWidth: 1280,
-            resHeight: 720,
+            resWidth: 856, // Wack default minecraft resolution
+            resHeight: 482,
             fullscreen: false,
             autoConnect: true,
             launchDetached: true
         },
         launcher: {
             allowPrerelease: false,
-            dataDirectory: dataPath
+            dataDirectory: dataPath,
+            shaderMirroring: false
         }
     },
     newsCache: {
@@ -687,6 +688,19 @@ exports.setLaunchDetached = function(launchDetached){
  */
 exports.getAllowPrerelease = function(def = false){
     return false
+}
+
+/**
+ * Check the if the shader mirroring setting is enabled
+ * 
+ * @returns {boolean} Whether the mirror setting is enabled, false for disabled
+ */
+exports.getShaderCopySetting = function() {
+    if(config.launcher.shaderMirroring !== null) {
+        return config.launcher.shaderMirroring
+    } else {
+        return true
+    }
 }
 
 /**

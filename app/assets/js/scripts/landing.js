@@ -144,6 +144,7 @@ document.getElementById('screenshotsMediaButton').onclick = (e) => {
     }
 }
 
+
 // Bind avatar overlay button.
 document.getElementById('avatarOverlay').onclick = (e) => {
     prepareSettings()
@@ -1055,27 +1056,31 @@ function dlAsync(login = true){
                                 }
         
         
-                                // Grab shaders while we're at it as well
-                                const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
-        
-                                // Check if there's a place to get shaders and a place to put them
-                                if(fs.existsSync(paths.shaderpacks) && fs.existsSync(oldShadersPath)) {
-        
-                                    // Find shaders in .minecraft/shaderpacks that instance doesn't have
-                                    let shadersArr = fs.readdirSync(paths.shaderpacks)
-                                    fs.readdirSync(oldShadersPath)
-                                        .filter(element => !shadersArr.includes(element))
-                                        .forEach(element => {
-        
-                                            // Attempt to copy shader
-                                            try{
-                                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(paths.shaderpacks, element))
-                                                loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
-                                            } catch(error) {
-                                                loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
-                                            }
-                                        })
-        
+                                if(ConfigManager.getShaderCopySetting()) {
+                                    // Grab shaders while we're at it as well
+                                    const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
+            
+                                    // Check if there's a place to get shaders and a place to put them
+                                    if(fs.existsSync(paths.shaderpacks) && fs.existsSync(oldShadersPath)) {
+            
+                                        // Find shaders in .minecraft/shaderpacks that instance doesn't have
+                                        let shadersArr = fs.readdirSync(paths.shaderpacks)
+                                        fs.readdirSync(oldShadersPath)
+                                            .filter(element => !shadersArr.includes(element))
+                                            .forEach(element => {
+            
+                                                // Attempt to copy shader
+                                                try{
+                                                    fs.copyFileSync(path.join(oldShadersPath, element), path.join(paths.shaderpacks, element))
+                                                    loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
+                                                } catch(error) {
+                                                    loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                                                }
+                                            })
+            
+                                    }
+                                } else {
+                                    loggerLaunchSuite.log('Shader mirroring disabled in launcher config')
                                 }
                                 
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution

@@ -323,6 +323,8 @@ document.getElementById('settingsAddAccount').onclick = (e) => {
     })
 }
 
+document.getElementById('')
+
 /**
  * Bind functionality for the account selection buttons. If another account
  * is selected, the UI of the previously selected account will be updated.
@@ -606,6 +608,8 @@ function bindModsToggleSwitch(){
         }
     })
 }
+
+document.getElementById('')
 
 
 /**
