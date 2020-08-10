@@ -1170,6 +1170,7 @@ function dlAsync(login = true){
                                 setLaunchEnabled(true)
                                 joinedServer = false
                                 loggerLaunchSuite.error('Error during launch', err);
+                                let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                 (async function() {
                                     await new Promise((resolve, reject) => {
                                         setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
