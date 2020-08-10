@@ -1037,7 +1037,7 @@ body, button {
 
 /* Add spacing to the bottom of each settings tab. */
 .settingsTab > *:last-child {
-    margin-bottom: 20%;
+    margin-bottom: 10%;
 }
 
 /* Tab header shared styles. */
@@ -1086,7 +1086,7 @@ body, button {
     align-items: center;
     justify-content: space-between;
     padding: 20px 0px;
-    width: 75%;
+    width: 74%;
     /*border-bottom: 1px solid rgba(255, 255, 255, 0.50);*/
 }
 .settingsFieldLeft {
@@ -1107,6 +1107,12 @@ body, button {
     height: 1px;
     width: 75%;
     background: rgba(255, 255, 255, 0.25);
+}
+
+/*Shader only overrides*/
+div#settingsShaderContainer {
+    width: 75px;
+    padding-right: 0px;
 }
 
 /* Toggle Switch */
