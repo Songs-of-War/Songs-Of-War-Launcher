@@ -1056,7 +1056,7 @@ function dlAsync(login = true){
                                 }
         
         
-                                if(ConfigManager.getShaderCopySetting()) {
+                                if(ConfigManager.getShaderMirroring()) {
                                     // Grab shaders while we're at it as well
                                     const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
             
