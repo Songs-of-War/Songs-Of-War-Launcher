@@ -695,12 +695,22 @@ exports.getAllowPrerelease = function(def = false){
  * 
  * @returns {boolean} Whether the mirror setting is enabled, false for disabled
  */
-exports.getShaderCopySetting = function() {
-    if(config.launcher.shaderMirroring !== null) {
-        return config.launcher.shaderMirroring
+exports.getShaderMirroring = function() {
+    if(config.settings.launcher.shaderMirroring !== null) {
+        return config.settings.launcher.shaderMirroring
     } else {
         return true
     }
+}
+
+
+/**
+ * Set the shader mirroring setting
+ * 
+ * @param {boolean} value Enables / Disables the Shader Mirroring config
+ */
+exports.setShaderMirroring = function(value) {
+    config.settings.launcher.shaderMirroring = value
 }
 
 /**
