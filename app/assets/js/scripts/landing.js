@@ -1098,10 +1098,12 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const ConfigWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config'), {
+                                const FancyMenu = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config/fancymenu/'), {
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
+                                
+
                                 const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
                                     encoding: 'utf-8',
                                     recursive: true
@@ -1128,7 +1130,7 @@ function dlAsync(login = true){
                                         ModsWatcher.close()
                                         CommonWatcher.close()
                                         ResourcePackWatcher.close()
-                                        ConfigWatcher.close()
+                                        FancyMenu.close()
                                         CustomAssetsWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
@@ -1143,13 +1145,14 @@ function dlAsync(login = true){
                                         showNotClosableMessage(
                                             'Please wait...',
                                             'The launcher is currently gathering information, this won\'t take long!'
-                                        )
-                                
-                                        if(!ModifyError) {
+                                        );
+                                        (async function() {
+                                            await new Promise((resolve, reject) => {
+                                                setTimeout(function() { resolve() }, 1000) //Wait 1 second
+                                            })
+                                            if(!ModifyError) {
 
-                                            let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                                        
-                                            (async function() {
+                                                let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8')                                            
                                                 await new Promise((resolve, reject) => {
                                                     setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
                                                 })
@@ -1167,10 +1170,11 @@ function dlAsync(login = true){
                                                 } catch(err) {
                                                     showLaunchFailure('Game crashed', '\nWe were not able to make an error report automatically.' + err)
                                                 }
-                                            })()
-                                        } else {
-                                            showLaunchFailure('Runtime error', 'A runtime error has occured, most likely due to a file edit.')
-                                        }
+                                        
+                                            } else {
+                                                showLaunchFailure('Runtime error', 'A runtime error has occured, most likely due to a file edit.')
+                                            }
+                                        })()
                                     }
                                 })
                                 
@@ -1196,16 +1200,20 @@ function dlAsync(login = true){
                                     ModifyError = true
                                     proc.kill()
                                 })
-                                ConfigWatcher.on('change', (event, filename) => {
-                                    loggerLanding.log('File edit: ' + filename)
-                                    /*ModifyError = true
-                                    proc.kill()*/
+                                FancyMenu.on('change', (event, filename) => {
+                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals')) {
+                                        loggerLanding.log('File edit: ' + filename)
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
                                     ModifyError = true
                                     proc.kill()
                                 })
+
+                                
 
                             } catch(err) {
         
