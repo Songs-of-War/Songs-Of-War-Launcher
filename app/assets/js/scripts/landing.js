@@ -28,6 +28,8 @@ const user_text               = document.getElementById('user_text')
 // Variable for checking if the user joined the server
 let joinedServer = false
 
+
+
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
 /* Launch Progress Wrapper Functions */
@@ -972,14 +974,19 @@ function dlAsync(login = true){
                             showLaunchFailure('Server in maintenance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
                             try {
-                                // Build Minecraft process.
-                                proc = pb.build()
-        
+
+                                // Setup the different file watchers
+                                const ModsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory()), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+
+
                                 
-        
-                                // Bind listeners to stdout.
-                                proc.stdout.on('data', tempListener)
-                                proc.stderr.on('data', gameErrorListener)
         
                                 setLaunchDetails('Done. Enjoy the server!')
                                 setLaunchEnabled(false)
@@ -1088,12 +1095,26 @@ function dlAsync(login = true){
                                 // Fixes ENOENT error without a .songsofwar folder
                                        
                                 
-        
+                                // Build Minecraft process.
+                                // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
+                                proc = pb.build()
+                                
+                                                        
+                                
+                                // Bind listeners to stdout.
+                                proc.stdout.on('data', tempListener)
+                                proc.stderr.on('data', gameErrorListener)
+
+
                                 proc.on('message', (data) => {
                                     if(data == 'MinecraftShutdown') {
                                         setLaunchEnabled(true)
                                         joinedServer = false
                                         GameInstanceStarted = false
+
+                                        //Shutdown all the file watchers
+                                        ModsWatcher.close()
+                                        CommonWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
                                     }
@@ -1133,6 +1154,16 @@ function dlAsync(login = true){
                                         })()
                                     }
                                 })
+                                
+                                ModsWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    proc.close()
+                                })
+                                CommonWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    proc.close()
+                                })
+
                             } catch(err) {
         
                                 DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
