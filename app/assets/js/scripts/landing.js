@@ -973,20 +973,7 @@ function dlAsync(login = true){
                         if(result.body == 'true') {
                             showLaunchFailure('Server in maintenance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
-                            try {
-
-                                // Setup the different file watchers
-                                const ModsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory()), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-
-
-                                
+                            try {                                                             
         
                                 setLaunchDetails('Done. Enjoy the server!')
                                 setLaunchEnabled(false)
@@ -1094,6 +1081,31 @@ function dlAsync(login = true){
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                                 // Fixes ENOENT error without a .songsofwar folder
                                        
+
+                                // Setup the watchers right before the process start and just after the asset checker is done
+                                // Setup the different file watchers
+
+                                // Note: I have no idea if there's a better way to do this so eh.
+                                const ModsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const ConfigWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
                                 
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
@@ -1115,6 +1127,7 @@ function dlAsync(login = true){
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
                                         CommonWatcher.close()
+                                        ResourcePackWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
                                     }
@@ -1130,38 +1143,63 @@ function dlAsync(login = true){
                                             'The launcher is currently gathering information, this won\'t take long!'
                                         )
                                 
-                                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                                
+                                        if(!ModifyError) {
+
+                                            let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                         
-                                        (async function() {
-                                            await new Promise((resolve, reject) => {
-                                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                                            })
-                                            try {
-                                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                                    form: {
-                                                        ReportData: reportdata
-                                                    },
-                                                }).json()
-                                                if(body['message'] == 'Success') {
-                                                    showLaunchFailure('Game crashed', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                                                } else {
-                                                    showLaunchFailure('Game crashed', ' \nWe were not able to make an error report automatically.')
+                                            (async function() {
+                                                await new Promise((resolve, reject) => {
+                                                    setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                                })
+                                                try {
+                                                    let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                                        form: {
+                                                            ReportData: reportdata
+                                                        },
+                                                    }).json()
+                                                    if(body['message'] == 'Success') {
+                                                        showLaunchFailure('Game crashed', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                                    } else {
+                                                        showLaunchFailure('Game crashed', ' \nWe were not able to make an error report automatically.')
+                                                    }
+                                                } catch(err) {
+                                                    showLaunchFailure('Game crashed', '\nWe were not able to make an error report automatically.' + err)
                                                 }
-                                            } catch(err) {
-                                                showLaunchFailure('Game crashed', '\nWe were not able to make an error report automatically.' + err)
-                                            }
-                                        })()
+                                            })()
+                                        } else {
+                                            showLaunchFailure('Runtime error', 'A runtime error has occured, most likely due to a file edit.')
+                                        }
                                     }
                                 })
                                 
+
+
+                                let ModifyError = false
+                                // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    proc.close()
+                                    ModifyError = true
+                                    proc.kill()
                                 })
                                 CommonWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    proc.close()
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+                                ResourcePackWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+                                ConfigWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+                                CustomAssetsWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
                                 })
 
                             } catch(err) {
@@ -1169,7 +1207,11 @@ function dlAsync(login = true){
                                 DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                                 setLaunchEnabled(true)
                                 joinedServer = false
-                                loggerLaunchSuite.error('Error during launch', err);
+                                showNotClosableMessage(
+                                    'Please wait...',
+                                    'The launcher is currently gathering information, this won\'t take long!'
+                                )
+                                loggerLaunchSuite.error('Error during launch', err)
                                 let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                 (async function() {
                                     await new Promise((resolve, reject) => {
