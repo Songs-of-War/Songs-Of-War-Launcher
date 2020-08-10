@@ -188,7 +188,7 @@ server_selection_button.onclick = (e) => {
 }
 
 // Update Mojang Status Color
-const refreshMojangStatuses = async function(){
+/*const refreshMojangStatuses = async function(){
     loggerLanding.log('Refreshing Mojang Statuses..')
 
     let allowchecking = false
@@ -249,7 +249,7 @@ const refreshMojangStatuses = async function(){
     //document.getElementById('mojangStatusEssentialContainer').innerHTML = tooltipEssentialHTML
     //document.getElementById('mojangStatusNonEssentialContainer').innerHTML = tooltipNonEssentialHTML
     //document.getElementById('mojang_status_icon').style.color = Mojang.statusToHex(status)
-}
+}*/
 
 const refreshServerStatus = async function(fade = false){
     loggerLanding.log('Refreshing Server Status')
@@ -335,11 +335,11 @@ const refreshRPC = async function() {
     }
 }
 
-refreshMojangStatuses()
+//refreshMojangStatuses()
 // Server Status is refreshed in uibinder.js on distributionIndexDone.
 
 // Set refresh rate to once every 5 minutes.
-let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
+//let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
 // Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
 // Set refresh rate to every 15 seconds.
