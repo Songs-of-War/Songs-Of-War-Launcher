@@ -1128,6 +1128,8 @@ function dlAsync(login = true){
                                         ModsWatcher.close()
                                         CommonWatcher.close()
                                         ResourcePackWatcher.close()
+                                        ConfigWatcher.close()
+                                        CustomAssetsWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
                                     }
