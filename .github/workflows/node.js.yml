@@ -32,8 +32,8 @@ jobs:
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          name: Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          path: dist/Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
@@ -57,13 +57,13 @@ jobs:
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          name: Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          name: Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:
@@ -87,13 +87,13 @@ jobs:
       - name: Upload Builded Things 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          name: Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
       - name: Upload Builded Things 2
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          name: Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/Songs of War Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
       - name: Upload Builded Things 3
         uses: actions/upload-artifact@v2
         with:

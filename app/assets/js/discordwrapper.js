@@ -21,7 +21,7 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
         details: initialDetails,
         state: 'Server', //Server name
         largeImageKey: 'sealcircle',
-        largeImageText: 'Songs of War Server',
+        largeImageText: 'songs-of-war.com',
         smallImageKey: genSettings.smallImageKey,
         smallImageText: genSettings.smallImageText,
         partySize: 0,
@@ -51,9 +51,27 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
     
 }
 
-exports.updateDetails = function(details){
+exports.updateOC = function(ocName, ocSpecies, imageKey) {
+    if(!isRPCEnabled) return
+    activity.smallImageKey = imageKey
+    activity.smallImageText = ocSpecies + ' OC: ' + ocName
+    client.setActivity(activity)
+}
+
+exports.resetOC = function() {
+    if(!isRPCEnabled) return
+    activity.smallImageKey = 'mainlogo'
+    activity.smallImageText = 'Songs of War'
+    client.setActivity(activity)
+}
+
+exports.updateDetails = function(details, startimestamp = null){
     if(!isRPCEnabled) return
     activity.details = details
+    if(startimestamp != null) {
+        LastDate = startimestamp
+    }
+    activity.startTimestamp = LastDate
     client.setActivity(activity)
 }
 

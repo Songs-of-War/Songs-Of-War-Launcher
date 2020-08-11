@@ -73,6 +73,8 @@ class ProcessBuilder {
         const loggerMCstdout = LoggerUtil('%c[Minecraft]', 'color: #36b030; font-weight: bold')
         const loggerMCstderr = LoggerUtil('%c[Minecraft]', 'color: #b03030; font-weight: bold')
 
+        child.emit('message', 'GameStarted')
+
         let hasstoppednormally = false
 
         child.stdout.on('data', (data) => {
@@ -86,8 +88,9 @@ class ProcessBuilder {
         })
         child.on('close', (code, signal) => {
             // Update discord RPC and check if the game shuts down cleanly
-            DiscordWrapper.updateDetails('In the Launcher')
+            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
             logger.log('Exited with code', code)
+            child.emit('message', 'MinecraftShutdown')
             fs.remove(tempNativePath, (err) => {
                 if(err){
                     logger.warn('Error while deleting temp dir', err)

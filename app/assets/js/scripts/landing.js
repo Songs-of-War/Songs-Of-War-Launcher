@@ -7,7 +7,7 @@ const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
 const got = require('got')
-const { app } = require('electron')
+const { app, ipcMain } = require('electron')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -24,6 +24,10 @@ const launch_progress_label   = document.getElementById('launch_progress_label')
 const launch_details_text     = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
 const user_text               = document.getElementById('user_text')
+
+// Variable for checking if the user joined the server
+let joinedServer = false
+
 
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
@@ -92,7 +96,7 @@ function setLaunchEnabled(val){
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
-    DiscordWrapper.updateDetails('Preparing to launch...')
+    DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
     
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
@@ -140,6 +144,7 @@ document.getElementById('screenshotsMediaButton').onclick = (e) => {
     }
 }
 
+
 // Bind avatar overlay button.
 document.getElementById('avatarOverlay').onclick = (e) => {
     prepareSettings()
@@ -184,7 +189,7 @@ server_selection_button.onclick = (e) => {
 }
 
 // Update Mojang Status Color
-const refreshMojangStatuses = async function(){
+/*const refreshMojangStatuses = async function(){
     loggerLanding.log('Refreshing Mojang Statuses..')
 
     let allowchecking = false
@@ -245,7 +250,7 @@ const refreshMojangStatuses = async function(){
     //document.getElementById('mojangStatusEssentialContainer').innerHTML = tooltipEssentialHTML
     //document.getElementById('mojangStatusNonEssentialContainer').innerHTML = tooltipNonEssentialHTML
     //document.getElementById('mojang_status_icon').style.color = Mojang.statusToHex(status)
-}
+}*/
 
 const refreshServerStatus = async function(fade = false){
     loggerLanding.log('Refreshing Server Status')
@@ -279,13 +284,67 @@ const refreshServerStatus = async function(fade = false){
     
 }
 
-refreshMojangStatuses()
+
+let responsecache
+const refreshRPC = async function() {
+
+    if(!joinedServer) return
+
+
+    // Grab hyphenated UUID
+    let uuid = ConfigManager.getSelectedAccount().uuid
+    uuid = uuid.substring(0, 8) + '-' + uuid.substring(8, 12) + '-' + uuid.substring(12, 16) + '-' + uuid.substring(16, 20) + '-' + uuid.substring(20, 32)
+    if(uuid.length !== 36) {return}
+    
+    try {
+        // Call API
+        let response = await got('https://mysql.songs-of-war.com/api/index.php?PlayerUUID=' + uuid)
+        response = await JSON.parse(response.body)
+        if(response === responsecache) return
+        responsecache = response
+
+        if(response.message === 'success') {
+            // Set OC
+            let imageKey = response.Species
+            let species = response.Species
+            if(typeof response.Clan === 'string') {
+                imageKey += '_' + response.Clan
+                species = response.Clan
+            }
+            imageKey = imageKey.toLowerCase()
+            if(response.Name !== null) {
+                DiscordWrapper.updateOC(response.Name, species, imageKey)
+            }
+
+            // Set location
+            if(typeof response.CurrentPosition === 'string') {
+                DiscordWrapper.updateDetails('In ' + response.CurrentPosition)
+                
+            } else {
+                //Check if user left server, since there is no way to do it through the minecraft logs this will have to do.
+                if(joinedServer) {
+                    joinedServer = false
+                    DiscordWrapper.updateDetails('In the main menu', new Date().getTime())
+                    DiscordWrapper.resetOC()
+                }
+            }
+
+            
+        }
+    } catch(error) {
+        return
+    }
+}
+
+//refreshMojangStatuses()
 // Server Status is refreshed in uibinder.js on distributionIndexDone.
 
 // Set refresh rate to once every 5 minutes.
-let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
+//let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 300000)
 // Set refresh rate to once every minute since it is required for rich presence we refresh this one faster.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 60000)
+// Set refresh rate to every 15 seconds.
+let APIPlayerInfoListener = setInterval(() => refreshRPC(true), 15000)
 
 /**
  * Shows an error overlay, toggles off the launch area.
@@ -537,6 +596,8 @@ function useDefaultOptions(optionsPath) {
     fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'optionsof.txt'), path.join(path.dirname(optionsPath), 'optionsof.txt'))
 }
 
+
+let GameInstanceStarted = false
 function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -549,8 +610,17 @@ function dlAsync(login = true){
         }
     }
 
+    if(GameInstanceStarted) {
+        setLaunchEnabled(false)
+        toggleLaunchArea(false)
+        return
+    }
+
+    
+
+
     setLaunchDetails('Please wait..')
-    DiscordWrapper.updateDetails('Preparing to launch...')
+    DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
@@ -582,7 +652,7 @@ function dlAsync(login = true){
     })
     aEx.on('error', (err) => {
         loggerLaunchSuite.error('Error during launch', err)
-        DiscordWrapper.updateDetails('In the Launcher')
+        DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
         showNotClosableMessage(
             'Please wait...',
             'The launcher is currently gathering information, this won\'t take long!'
@@ -601,12 +671,12 @@ function dlAsync(login = true){
                     },
                 }).json()
                 if(body['message'] == 'Success') {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                    showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                 } else {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                    showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                 }
             } catch(err) {
-                showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
             }
         })()
         
@@ -614,7 +684,7 @@ function dlAsync(login = true){
     aEx.on('close', (code, signal) => {
         if(code !== 0){
             loggerLaunchSuite.error(`AssetExec exited with code ${code}, assuming error.`)
-            DiscordWrapper.updateDetails('In the Launcher')
+            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
             showNotClosableMessage(
                 'Please wait...',
                 'The launcher is currently gathering information, this won\'t take long!'
@@ -633,12 +703,12 @@ function dlAsync(login = true){
                         },
                     }).json()
                     if(body['message'] == 'Success') {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                        showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                     } else {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                        showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                     }
                 } catch(err) {
-                    showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically. ' + err)
+                    showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically. ' + err)
                 }
             })()
             
@@ -746,14 +816,14 @@ function dlAsync(login = true){
                     }
 
                     setLaunchDetails('Preparing to launch..')
-                    DiscordWrapper.updateDetails('Game launching...')
+                    DiscordWrapper.updateDetails('Game launching...', new Date().getTime())
                     break
             }
         } else if(m.context === 'error'){
             switch(m.data){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
-                    DiscordWrapper.updateDetails('In the Launcher')
+                    DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                     if(m.error.code === 'ENOENT'){
                         showLaunchFailure(
                             'Download Error',
@@ -778,12 +848,12 @@ function dlAsync(login = true){
                                     },
                                 }).json()
                                 if(body['message'] == 'Success') {
-                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                    showLaunchFailure('Download Error', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                                 } else {
-                                    showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                    showLaunchFailure('Download Error', ' \nWe were not able to make an error report automatically.')
                                 }
                             } catch(err) {
-                                showLaunchFailure('Download Error', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                showLaunchFailure('Download Error', '\nWe were not able to make an error report automatically.' + err)
                             }
                         })()
                     }
@@ -802,7 +872,7 @@ function dlAsync(login = true){
             if(m.result.forgeData == null || m.result.versionData == null){
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
-                DiscordWrapper.updateDetails('In the Launcher')
+                DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                 loggerLaunchSuite.error('Error during launch', m.result.error);
                 (async function() {
                     await new Promise((resolve, reject) => {
@@ -815,12 +885,12 @@ function dlAsync(login = true){
                             },
                         }).json()
                         if(body['message'] == 'Success') {
-                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                            showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                         } else {
-                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                            showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                         }
                     } catch(err) {
-                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                        showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
                     }
                 })()
 
@@ -838,7 +908,7 @@ function dlAsync(login = true){
 
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
-                    DiscordWrapper.updateDetails('Loading game...')
+                    DiscordWrapper.updateDetails('Loading game...', new Date().getTime())
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
                     proc.stderr.removeListener('data', gameErrorListener)
@@ -864,16 +934,17 @@ function dlAsync(login = true){
                 const gameStateChange = function(data){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Playing on the server!')
+                        DiscordWrapper.updateDetails('Playing on the server!', new Date().getTime())
+                        joinedServer = true
                     } else if(GAME_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('In the Main Menu')
+                        DiscordWrapper.updateDetails('In the Main Menu', new Date().getTime())
                     }
                 }
 
                 const gameErrorListener = function(data){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
-                        DiscordWrapper.updateDetails('In the Launcher')
+                        DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                         loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
                         (async function() {
                             await new Promise((resolve, reject) => {
@@ -903,17 +974,10 @@ function dlAsync(login = true){
                         if(result.body == 'true') {
                             showLaunchFailure('Server in maintenance', 'Our data server is currently in maintenance. Likely because of an update, please try again later.')
                         } else {
-                            try {
-                                // Build Minecraft process.
-                                proc = pb.build()
-        
-                                
-        
-                                // Bind listeners to stdout.
-                                proc.stdout.on('data', tempListener)
-                                proc.stderr.on('data', gameErrorListener)
+                            try {                                                             
         
                                 setLaunchDetails('Done. Enjoy the server!')
+                                setLaunchEnabled(false)
 
                                 // Get the game instance
                                 const gamePath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID())
@@ -924,7 +988,7 @@ function dlAsync(login = true){
                                     shaderpacks: path.join(gamePath, 'shaderpacks')
                                 }
 
-                                // Deletus le mods
+                                // Delete forbidden mods
                                 if (fs.existsSync(paths.mods)) {
                                     fs.readdirSync(paths.mods).forEach((file) => {
                                         if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
@@ -968,9 +1032,22 @@ function dlAsync(login = true){
                                         musicOff = true
                                     }
                                 })
+
+                                let optifineOverrides = false
+
+                                if(fs.existsSync(path.join(gamePath, 'optionsof.txt'))) {
+                                    loggerLaunchSuite.log('Validating optifine settings')
+                                    let dataof = fs.readFileSync(path.join(gamePath, 'optionsof.txt'), 'utf-8').split('\n')
+                                    dataof.forEach((element, index) => {
+                                        if(element.startsWith('ofShowCapes:')) {
+                                            data[index] = 'ofShowCapes:false'
+                                            optifineOverrides = true
+                                        }
+                                    })
+                                }
         
                                 // If override successful
-                                if(packOn && musicOff) {
+                                if(packOn && musicOff && optifineOverrides) {
                                     fs.writeFileSync(paths.options, data.join('\n'))
                                     loggerLaunchSuite.log('Options validated.')
                                 } else {
@@ -979,72 +1056,181 @@ function dlAsync(login = true){
                                 }
         
         
-                                // Grab shaders while we're at it as well
-                                const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
-        
-                                // Check if there's a place to get shaders and a place to put them
-                                if(fs.existsSync(paths.shaderpacks) && fs.existsSync(oldShadersPath)) {
-        
-                                    // Find shaders in .minecraft/shaderpacks that instance doesn't have
-                                    let shadersArr = fs.readdirSync(paths.shaderpacks)
-                                    fs.readdirSync(oldShadersPath)
-                                        .filter(element => !shadersArr.includes(element))
-                                        .forEach(element => {
-        
-                                            // Attempt to copy shader
-                                            try{
-                                                fs.copyFileSync(path.join(oldShadersPath, element), path.join(paths.shaderpacks, element))
-                                                loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
-                                            } catch(error) {
-                                                loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
-                                            }
-                                        })
-        
+                                if(ConfigManager.getShaderMirroring()) {
+                                    // Grab shaders while we're at it as well
+                                    const oldShadersPath = path.join(ConfigManager.getMinecraftDirectory(), 'shaderpacks')
+            
+                                    // Check if there's a place to get shaders and a place to put them
+                                    if(fs.existsSync(paths.shaderpacks) && fs.existsSync(oldShadersPath)) {
+            
+                                        // Find shaders in .minecraft/shaderpacks that instance doesn't have
+                                        let shadersArr = fs.readdirSync(paths.shaderpacks)
+                                        fs.readdirSync(oldShadersPath)
+                                            .filter(element => !shadersArr.includes(element))
+                                            .forEach(element => {
+            
+                                                // Attempt to copy shader
+                                                try{
+                                                    fs.copyFileSync(path.join(oldShadersPath, element), path.join(paths.shaderpacks, element))
+                                                    loggerLaunchSuite.log('Copied shader ' + element.slice(0, -4) + ' to launcher instance.')
+                                                } catch(error) {
+                                                    loggerLaunchSuite.warn('Failed to copy shader '+ element.slice(0, -4) + ' to launcher instance.')
+                                                }
+                                            })
+            
+                                    }
+                                } else {
+                                    loggerLaunchSuite.log('Shader mirroring disabled in launcher config')
                                 }
                                 
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                                 // Fixes ENOENT error without a .songsofwar folder
                                        
-        
 
+                                // Setup the watchers right before the process start and just after the asset checker is done
+                                // Setup the different file watchers
+
+                                // Note: I have no idea if there's a better way to do this so eh.
+                                const ModsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                const FancyMenu = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config/fancymenu/'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                
+
+                                const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
+                                    encoding: 'utf-8',
+                                    recursive: true
+                                })
+                                
+                                // Build Minecraft process.
+                                // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
+                                proc = pb.build()
+                                
+                                                        
+                                
+                                // Bind listeners to stdout.
+                                proc.stdout.on('data', tempListener)
+                                proc.stderr.on('data', gameErrorListener)
+
+
+                                proc.on('message', (data) => {
+                                    if(data == 'MinecraftShutdown') {
+                                        setLaunchEnabled(true)
+                                        joinedServer = false
+                                        GameInstanceStarted = false
+
+                                        //Shutdown all the file watchers
+                                        ModsWatcher.close()
+                                        CommonWatcher.close()
+                                        ResourcePackWatcher.close()
+                                        FancyMenu.close()
+                                        CustomAssetsWatcher.close()
+                                    } else if(data == 'GameStarted') {
+                                        GameInstanceStarted = true
+                                    }
+                                })
         
                                 //Receive crash message
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
+                                        setLaunchEnabled(true)
+                                        joinedServer = false
                                         showNotClosableMessage(
                                             'Please wait...',
                                             'The launcher is currently gathering information, this won\'t take long!'
-                                        )
-                                
-                                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                                
+                                        );
                                         (async function() {
                                             await new Promise((resolve, reject) => {
-                                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                                setTimeout(function() { resolve() }, 1000) //Wait 1 second
                                             })
-                                            try {
-                                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                                    form: {
-                                                        ReportData: reportdata
-                                                    },
-                                                }).json()
-                                                if(body['message'] == 'Success') {
-                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                                                } else {
-                                                    showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                            if(!ModifyError) {
+
+                                                let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8')                                            
+                                                await new Promise((resolve, reject) => {
+                                                    setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                                                })
+                                                try {
+                                                    let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                                        form: {
+                                                            ReportData: reportdata
+                                                        },
+                                                    }).json()
+                                                    if(body['message'] == 'Success') {
+                                                        showLaunchFailure('Game crashed', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                                    } else {
+                                                        showLaunchFailure('Game crashed', ' \nWe were not able to make an error report automatically.')
+                                                    }
+                                                } catch(err) {
+                                                    showLaunchFailure('Game crashed', '\nWe were not able to make an error report automatically.' + err)
                                                 }
-                                            } catch(err) {
-                                                showLaunchFailure('Game crashed', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                        
+                                            } else {
+                                                showLaunchFailure('Runtime error', 'A runtime error has occured, most likely due to a file edit.')
                                             }
                                         })()
                                     }
                                 })
                                 
-        
+
+
+                                let ModifyError = false
+                                // Kill the process if the files get changed at runtime
+                                ModsWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+                                CommonWatcher.on('change', (event, filename) => {
+                                    // Minecraft caches the skins in the asset folder causing runtime errors on edits
+                                    if(!filename.startsWith('assets')) {
+                                        loggerLanding.log('File edit: ' + filename)
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
+                                })
+                                ResourcePackWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+                                FancyMenu.on('change', (event, filename) => {
+                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals')) {
+                                        loggerLanding.log('File edit: ' + filename)
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
+                                })
+                                CustomAssetsWatcher.on('change', (event, filename) => {
+                                    loggerLanding.log('File edit: ' + filename)
+                                    ModifyError = true
+                                    proc.kill()
+                                })
+
+                                
+
                             } catch(err) {
         
-                                DiscordWrapper.updateDetails('In the Launcher')
-                                loggerLaunchSuite.error('Error during launch', err);
+                                DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
+                                setLaunchEnabled(true)
+                                joinedServer = false
+                                showNotClosableMessage(
+                                    'Please wait...',
+                                    'The launcher is currently gathering information, this won\'t take long!'
+                                )
+                                loggerLaunchSuite.error('Error during launch', err)
+                                let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                 (async function() {
                                     await new Promise((resolve, reject) => {
                                         setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
@@ -1056,12 +1242,12 @@ function dlAsync(login = true){
                                             },
                                         }).json()
                                         if(body['message'] == 'Success') {
-                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                            showLaunchFailure('Error During Launch', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
                                         } else {
-                                            showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details. \nWe were not able to make an error report automatically.')
+                                            showLaunchFailure('Error During Launch', ' \nWe were not able to make an error report automatically.')
                                         }
                                     } catch(err) {
-                                        showLaunchFailure('Error During Launch', 'See console (CTRL + Shift + i) for more details.\nWe were not able to make an error report automatically.' + err)
+                                        showLaunchFailure('Error During Launch', '\nWe were not able to make an error report automatically.' + err)
                                     }
                                 })()
         
@@ -1070,11 +1256,13 @@ function dlAsync(login = true){
                     })
                 } catch(error) {
                     error(error)
+                    setLaunchEnabled(true)
                 }
             }
 
             // Disconnect from AssetExec
             aEx.disconnect()
+            setLaunchEnabled(true)
 
         }
     })
@@ -1097,7 +1285,7 @@ function dlAsync(login = true){
         }, (err) => {
             loggerLaunchSuite.error('Unable to refresh distribution index.', err)
             if(DistroManager.getDistribution() == null){
-                showLaunchFailure('Fatal Error', 'Could not load a copy of the distribution index. See the console (CTRL + Shift + i) for more details.')
+                showLaunchFailure('Fatal Error', 'Could not load a copy of the distribution index.')
 
                 // Disconnect from AssetExec
                 aEx.disconnect()
