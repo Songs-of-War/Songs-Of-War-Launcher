@@ -33,6 +33,7 @@ function initAutoUpdater(event, data) {
 
 
     autoUpdater.allowPrerelease = false
+    autoUpdater.autoInstallOnAppQuit = true
     
     if(isDev){
         autoUpdater.autoInstallOnAppQuit = false
