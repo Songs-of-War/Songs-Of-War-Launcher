@@ -71,6 +71,9 @@ exports.updateDetails = function(details, startimestamp = null){
     if(startimestamp != null) {
         LastDate = startimestamp
     }
+    if(details == 'In the Launcher') {
+        exports.resetOC()
+    }
     activity.startTimestamp = LastDate
     client.setActivity(activity)
 }
