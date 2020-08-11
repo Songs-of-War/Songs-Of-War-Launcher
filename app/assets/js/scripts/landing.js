@@ -1194,7 +1194,7 @@ function dlAsync(login = true){
                                 })
                                 CommonWatcher.on('change', (event, filename) => {
                                     // Minecraft caches the skins in the asset folder causing runtime errors on edits
-                                    if(!filename.startsWith('assets')) {
+                                    if(!filename.startsWith('assets') && !filename.startsWith('libraries') && !filename.startsWith('versions') && !filename.startsWith('modstore')) {
                                         loggerLanding.log('File edit: ' + filename)
                                         ModifyError = true
                                         proc.kill()
@@ -1206,7 +1206,7 @@ function dlAsync(login = true){
                                     proc.kill()
                                 })
                                 FancyMenu.on('change', (event, filename) => {
-                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals')) {
+                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals') && !filename.startsWith('customguis')) {
                                         loggerLanding.log('File edit: ' + filename)
                                         ModifyError = true
                                         proc.kill()

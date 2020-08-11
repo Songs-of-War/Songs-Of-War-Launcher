@@ -103,7 +103,7 @@ const DEFAULT_CONFIG = {
         launcher: {
             allowPrerelease: false,
             dataDirectory: dataPath,
-            shaderMirroring: false
+            shaderMirroring: true
         }
     },
     newsCache: {
