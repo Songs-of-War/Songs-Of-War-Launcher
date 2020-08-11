@@ -1103,10 +1103,6 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const FancyMenu = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config/fancymenu/'), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
                                 
 
                                 const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
@@ -1135,7 +1131,6 @@ function dlAsync(login = true){
                                         ModsWatcher.close()
                                         CommonWatcher.close()
                                         ResourcePackWatcher.close()
-                                        FancyMenu.close()
                                         CustomAssetsWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
@@ -1204,13 +1199,6 @@ function dlAsync(login = true){
                                     loggerLanding.log('File edit: ' + filename)
                                     ModifyError = true
                                     proc.kill()
-                                })
-                                FancyMenu.on('change', (event, filename) => {
-                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals') && !filename.startsWith('customguis')) {
-                                        loggerLanding.log('File edit: ' + filename)
-                                        ModifyError = true
-                                        proc.kill()
-                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
