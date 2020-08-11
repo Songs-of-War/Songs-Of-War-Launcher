@@ -1095,7 +1095,7 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks/SoWPack/assets'), {
+                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks/SoWPack/assets/minecraft'), {
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
@@ -1172,7 +1172,7 @@ function dlAsync(login = true){
                                 })
                                 
 
-
+                                ///This is very fucking stupid but oh well
                                 let ModifyError = false
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
@@ -1181,9 +1181,11 @@ function dlAsync(login = true){
                                     proc.kill()
                                 })
                                 ResourcePackWatcher.on('change', (event, filename) => {
-                                    loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
+                                    if(!filename.startsWith('optifine')) {
+                                        loggerLanding.log('File edit: ' + filename)
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
