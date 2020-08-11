@@ -1095,16 +1095,10 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
+                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks/SoWPack/assets'), {
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks'), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-                                
-
                                 const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
                                     encoding: 'utf-8',
                                     recursive: true
@@ -1129,7 +1123,6 @@ function dlAsync(login = true){
 
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
-                                        CommonWatcher.close()
                                         ResourcePackWatcher.close()
                                         CustomAssetsWatcher.close()
                                     } else if(data == 'GameStarted') {
@@ -1186,14 +1179,6 @@ function dlAsync(login = true){
                                     loggerLanding.log('File edit: ' + filename)
                                     ModifyError = true
                                     proc.kill()
-                                })
-                                CommonWatcher.on('change', (event, filename) => {
-                                    // Minecraft caches the skins in the asset folder causing runtime errors on edits
-                                    if(!filename.startsWith('assets') && !filename.startsWith('libraries') && !filename.startsWith('versions') && !filename.startsWith('modstore')) {
-                                        loggerLanding.log('File edit: ' + filename)
-                                        ModifyError = true
-                                        proc.kill()
-                                    }
                                 })
                                 ResourcePackWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
