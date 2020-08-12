@@ -49,6 +49,13 @@ function toggleLaunchArea(loading){
     }
 }
 
+cp.exec('wmic path win32_VideoController get name', (error, stdout, stderr) => {
+    // Normalise the result here to get the GPU name
+    if(stdout.toLowerCase().includes('intel')) {
+        showLaunchFailure('Unsupported graphics', 'Warning you are using an unsupported GPU, issues may arise.')
+    }
+})
+
 /**
  * Set the details text of the loading area.
  * 
@@ -1241,7 +1248,6 @@ function dlAsync(login = true){
         onDistroRefresh(data)
         serv = data.getServer(ConfigManager.getSelectedServer())
         aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroManager.isDevMode()]})
-        aEx.send({task: 'execute', function: 'updateGraphicDrivers'})
     }, (err) => {
         loggerLaunchSuite.log('Error while fetching a fresh copy of the distribution index.', err)
         refreshDistributionIndex(false, (data) => {

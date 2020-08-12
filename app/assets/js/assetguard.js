@@ -1996,34 +1996,6 @@ class AssetGuard extends EventEmitter {
 
     }
 
-    updateGraphicDrivers() {
-        if(process.platform == 'win32') {
-            child_process.exec('wmic path win32_videoController get name', async (error, stdout, stderr) => {
-                if(error) {
-                    console.log('Error while checking graphic device: ' + error)
-                }
-                if(stderr) {
-                    console.log('stderr: ' + stderr)
-                }
-                if(stdout.includes('Intel')) {
-                    console.log('Start install of intel graphics drivers')
-                    child_process.exec(path.join(__dirname, '/FixOpenGL.bat'), (error, stdout, stderr) => {
-                        if(error) {
-                            console.log('DRIVER INSTALLER: ' + error)
-                        }
-                        if(stdout) {
-                            console.log('DRIVER INSTALLER STDOUT: ' + stdout)
-                        }
-                        if(stderr) {
-                            console.log('DIRVER INSTALLER STDERR: ' + stderr)
-                        }
-                    })
-                    return
-                }
-            })
-        }
-    }
-
     // #endregion
 
 }

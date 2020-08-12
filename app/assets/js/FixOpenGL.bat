@@ -1,1 +1,0 @@
-sdbinst.exe -p -q LegacyIHD_HotFix_V1_64bit.sdb
