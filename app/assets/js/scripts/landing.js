@@ -51,7 +51,7 @@ function toggleLaunchArea(loading){
 
 cp.exec('wmic path win32_VideoController get name', (error, stdout, stderr) => {
     // Normalise the result here to get the GPU name
-    if(stdout.toLowerCase().includes('intel')) {
+    if(stdout.toLowerCase().includes('intel(r) hd graphics 3000')) {
         showLaunchFailure('Unsupported graphics', 'Warning you are using an unsupported GPU, issues may arise.')
     }
 })
