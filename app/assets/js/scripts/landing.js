@@ -6,7 +6,6 @@ const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
-const os = require('os')
 const got = require('got')
 const { app, ipcMain } = require('electron')
 

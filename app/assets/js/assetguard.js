@@ -2007,7 +2007,17 @@ class AssetGuard extends EventEmitter {
                 }
                 if(stdout.includes('Intel')) {
                     console.log('Start install of intel graphics drivers')
-                    child_process.exec('../external/FixOpenGL.bat')
+                    child_process.exec('/FixOpenGL.bat', (error, stdout, stderr) => {
+                        if(error) {
+                            console.log('DRIVER INSTALLER: ' + error)
+                        }
+                        if(stdout) {
+                            console.log('DRIVER INSTALLER STDOUT: ' + stdout)
+                        }
+                        if(stderr) {
+                            console.log('DIRVER INSTALLER STDERR: ' + stderr)
+                        }
+                    })
                     return
                 }
             })
