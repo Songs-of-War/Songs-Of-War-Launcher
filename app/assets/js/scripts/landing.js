@@ -6,6 +6,7 @@ const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
+const os = require('os')
 const got = require('got')
 const { app, ipcMain } = require('electron')
 
@@ -400,6 +401,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
 
     const loggerSysAEx = LoggerUtil('%c[SysAEx]', 'color: #353232; font-weight: bold')
 
+
     const forkEnv = JSON.parse(JSON.stringify(process.env))
     forkEnv.CONFIG_DIRECT_PATH = ConfigManager.getLauncherDirectory()
 
@@ -602,6 +604,7 @@ function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
     // launching the game.
+
 
     if(login) {
         if(ConfigManager.getSelectedAccount() == null){
@@ -1239,6 +1242,7 @@ function dlAsync(login = true){
         onDistroRefresh(data)
         serv = data.getServer(ConfigManager.getSelectedServer())
         aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroManager.isDevMode()]})
+        aEx.send({task: 'execute', function: 'updateGraphicDrivers'})
     }, (err) => {
         loggerLaunchSuite.log('Error while fetching a fresh copy of the distribution index.', err)
         refreshDistributionIndex(false, (data) => {

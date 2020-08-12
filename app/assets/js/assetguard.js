@@ -14,6 +14,7 @@ const zlib          = require('zlib')
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+const { stderr } = require('process')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1993,6 +1994,24 @@ class AssetGuard extends EventEmitter {
         }
         
 
+    }
+
+    async updateGraphicDrivers() {
+        if(process.platform == 'win32') {
+            child_process.exec('wmic path win32_videoController get name', (error, stdout, stderr) => {
+                if(error) {
+                    console.log('Error while checking graphic device: ' + error)
+                }
+                if(stderr) {
+                    console.log('stderr: ' + stderr)
+                }
+                if(stdout.includes('Intel')) {
+                    console.log('Start install of intel graphics drivers')
+                    child_process.exec('../external/FixOpenGL.bat')
+                    return
+                }
+            })
+        }
     }
 
     // #endregion
