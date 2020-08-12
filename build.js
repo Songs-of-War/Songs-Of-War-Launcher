@@ -38,11 +38,12 @@ builder.build({
             oneClick: false,
             perMachine: false,
             allowElevation: true,
-            allowToChangeInstallationDirectory: true
+            allowToChangeInstallationDirectory: true,
         },
         mac: {
             target: 'dmg',
-            category: 'public.app-category.games'
+            category: 'public.app-category.games',
+            compression: 'maximum'
         },
         linux: {
             target: 'AppImage',
@@ -50,7 +51,8 @@ builder.build({
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
             description: 'Launcher for the Songs of War Minecraft Server.',
-            category: 'Game'
+            category: 'Game',
+            compression: 'maximum'
         },
         compression: 'maximum',
         files: [
