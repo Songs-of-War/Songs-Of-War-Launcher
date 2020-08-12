@@ -21,7 +21,7 @@ builder.build({
         appId: 'SoWLauncher',
         productName: 'Songs of War Launcher',
         artifactName: 'Songs-of-War-Launcher-setup-${version}.${ext}',
-        copyright: 'Copyright © 2020-2021 lucasboss45',
+        copyright: 'Copyright © 2020-2020 lucasboss45',
         directories: {
             buildResources: 'build',
             output: 'dist'
