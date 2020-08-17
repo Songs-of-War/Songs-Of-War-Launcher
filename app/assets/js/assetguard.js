@@ -1608,22 +1608,22 @@ class AssetGuard extends EventEmitter {
                     try {
                         let rawhtml = await got('https://www.java.com/en/download/manual.jsp')
                         // You thought I was done with my shitty one liners? Hell nah
-                        let path = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(17)
+                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(17)
 
                         const http = require('follow-redirects').https
 
                         const options = {
                             host: 'javadl.oracle.com',
                             port: 443,
-                            path: '/webapps/download/AutoDL?BundleId=242981_a4634525489241b9a9e1aa73d9e118e6',
+                            path: filepath,
                             method: 'HEAD'
                         }
 
                         http.get(options, function(res) {
                             dataDir = path.join(dataDir, 'runtime', 'x64')
-                            const fDir = path.join(dataDir, 'JavaDmg-' + path + '.dmg')
+                            const fDir = path.join(dataDir, 'JavaDmg-' + filepath + '.dmg')
                             const dmgExtract = require('extract-dmg')
-                            const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com/' + path, fDir)
+                            const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com/' + filepath, fDir)
                             this.java = new DLTracker([jre], jre.size, (a, self) => {
                                 dmgExtract(fDir, path.join(dataDir, 'temp'))
                                 let dirFiles = fs.readdirSync(fDir)
