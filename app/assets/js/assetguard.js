@@ -1635,12 +1635,13 @@ class AssetGuard extends EventEmitter {
                                 self.emit('complete', 'java', JavaGuard.javaExecFromRoot(fDir, 'jre-latest'))
                                 
                             })
+                            resolve(true)
                         }).on('error', function(e) {
                             console.log('Got error: ' + e.message)
                         })
 
                         
-                        resolve(true)
+                        
                     } catch(err) {
                         console.log(err)
                     }
