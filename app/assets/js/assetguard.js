@@ -276,7 +276,13 @@ class JavaGuard extends EventEmitter {
 
         const sanitizedOS = process.platform === 'win32' ? 'windows' : (process.platform === 'darwin' ? 'mac' : process.platform)
 
-        const url = `https://api.adoptopenjdk.net/v2/latestAssets/nightly/openjdk${major}?os=${sanitizedOS}&arch=x64&heap_size=normal&openjdk_impl=hotspot&type=jre`
+        let url
+        if (process.platform !== 'darwin') {
+            url = `https://api.adoptopenjdk.net/v2/latestAssets/nightly/openjdk${major}?os=${sanitizedOS}&arch=x64&heap_size=normal&openjdk_impl=hotspot&type=jre`
+        } else {
+            // Use an oracle version on mac because OpenJDK has issues on mac
+            url = 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242981_a4634525489241b9a9e1aa73d9e118e6'
+        }
         
         return new Promise((resolve, reject) => {
             request({url, json: true}, (err, resp, body) => {
