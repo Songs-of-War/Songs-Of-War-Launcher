@@ -10,10 +10,12 @@ const Registry      = require('winreg')
 const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
+const got           = require('got')
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+const { data } = require('jquery')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1540,66 +1542,109 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
-            JavaGuard._latestOpenJDK('8').then(verData => {
-                if(verData != null){
+            // I am getting severly annoyed at the amount of mac fixes I have to do...
+            if(process.platform !== 'darwin') {
+                JavaGuard._latestOpenJDK('8').then(verData => {
+                    if(verData != null){
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        const fDir = path.join(dataDir, verData.name)
+                        const jre = new Asset(verData.name, null, verData.size, verData.uri, fDir)
+                        this.java = new DLTracker([jre], jre.size, (a, self) => {
+                            if(verData.name.endsWith('zip')){
 
-                    dataDir = path.join(dataDir, 'runtime', 'x64')
-                    const fDir = path.join(dataDir, verData.name)
-                    const jre = new Asset(verData.name, null, verData.size, verData.uri, fDir)
-                    this.java = new DLTracker([jre], jre.size, (a, self) => {
-                        if(verData.name.endsWith('zip')){
-
-                            const zip = new AdmZip(a.to)
-                            const pos = path.join(dataDir, zip.getEntries()[0].entryName)
-                            zip.extractAllToAsync(dataDir, true, (err) => {
-                                if(err){
-                                    console.log(err)
-                                    self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
-                                } else {
-                                    fs.unlink(a.to, err => {
-                                        if(err){
-                                            console.log(err)
-                                        }
+                                const zip = new AdmZip(a.to)
+                                const pos = path.join(dataDir, zip.getEntries()[0].entryName)
+                                zip.extractAllToAsync(dataDir, true, (err) => {
+                                    if(err){
+                                        console.log(err)
                                         self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
+                                    } else {
+                                        fs.unlink(a.to, err => {
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
+                                        })
+                                    }
+                                })
+
+                            } else {
+                                // Tar.gz
+                                let h = null
+                                fs.createReadStream(a.to)
+                                    .on('error', err => console.log(err))
+                                    .pipe(zlib.createGunzip())
+                                    .on('error', err => console.log(err))
+                                    .pipe(tar.extract(dataDir, {
+                                        map: (header) => {
+                                            if(h == null){
+                                                h = header.name
+                                            }
+                                        }
+                                    }))
+                                    .on('error', err => console.log(err))
+                                    .on('finish', () => {
+                                        fs.unlink(a.to, err => {
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            if(h.indexOf('/') > -1){
+                                                h = h.substring(0, h.indexOf('/'))
+                                            }
+                                            const pos = path.join(dataDir, h)
+                                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
+                                        })
                                     })
+                            }
+                        })
+                        resolve(true)
+
+                    } else {
+                        resolve(false)
+                    }
+                })
+            } else {
+                (async () => {
+                    let rawhtml = await got('https://www.java.com/en/download/manual.jsp', {
+                        resolveBodyOnly: true
+                    })
+                    // You thought I was done with my shitty one liners? Hell nah
+                    let path = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml)[0].substring(17)
+
+                    const http = require('follow-redirects').https
+
+                    const options = {
+                        host: 'javadl.oracle.com',
+                        port: 443,
+                        path: '/webapps/download/AutoDL?BundleId=242981_a4634525489241b9a9e1aa73d9e118e6',
+                        method: 'HEAD'
+                    }
+
+                    http.get(options, function(res) {
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        const fDir = path.join(dataDir, 'JavaDmg-' + path + '.dmg')
+                        const dmgExtract = require('extract-dmg')
+                        const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com/' + path, fDir)
+                        this.java = new DLTracker([jre], jre.size, (a, self) => {
+                            dmgExtract(fDir, path.join(dataDir, 'temp'))
+                            let dirFiles = fs.readdirSync(fDir)
+                            dirFiles.forEach(element => {
+                                if(element.toLowerCase().startsWith('java 8')) {
+                                    fs.copyFileSync(path.join(dataDir, 'temp', element, 'Contents'), path.join(fDir, 'jre-latest', 'Contents'))
                                 }
                             })
-
-                        } else {
-                            // Tar.gz
-                            let h = null
-                            fs.createReadStream(a.to)
-                                .on('error', err => console.log(err))
-                                .pipe(zlib.createGunzip())
-                                .on('error', err => console.log(err))
-                                .pipe(tar.extract(dataDir, {
-                                    map: (header) => {
-                                        if(h == null){
-                                            h = header.name
-                                        }
-                                    }
-                                }))
-                                .on('error', err => console.log(err))
-                                .on('finish', () => {
-                                    fs.unlink(a.to, err => {
-                                        if(err){
-                                            console.log(err)
-                                        }
-                                        if(h.indexOf('/') > -1){
-                                            h = h.substring(0, h.indexOf('/'))
-                                        }
-                                        const pos = path.join(dataDir, h)
-                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
-                                    })
-                                })
-                        }
+                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(fDir, 'jre-latest'))
+                            
+                        })
+                    }).on('error', function(e) {
+                        console.log('Got error: ' + e.message)
                     })
-                    resolve(true)
 
-                } else {
-                    resolve(false)
-                }
-            })
+                    
+                    resolve(true)
+                })
+                
+            }
         })
 
     }
