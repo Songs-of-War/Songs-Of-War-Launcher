@@ -1638,7 +1638,7 @@ class AssetGuard extends EventEmitter {
                         })
                     }).on('error', function(e) {
                         console.log('Got error: ' + e.message)
-                    })
+                    })()
 
                     
                     resolve(true)
