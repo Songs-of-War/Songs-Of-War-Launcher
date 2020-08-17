@@ -1608,7 +1608,7 @@ class AssetGuard extends EventEmitter {
                     try {
                         let rawhtml = await got('https://www.java.com/en/download/manual.jsp')
                         // You thought I was done with my shitty one liners? Hell nah
-                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(23)
+                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(25)
                         console.log('Link Path ' + filepath)
 
                         const http = require('follow-redirects').https
