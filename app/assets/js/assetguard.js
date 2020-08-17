@@ -1623,7 +1623,7 @@ class AssetGuard extends EventEmitter {
                         http.get(options, function(res) {
                             dataDir = path.join(dataDir, 'runtime', 'x64')
                             console.log(dataDir)
-                            const fDir = path.join(dataDir, 'JavaDmg-' + filepath + '.dmg')
+                            const fDir = path.join(dataDir, 'JavaDmg-Latest.dmg')
                             console.log(fDir)
                             const dmgExtract = require('extract-dmg')
                             console.log(res.headers['content-length'] + ' ' + 'javadl.oracle.com/' + filepath)
