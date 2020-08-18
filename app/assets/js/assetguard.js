@@ -10,10 +10,14 @@ const Registry      = require('winreg')
 const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
+const got           = require('got')
+//Fuck it, I didn't want to spend my time making an algorithm to loop over the path
+const shelljs = require('shelljs');
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+const { data } = require('jquery')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1264,7 +1268,7 @@ class AssetGuard extends EventEmitter {
             if(!fs.existsSync(assetIndexLoc) || force){
                 console.log('Downloading ' + versionData.id + ' asset index.')
                 fs.ensureDirSync(indexPath)
-                const stream = request(assetIndex.url).pipe(fs.createWriteStream(assetIndexLoc))
+                const stream = got.stream(assetIndex.url).pipe(fs.createWriteStream(assetIndexLoc))
                 stream.on('finish', () => {
                     data = JSON.parse(fs.readFileSync(assetIndexLoc, 'utf-8'))
                     self._assetChainValidateAssets(versionData, data).then(() => {
@@ -1540,66 +1544,127 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
-            JavaGuard._latestOpenJDK('8').then(verData => {
-                if(verData != null){
+            // I am getting severly annoyed at the amount of mac fixes I have to do...
+            if(process.platform !== 'darwin') {
+                JavaGuard._latestOpenJDK('8').then(verData => {
+                    if(verData != null){
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        const fDir = path.join(dataDir, verData.name)
+                        const jre = new Asset(verData.name, null, verData.size, verData.uri, fDir)
+                        this.java = new DLTracker([jre], jre.size, (a, self) => {
+                            if(verData.name.endsWith('zip')){
 
-                    dataDir = path.join(dataDir, 'runtime', 'x64')
-                    const fDir = path.join(dataDir, verData.name)
-                    const jre = new Asset(verData.name, null, verData.size, verData.uri, fDir)
-                    this.java = new DLTracker([jre], jre.size, (a, self) => {
-                        if(verData.name.endsWith('zip')){
-
-                            const zip = new AdmZip(a.to)
-                            const pos = path.join(dataDir, zip.getEntries()[0].entryName)
-                            zip.extractAllToAsync(dataDir, true, (err) => {
-                                if(err){
-                                    console.log(err)
-                                    self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
-                                } else {
-                                    fs.unlink(a.to, err => {
-                                        if(err){
-                                            console.log(err)
-                                        }
+                                const zip = new AdmZip(a.to)
+                                const pos = path.join(dataDir, zip.getEntries()[0].entryName)
+                                zip.extractAllToAsync(dataDir, true, (err) => {
+                                    if(err){
+                                        console.log(err)
                                         self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
-                                    })
-                                }
-                            })
-
-                        } else {
-                            // Tar.gz
-                            let h = null
-                            fs.createReadStream(a.to)
-                                .on('error', err => console.log(err))
-                                .pipe(zlib.createGunzip())
-                                .on('error', err => console.log(err))
-                                .pipe(tar.extract(dataDir, {
-                                    map: (header) => {
-                                        if(h == null){
-                                            h = header.name
-                                        }
+                                    } else {
+                                        fs.unlink(a.to, err => {
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
+                                        })
                                     }
-                                }))
-                                .on('error', err => console.log(err))
-                                .on('finish', () => {
-                                    fs.unlink(a.to, err => {
-                                        if(err){
-                                            console.log(err)
-                                        }
-                                        if(h.indexOf('/') > -1){
-                                            h = h.substring(0, h.indexOf('/'))
-                                        }
-                                        const pos = path.join(dataDir, h)
-                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
-                                    })
                                 })
-                        }
-                    })
-                    resolve(true)
 
-                } else {
-                    resolve(false)
+                            } else {
+                                // Tar.gz
+                                let h = null
+                                fs.createReadStream(a.to)
+                                    .on('error', err => console.log(err))
+                                    .pipe(zlib.createGunzip())
+                                    .on('error', err => console.log(err))
+                                    .pipe(tar.extract(dataDir, {
+                                        map: (header) => {
+                                            if(h == null){
+                                                h = header.name
+                                            }
+                                        }
+                                    }))
+                                    .on('error', err => console.log(err))
+                                    .on('finish', () => {
+                                        fs.unlink(a.to, err => {
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            if(h.indexOf('/') > -1){
+                                                h = h.substring(0, h.indexOf('/'))
+                                            }
+                                            const pos = path.join(dataDir, h)
+                                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(pos))
+                                        })
+                                    })
+                            }
+                        })
+                        resolve(true)
+
+                    } else {
+                        resolve(false)
+                    }
+                })
+            } else {
+                try {
+                    // Download the java shit from Mojang themselves
+                    (async () => {
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
+                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
+                        let javamanifest = await got(javamanifesturl)
+                        javamanifest = JSON.parse(javamanifest.body)['files']
+                        let JavaAssets = []
+                        for (const key of Object.keys(javamanifest)) {
+                    
+
+                            // Create the path string with only the folder paths
+                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
+
+                            // Create file name without the folder paths
+                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
+                    
+                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
+                                // Make directories, will create intermediate directories if necessary, makes my life a shit ton easier
+                                shelljs.mkdir('-p', dataDir + pathDir)
+                            }
+
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
+                        
+                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
+                            console.log(javamanifest[key].downloads.raw.url)
+                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
+                                response.pipe(filepath)
+                            })*/
+                            
+                        }
+                        let FileSizes = 0
+                        JavaAssets.forEach(element => {
+                            FileSizes += element.size
+                        })
+                        let AssetSize = JavaAssets.length
+                        let CurExecTimes = 0
+                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                            child_process.execSync('chmod +x ' + '"' + a.to + '"')
+                            CurExecTimes += 1
+                            if(CurExecTimes == AssetSize) {
+                                new Promise((resolve, reject) => {
+                                    setTimeout(function() { 
+                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                                        resolve()
+                                    }, 1000) //Wait 1 second
+                                })
+                                
+                            }
+                        })
+                        resolve(true)
+                        
+                    })()
+                } catch(err) {
+                    console.log('Error ' + err)
                 }
-            })
+                
+            }
         })
 
     }
@@ -1731,7 +1796,7 @@ class AssetGuard extends EventEmitter {
 
                 fs.ensureDirSync(path.join(asset.to, '..'))
 
-                let req = request(asset.from)
+                let req = got.stream(asset.from, { throwHttpErrors: false })
                 req.pause()
 
                 req.on('response', (resp) => {
@@ -1776,7 +1841,7 @@ class AssetGuard extends EventEmitter {
 
                     } else {
 
-                        req.abort()
+                        req.destroy()
                         console.log(`Failed to download ${asset.id}(${typeof asset.from === 'object' ? asset.from.url : asset.from}). Response code ${resp.statusCode}`)
                         self.progress += asset.size*1
                         self.emit('progress', 'download', self.progress, self.totaldlsize)
@@ -1787,7 +1852,7 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('error', (err) => {
-                    self.emit('error', 'download', err)
+                    self.emit('error', 'download', err + ' Code: ' + req.RequestError)
                 })
 
                 req.on('data', (chunk) => {

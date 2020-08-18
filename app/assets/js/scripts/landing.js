@@ -1021,7 +1021,7 @@ function dlAsync(login = true){
                                 // Loop through our options.txt and attempt to override
                                 loggerLaunchSuite.log('Validating options...')
                                 let data = fs.readFileSync(paths.options, 'utf8').split('\n')
-                                let packOn = false, musicOff = false
+                                let packOn = false, musicOff = false, fullscreenOff = false
         
                                 data.forEach((element, index) => {
                                     if(element.startsWith('resourcePacks:')) {
@@ -1030,6 +1030,9 @@ function dlAsync(login = true){
                                     } else if(element.startsWith('soundCategory_music:')) {
                                         data[index] = 'soundCategory_music:0.0'
                                         musicOff = true
+                                    } else if(element.startsWith('fullscreen:')) {
+                                        data[index] = 'fullscreen:false'
+                                        fullscreenOff = true
                                     }
                                 })
 
@@ -1047,7 +1050,7 @@ function dlAsync(login = true){
                                 }
         
                                 // If override successful
-                                if(packOn && musicOff && optifineOverrides) {
+                                if(packOn && musicOff && fullscreenOff && optifineOverrides) {
                                     fs.writeFileSync(paths.options, data.join('\n'))
                                     loggerLaunchSuite.log('Options validated.')
                                 } else {
@@ -1095,20 +1098,6 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const CommonWatcher = fs.watch(path.join(ConfigManager.getCommonDirectory()), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-                                const ResourcePackWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/resourcepacks'), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-                                const FancyMenu = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/config/fancymenu/'), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
-                                
-
                                 const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
                                     encoding: 'utf-8',
                                     recursive: true
@@ -1133,9 +1122,6 @@ function dlAsync(login = true){
 
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
-                                        CommonWatcher.close()
-                                        ResourcePackWatcher.close()
-                                        FancyMenu.close()
                                         CustomAssetsWatcher.close()
                                     } else if(data == 'GameStarted') {
                                         GameInstanceStarted = true
@@ -1184,33 +1170,13 @@ function dlAsync(login = true){
                                 })
                                 
 
-
+                                ///This is very fucking stupid but oh well
                                 let ModifyError = false
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
                                     ModifyError = true
                                     proc.kill()
-                                })
-                                CommonWatcher.on('change', (event, filename) => {
-                                    // Minecraft caches the skins in the asset folder causing runtime errors on edits
-                                    if(!filename.startsWith('assets')) {
-                                        loggerLanding.log('File edit: ' + filename)
-                                        ModifyError = true
-                                        proc.kill()
-                                    }
-                                })
-                                ResourcePackWatcher.on('change', (event, filename) => {
-                                    loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
-                                })
-                                FancyMenu.on('change', (event, filename) => {
-                                    if(filename !== 'config.txt' && filename !== 'config.txt.backup' && filename !== null && !filename.startsWith('locals')) {
-                                        loggerLanding.log('File edit: ' + filename)
-                                        ModifyError = true
-                                        proc.kill()
-                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
