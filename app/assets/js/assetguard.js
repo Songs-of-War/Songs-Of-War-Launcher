@@ -1605,21 +1605,12 @@ class AssetGuard extends EventEmitter {
                 })
             } else {
                 try {
-                    // Callback hell, fun
-                    
-                    got('https://www.java.com/en/download/manual.jsp').then(rawhtml => {
-                        // You thought I was done with my shitty one liners? Hell nah
-                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(25)
-                        console.log('Link Path ' + filepath)
+                    // Download the java shit from Mojang themselves
+                    (async () => {
+                        let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
+                        manifest.files.forEach()
+                    })
 
-                        const http = require('follow-redirects').https
-
-                        const options = {
-                            host: 'javadl.oracle.com',
-                            port: 443,
-                            path: filepath,
-                            method: 'HEAD'
-                        }
 
                         http.get(options, function(res) {
                             // Honestly idk what I'm doing, idk why it doesn't execute this part of the code properly
