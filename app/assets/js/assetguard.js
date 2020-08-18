@@ -1628,14 +1628,22 @@ class AssetGuard extends EventEmitter {
                             const dmgExtract = require('extract-dmg')
                             console.log(res.headers['content-length'] + ' ' + 'javadl.oracle.com' + filepath)
                             const jre = new Asset('JavaDmg-Latest', null, res.headers['content-length'], 'javadl.oracle.com' + filepath, fDir)
+                            console.log('Start download')
                             this.java = new DLTracker([jre], jre.size, (a, self) => {
+                                console.log('Start dmg extract')
                                 dmgExtract(fDir, path.join(dataDir, 'temp'))
+                                console.log('End dmg extract')
                                 let dirFiles = fs.readdirSync(fDir)
+                                console.log(dirFiles)
                                 dirFiles.forEach(element => {
+                                    console.log(element)
                                     if(element.toLowerCase().startsWith('java 8')) {
+                                        console.log(element + ' true')
                                         fs.copyFileSync(path.join(dataDir, 'temp', element, 'Contents'), path.join(fDir, 'jre-latest', 'Contents'))
+
                                     }
                                 })
+                                console.log('Complete')
                                 self.emit('complete', 'java', JavaGuard.javaExecFromRoot(fDir, 'jre-latest'))
                                 
                             })
