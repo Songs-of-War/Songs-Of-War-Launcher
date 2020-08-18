@@ -1628,7 +1628,7 @@ class AssetGuard extends EventEmitter {
                                 console.log(fDir)
                                 const dmgExtract = require('extract-dmg')
                                 console.log(res.headers['content-length'] + ' ' + 'https://javadl.oracle.com' + filepath)
-                                const jre = new Asset('JavaDmg-Latest', null, res.headers['content-length'], 'https://javadl.oracle.com' + filepath, fDir)
+                                const jre = new Asset('JavaDmg-Latest.dmg', null, res.headers['content-length'], 'https://javadl.oracle.com' + filepath, fDir)
                                 console.log('Start download')
                                 this.java = new DLTracker([jre], jre.size, (a, self) => {
                                     console.log('Start dmg extract')
