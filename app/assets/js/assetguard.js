@@ -1646,13 +1646,14 @@ class AssetGuard extends EventEmitter {
                         let AssetSize = JavaAssets.length
                         let CurExecTimes = 0
                         this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                            child_process.execSync('chmod +x ' + a.to)
                             CurExecTimes += 1
                             if(CurExecTimes == AssetSize) {
                                 new Promise((resolve, reject) => {
                                     setTimeout(function() { 
                                         self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
                                         resolve()
-                                    }, 3000) //Wait 3 seconds                                
+                                    }, 1000) //Wait 1 second
                                 })
                                 
                             }
