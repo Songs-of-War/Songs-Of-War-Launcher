@@ -1606,30 +1606,33 @@ class AssetGuard extends EventEmitter {
             } else {
                 try {
                     // Callback hell, fun
-                    JavaGuard._latestOpenJDK('8').then(() => {
-                        got('https://www.java.com/en/download/manual.jsp').then(rawhtml => {
-                            // You thought I was done with my shitty one liners? Hell nah
-                            let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(25)
-                            console.log('Link Path ' + filepath)
+                    
+                    got('https://www.java.com/en/download/manual.jsp').then(rawhtml => {
+                        // You thought I was done with my shitty one liners? Hell nah
+                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(25)
+                        console.log('Link Path ' + filepath)
 
-                            const http = require('follow-redirects').https
+                        const http = require('follow-redirects').https
 
-                            const options = {
-                                host: 'javadl.oracle.com',
-                                port: 443,
-                                path: filepath,
-                                method: 'HEAD'
-                            }
+                        const options = {
+                            host: 'javadl.oracle.com',
+                            port: 443,
+                            path: filepath,
+                            method: 'HEAD'
+                        }
 
-                            http.get(options, function(res) {
+                        http.get(options, function(res) {
+                            // Honestly idk what I'm doing, idk why it doesn't execute this part of the code properly
+                            JavaGuard._latestOpenJDK('8').then(() => {
                                 dataDir = path.join(dataDir, 'runtime', 'x64')
                                 console.log(dataDir)
                                 const fDir = path.join(dataDir, 'JavaDmg-Latest.dmg')
                                 console.log(fDir)
                                 const dmgExtract = require('extract-dmg')
                                 console.log(res.headers['content-length'] + ' ' + 'https://javadl.oracle.com' + filepath)
-                                const jre = new Asset('JavaDmg-Latest.dmg', null, res.headers['content-length'], 'https://javadl.oracle.com' + filepath, fDir)
+                                const jre = new Asset('JavaDmg-Latest.dmg', null, parseInt(res.headers['content-length']), 'https://javadl.oracle.com' + filepath, fDir)
                                 console.log('Start download')
+                                // Code locks itself here
                                 this.java = new DLTracker([jre], jre.size, (a, self) => {
                                     console.log('Start dmg extract')
                                     dmgExtract(fDir, path.join(dataDir, 'temp'))
@@ -1649,16 +1652,11 @@ class AssetGuard extends EventEmitter {
                                     
                                 })
                                 resolve(true)
-                            }).on('error', function(e) {
-                                console.log('Got error: ' + e.message)
                             })
+                        }).on('error', function(e) {
+                            console.log('Got error: ' + e.message)
                         })
-                        
                     })
-                    
-
-                    
-                    
                 } catch(err) {
                     console.log('Error ' + err)
                 }
