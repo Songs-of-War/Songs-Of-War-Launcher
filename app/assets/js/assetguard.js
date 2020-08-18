@@ -1543,7 +1543,7 @@ class AssetGuard extends EventEmitter {
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
             // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform !== 'darwin') {
+            if(process.platform !== 'yes') {
                 JavaGuard._latestOpenJDK('8').then(verData => {
                     if(verData != null){
                         dataDir = path.join(dataDir, 'runtime', 'x64')
@@ -1624,13 +1624,15 @@ class AssetGuard extends EventEmitter {
                         http.get(options, function(res) {
                             // Honestly idk what I'm doing, idk why it doesn't execute this part of the code properly
                             JavaGuard._latestOpenJDK('8').then(() => {
+                                // Get the package name by parsing it from the response url
+                                let dmgName = /(?<=&File=)(jre-8u[0-9]+-macosx-x64\.dmg)/gm.exec(res.responseUrl)[0]
                                 dataDir = path.join(dataDir, 'runtime', 'x64')
                                 console.log(dataDir)
-                                const fDir = path.join(dataDir, 'JavaDmg-Latest.dmg')
+                                const fDir = path.join(dataDir, dmgName)
                                 console.log(fDir)
                                 const dmgExtract = require('extract-dmg')
                                 console.log(res.headers['content-length'] + ' ' + 'https://javadl.oracle.com' + filepath)
-                                const jre = new Asset('JavaDmg-Latest.dmg', null, parseInt(res.headers['content-length']), 'https://javadl.oracle.com' + filepath, fDir)
+                                const jre = new Asset(dmgName, null, parseInt(res.headers['content-length']), 'https://javadl.oracle.com' + filepath, fDir)
                                 console.log('Start download')
                                 // Code locks itself here
                                 this.java = new DLTracker([jre], jre.size, (a, self) => {
