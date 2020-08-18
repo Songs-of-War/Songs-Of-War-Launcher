@@ -1268,7 +1268,7 @@ class AssetGuard extends EventEmitter {
             if(!fs.existsSync(assetIndexLoc) || force){
                 console.log('Downloading ' + versionData.id + ' asset index.')
                 fs.ensureDirSync(indexPath)
-                const stream = request(assetIndex.url).pipe(fs.createWriteStream(assetIndexLoc))
+                const stream = got.stream(assetIndex.url).pipe(fs.createWriteStream(assetIndexLoc))
                 stream.on('finish', () => {
                     data = JSON.parse(fs.readFileSync(assetIndexLoc, 'utf-8'))
                     self._assetChainValidateAssets(versionData, data).then(() => {
@@ -1796,7 +1796,7 @@ class AssetGuard extends EventEmitter {
 
                 fs.ensureDirSync(path.join(asset.to, '..'))
 
-                let req = request(asset.from)
+                let req = got.stream(asset.from, { throwHttpErrors: false })
                 req.pause()
 
                 req.on('response', (resp) => {
@@ -1841,7 +1841,7 @@ class AssetGuard extends EventEmitter {
 
                     } else {
 
-                        req.abort()
+                        req.destroy()
                         console.log(`Failed to download ${asset.id}(${typeof asset.from === 'object' ? asset.from.url : asset.from}). Response code ${resp.statusCode}`)
                         self.progress += asset.size*1
                         self.emit('progress', 'download', self.progress, self.totaldlsize)
@@ -1852,7 +1852,7 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('error', (err) => {
-                    self.emit('error', 'download', err)
+                    self.emit('error', 'download', err + ' Code: ' + req.RequestError)
                 })
 
                 req.on('data', (chunk) => {
