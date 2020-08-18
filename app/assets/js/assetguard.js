@@ -1543,7 +1543,7 @@ class AssetGuard extends EventEmitter {
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
             // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform !== 'yes') {
+            if(process.platform !== 'darwin') {
                 JavaGuard._latestOpenJDK('8').then(verData => {
                     if(verData != null){
                         dataDir = path.join(dataDir, 'runtime', 'x64')
