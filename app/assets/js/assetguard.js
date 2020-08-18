@@ -1626,8 +1626,8 @@ class AssetGuard extends EventEmitter {
                             const fDir = path.join(dataDir, 'JavaDmg-Latest.dmg')
                             console.log(fDir)
                             const dmgExtract = require('extract-dmg')
-                            console.log(res.headers['content-length'] + ' ' + 'javadl.oracle.com/' + filepath)
-                            const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com/' + filepath, fDir)
+                            console.log(res.headers['content-length'] + ' ' + 'javadl.oracle.com' + filepath)
+                            const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com' + filepath, fDir)
                             this.java = new DLTracker([jre], jre.size, (a, self) => {
                                 dmgExtract(fDir, path.join(dataDir, 'temp'))
                                 let dirFiles = fs.readdirSync(fDir)
