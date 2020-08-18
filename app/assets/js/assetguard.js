@@ -11,6 +11,8 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
+//Fuck it, I didn't want to spend my time making an algorithm to loop over the path
+const shelljs = require('shelljs');
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
@@ -1607,49 +1609,44 @@ class AssetGuard extends EventEmitter {
                 try {
                     // Download the java shit from Mojang themselves
                     (async () => {
+                        const https = require('https')
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
                         let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
-                        manifest.files.forEach()
-                    })
+                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
+                        let javamanifest = await got(javamanifesturl)
+                        javamanifest = JSON.parse(javamanifest.body)['files']
+                        let JavaAssets = []
+                        for (const key of Object.keys(javamanifest)) {
+                    
 
+                            // Create the path string with only the folder paths
+                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir.join('/').toString()
 
-                        http.get(options, function(res) {
-                            // Honestly idk what I'm doing, idk why it doesn't execute this part of the code properly
-                            JavaGuard._latestOpenJDK('8').then(() => {
-                                // Get the package name by parsing it from the response url
-                                let dmgName = /(?<=&File=)(jre-8u[0-9]+-macosx-x64\.dmg)/gm.exec(res.responseUrl)[0]
-                                dataDir = path.join(dataDir, 'runtime', 'x64')
-                                console.log(dataDir)
-                                const fDir = path.join(dataDir, dmgName)
-                                console.log(fDir)
-                                const dmgExtract = require('extract-dmg')
-                                console.log(res.headers['content-length'] + ' ' + 'https://javadl.oracle.com' + filepath)
-                                const jre = new Asset(dmgName, null, parseInt(res.headers['content-length']), 'https://javadl.oracle.com' + filepath, fDir)
-                                console.log('Start download')
-                                // Code locks itself here
-                                this.java = new DLTracker([jre], jre.size, (a, self) => {
-                                    console.log('Start dmg extract')
-                                    dmgExtract(fDir, path.join(dataDir, 'temp'))
-                                    console.log('End dmg extract')
-                                    let dirFiles = fs.readdirSync(fDir)
-                                    console.log(dirFiles)
-                                    dirFiles.forEach(element => {
-                                        console.log(element)
-                                        if(element.toLowerCase().startsWith('java 8')) {
-                                            console.log(element + ' true')
-                                            fs.copyFileSync(path.join(dataDir, 'temp', element, 'Contents'), path.join(fDir, 'jre-latest', 'Contents'))
+                            // Create file name without the folder paths
+                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
+                    
+                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
+                                // Make directories, will create intermediate directories if necessary, makes my life a shit ton easier
+                                shelljs.mkdir('-p', dataDir + pathDir)
+                            }
 
-                                        }
-                                    })
-                                    console.log('Complete')
-                                    self.emit('complete', 'java', JavaGuard.javaExecFromRoot(fDir, 'jre-latest'))
-                                    
-                                })
-                                resolve(true)
-                            })
-                        }).on('error', function(e) {
-                            console.log('Got error: ' + e.message)
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
+                        
+                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
+                            console.log(javamanifest[key].downloads.raw.url)
+                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
+                                response.pipe(filepath)
+                            })*/
+                            
+                        }
+                        let FileSizes = 0
+                        JavaAssets.forEach(element => {
+                            FileSizes += element.size
                         })
-                    })
+                        this.java = new DLTracker(JavaAssets, FileSizes)
+                        resolve(true)
+                        
+                    })()
                 } catch(err) {
                     console.log('Error ' + err)
                 }
