@@ -1609,7 +1609,6 @@ class AssetGuard extends EventEmitter {
                 try {
                     // Download the java shit from Mojang themselves
                     (async () => {
-                        const https = require('https')
                         dataDir = path.join(dataDir, 'runtime', 'x64')
                         let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
                         let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
