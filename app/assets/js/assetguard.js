@@ -1620,7 +1620,7 @@ class AssetGuard extends EventEmitter {
                     
 
                             // Create the path string with only the folder paths
-                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir.join('/').toString()
+                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
 
                             // Create file name without the folder paths
                             let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
