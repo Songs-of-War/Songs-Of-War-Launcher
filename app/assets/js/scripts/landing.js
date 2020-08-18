@@ -1021,7 +1021,7 @@ function dlAsync(login = true){
                                 // Loop through our options.txt and attempt to override
                                 loggerLaunchSuite.log('Validating options...')
                                 let data = fs.readFileSync(paths.options, 'utf8').split('\n')
-                                let packOn = false, musicOff = false
+                                let packOn = false, musicOff = false, fullscreenOff = false
         
                                 data.forEach((element, index) => {
                                     if(element.startsWith('resourcePacks:')) {
@@ -1030,6 +1030,9 @@ function dlAsync(login = true){
                                     } else if(element.startsWith('soundCategory_music:')) {
                                         data[index] = 'soundCategory_music:0.0'
                                         musicOff = true
+                                    } else if(element.startsWith('fullscreen:')) {
+                                        data[index] = 'fullscreen:false'
+                                        fullscreenOff = true
                                     }
                                 })
 
@@ -1047,7 +1050,7 @@ function dlAsync(login = true){
                                 }
         
                                 // If override successful
-                                if(packOn && musicOff && optifineOverrides) {
+                                if(packOn && musicOff && fullscreenOff && optifineOverrides) {
                                     fs.writeFileSync(paths.options, data.join('\n'))
                                     loggerLaunchSuite.log('Options validated.')
                                 } else {
