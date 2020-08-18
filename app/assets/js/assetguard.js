@@ -11,6 +11,8 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
+//Fuck it, I didn't want to spend my time making an algorithm to loop over the path
+const shelljs = require('shelljs');
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
@@ -1604,48 +1606,64 @@ class AssetGuard extends EventEmitter {
                     }
                 })
             } else {
-                (async () => {
-                    try {
-                        let rawhtml = await got('https://www.java.com/en/download/manual.jsp')
-                        // You thought I was done with my shitty one liners? Hell nah
-                        let filepath = /(?<=a title="Download Java for Mac OS X" href=")(https:\/\/javadl\.oracle\.com\/webapps\/download\/AutoDL\?BundleId=)([^"]+)/gm.exec(rawhtml.body)[0].substring(17)
+                try {
+                    // Download the java shit from Mojang themselves
+                    (async () => {
+                        const https = require('https')
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
+                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
+                        let javamanifest = await got(javamanifesturl)
+                        javamanifest = JSON.parse(javamanifest.body)['files']
+                        let JavaAssets = []
+                        for (const key of Object.keys(javamanifest)) {
+                    
 
-                        const http = require('follow-redirects').https
+                            // Create the path string with only the folder paths
+                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
 
-                        const options = {
-                            host: 'javadl.oracle.com',
-                            port: 443,
-                            path: filepath,
-                            method: 'HEAD'
+                            // Create file name without the folder paths
+                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
+                    
+                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
+                                // Make directories, will create intermediate directories if necessary, makes my life a shit ton easier
+                                shelljs.mkdir('-p', dataDir + pathDir)
+                            }
+
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
+                        
+                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
+                            console.log(javamanifest[key].downloads.raw.url)
+                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
+                                response.pipe(filepath)
+                            })*/
+                            
                         }
-
-                        http.get(options, function(res) {
-                            dataDir = path.join(dataDir, 'runtime', 'x64')
-                            const fDir = path.join(dataDir, 'JavaDmg-' + filepath + '.dmg')
-                            const dmgExtract = require('extract-dmg')
-                            const jre = new Asset(null, null, res.headers['content-length'], 'javadl.oracle.com/' + filepath, fDir)
-                            this.java = new DLTracker([jre], jre.size, (a, self) => {
-                                dmgExtract(fDir, path.join(dataDir, 'temp'))
-                                let dirFiles = fs.readdirSync(fDir)
-                                dirFiles.forEach(element => {
-                                    if(element.toLowerCase().startsWith('java 8')) {
-                                        fs.copyFileSync(path.join(dataDir, 'temp', element, 'Contents'), path.join(fDir, 'jre-latest', 'Contents'))
-                                    }
-                                })
-                                self.emit('complete', 'java', JavaGuard.javaExecFromRoot(fDir, 'jre-latest'))
-                                
-                            })
-                            resolve(true)
-                        }).on('error', function(e) {
-                            console.log('Got error: ' + e.message)
+                        let FileSizes = 0
+                        JavaAssets.forEach(element => {
+                            FileSizes += element.size
                         })
-
+                        let AssetSize = JavaAssets.length
+                        let CurExecTimes = 0
+                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                            child_process.execSync('chmod +x ' + '"' + a.to + '"')
+                            CurExecTimes += 1
+                            if(CurExecTimes == AssetSize) {
+                                new Promise((resolve, reject) => {
+                                    setTimeout(function() { 
+                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                                        resolve()
+                                    }, 1000) //Wait 1 second
+                                })
+                                
+                            }
+                        })
+                        resolve(true)
                         
-                        
-                    } catch(err) {
-                        console.log(err)
-                    }
-                })()
+                    })()
+                } catch(err) {
+                    console.log('Error ' + err)
+                }
                 
             }
         })
