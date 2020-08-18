@@ -1651,6 +1651,7 @@ class AssetGuard extends EventEmitter {
                                 new Promise((resolve, reject) => {
                                     setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
                                     self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                                    resolve()
                                 })
                                 
                             }
