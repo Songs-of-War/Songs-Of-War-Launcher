@@ -1647,7 +1647,7 @@ class AssetGuard extends EventEmitter {
                         
                         
                     } catch(err) {
-                        console.log(err)
+                        console.log('Error ' + err)
                     }
                 })()
                 
