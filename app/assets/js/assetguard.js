@@ -1643,8 +1643,11 @@ class AssetGuard extends EventEmitter {
                         JavaAssets.forEach(element => {
                             FileSizes += element.size
                         })
+                        let AssetSize = JavaAssets.length
+                        let CurExecTimes = 0
                         this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
-                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                            CurExecTimes += 1
+                            if(CurExecTimes == AssetSize) self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
                         })
                         resolve(true)
                         
