@@ -1643,7 +1643,9 @@ class AssetGuard extends EventEmitter {
                         JavaAssets.forEach(element => {
                             FileSizes += element.size
                         })
-                        this.java = new DLTracker(JavaAssets, FileSizes)
+                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                            self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                        })
                         resolve(true)
                         
                     })()
