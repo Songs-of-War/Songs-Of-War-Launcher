@@ -24,8 +24,8 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
         largeImageText: 'songs-of-war.com',
         smallImageKey: genSettings.smallImageKey,
         smallImageText: genSettings.smallImageText,
-        partySize: 0,
-        partyMax: 0,
+        partySize: null,
+        partyMax: null,
         startTimestamp: LastDate,
         instance: false
     }
@@ -80,8 +80,11 @@ exports.updateDetails = function(details, startimestamp = null){
 
 exports.updatePartySize = function(curPlayers = 0, maxPlayers = 0){
     if(!isRPCEnabled) return
-    activity.partyMax = maxPlayers
-    activity.partySize = curPlayers
+    if(curPlayers != 0) {
+        activity.partyMax = maxPlayers
+        activity.partySize = curPlayers
+    }
+    
     client.setActivity(activity)
 }
 
