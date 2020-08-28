@@ -907,6 +907,9 @@ function dlAsync(login = true){
                 let pb = new ProcessBuilder(serv, versionData, forgeData, authUser, remote.app.getVersion())
                 setLaunchDetails('Launching game..')
 
+                // const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
+                const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
+
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
                     DiscordWrapper.updateDetails('Loading game...', new Date().getTime())
