@@ -75,16 +75,14 @@ class ProcessBuilder {
 
 
         let hasstoppednormally = false
-
-        child.setMaxListeners(50)
-        logger.log('Game started message passed')
-        child.emit('message', 'GameStarted')
+        let instanceStarted = false
 
         child.stdout.on('data', (data) => {
             loggerMCstdout.log(data)
             if(data.includes('[Render thread/INFO]: Stopping!')) {
                 hasstoppednormally = true
             }
+            if(!instanceStarted) instanceStarted = true; child.emit('message', 'GameStarted')
         })
         child.stderr.on('data', (data) => {
             loggerMCstderr.log(data)
