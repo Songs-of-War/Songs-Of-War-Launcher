@@ -1957,9 +1957,9 @@ class AssetGuard extends EventEmitter {
                 await fs.writeFile(ConfigManager.getCommonDirectory() + '/launcher_profiles.json', '{}')
                 this.emit('validate', 'dlforge')
                 await new Promise((resolve, reject) => {
-                    let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar'))
+                    let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar'))
                     request({
-                        uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
+                        uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.37.jar',
                         headers: {
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
@@ -1983,10 +1983,10 @@ class AssetGuard extends EventEmitter {
                                 reject()
                             } else {
                                 console.log('Installing forge')
-                                console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
+                                console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
                                 let launcharguments = [ 
                                     '-jar',
-                                    ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar',
+                                    ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar',
                                     '-installClient',
                                     ConfigManager.getCommonDirectory()                            
                                 ]
