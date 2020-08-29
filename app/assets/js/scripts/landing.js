@@ -1175,13 +1175,15 @@ function dlAsync(login = true){
                                 })
                                 
 
-                                ///This is very fucking stupid but oh well
+                                ///This is very stupid but oh well
                                 let ModifyError = false
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
+                                    if(!joinedServer) {
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)

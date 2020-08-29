@@ -11,7 +11,7 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
-//Fuck it, I didn't want to spend my time making an algorithm to loop over the path
+// Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
 const ConfigManager = require('./configmanager')
@@ -1610,7 +1610,7 @@ class AssetGuard extends EventEmitter {
                 })
             } else {
                 try {
-                    // Download the java shit from Mojang themselves
+                    // Download the Java stuff from Mojang themselves
                     (async () => {
                         dataDir = path.join(dataDir, 'runtime', 'x64')
                         let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
@@ -1628,7 +1628,7 @@ class AssetGuard extends EventEmitter {
                             let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
                     
                             if(!fs.existsSync(path.join(dataDir + pathDir))) {
-                                // Make directories, will create intermediate directories if necessary, makes my life a shit ton easier
+                                // Make directories, will create intermediate directories if necessary, makes my life a lot easier
                                 shelljs.mkdir('-p', dataDir + pathDir)
                             }
 
