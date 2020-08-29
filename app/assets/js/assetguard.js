@@ -12,12 +12,11 @@ const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
 //Fuck it, I didn't want to spend my time making an algorithm to loop over the path
-const shelljs = require('shelljs');
+const shelljs = require('shelljs')
 
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
-const { data } = require('jquery')
 
 // Constants
 // const PLATFORM_MAP = {
@@ -1381,14 +1380,18 @@ class AssetGuard extends EventEmitter {
      * the 'files' identifier.
      * 
      * @param {Object} versionData The version data for the assets.
-     * @returns {Promise.<void>} An empty promise to indicate the async processing has completed.
+     * @returns {Promise.<boolean>} A value that if true means a download has started.
      */
     validateMiscellaneous(versionData){
         const self = this
         return new Promise(async (resolve, reject) => {
-            await self.validateClient(versionData)
-            await self.validateLogConfig(versionData)
-            resolve()
+            let wasran = await self.validateClient(versionData)
+            let wasran2 = await self.validateLogConfig(versionData)
+            if(wasran || wasran2) {
+                resolve(true)
+            } else {
+                resolve(false)
+            }
         })
     }
 
@@ -1397,7 +1400,7 @@ class AssetGuard extends EventEmitter {
      * 
      * @param {Object} versionData The version data for the assets.
      * @param {boolean} force Optional. If true, the asset index will be downloaded even if it exists locally. Defaults to false.
-     * @returns {Promise.<void>} An empty promise to indicate the async processing has completed.
+     * @returns {Promise.<boolean>} An empty promise to indicate the async processing has completed.
      */
     validateClient(versionData, force = false){
         const self = this
@@ -1412,9 +1415,9 @@ class AssetGuard extends EventEmitter {
             if(!AssetGuard._validateLocal(client.to, 'sha1', client.hash) || force){
                 self.files.dlqueue.push(client)
                 self.files.dlsize += client.size*1
-                resolve()
+                resolve(true)
             } else {
-                resolve()
+                resolve(false)
             }
         })
     }
@@ -1424,7 +1427,7 @@ class AssetGuard extends EventEmitter {
      * 
      * @param {Object} versionData The version data for the assets.
      * @param {boolean} force Optional. If true, the asset index will be downloaded even if it exists locally. Defaults to false.
-     * @returns {Promise.<void>} An empty promise to indicate the async processing has completed.
+     * @returns {Promise.<boolean>} If true means a download has been initiated.
      */
     validateLogConfig(versionData){
         const self = this
@@ -1438,9 +1441,9 @@ class AssetGuard extends EventEmitter {
             if(!AssetGuard._validateLocal(logConfig.to, 'sha1', logConfig.hash)){
                 self.files.dlqueue.push(logConfig)
                 self.files.dlsize += logConfig.size*1
-                resolve()
+                resolve(true)
             } else {
-                resolve()
+                resolve(false)
             }
         })
     }
@@ -1952,14 +1955,17 @@ class AssetGuard extends EventEmitter {
             this.emit('validate', 'assets')
             let wasran = await this.validateLibraries(versionData)
             this.emit('validate', 'libraries')
-            if(wasran) {
+            let wasran2 = await this.validateMiscellaneous(versionData)
+            console.log('Wasran 1: ', wasran, ' ', 'Wasran 2: ', wasran2)
+            console.log(this.forge.dlqueue)
+            if(wasran || wasran2 || this.forge.dlqueue.find(x => x.id.toLowerCase().includes('forge'))) {
                 console.log('Downloading forge')
                 await fs.writeFile(ConfigManager.getCommonDirectory() + '/launcher_profiles.json', '{}')
                 this.emit('validate', 'dlforge')
                 await new Promise((resolve, reject) => {
-                    let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar'))
+                    let file = fs.createWriteStream(path.join(ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar'))
                     request({
-                        uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.31.jar',
+                        uri: 'https://mysql.songs-of-war.com/sow-installer-31.2.37.jar',
                         headers: {
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
@@ -1983,10 +1989,10 @@ class AssetGuard extends EventEmitter {
                                 reject()
                             } else {
                                 console.log('Installing forge')
-                                console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
+                                console.log('Executing: ' + path.join('"' + path.join(ConfigManager.getJavaExecutable() + '" -jar ' + '"' + ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar" --installClient "' + ConfigManager.getCommonDirectory() + '"')).toString())
                                 let launcharguments = [ 
                                     '-jar',
-                                    ConfigManager.getCommonDirectory() + '/sow-installer-31.2.31.jar',
+                                    ConfigManager.getCommonDirectory() + '/sow-installer-31.2.37.jar',
                                     '-installClient',
                                     ConfigManager.getCommonDirectory()                            
                                 ]
@@ -2037,7 +2043,6 @@ class AssetGuard extends EventEmitter {
                         })
                 })
             }
-            await this.validateMiscellaneous(versionData)
             this.emit('validate', 'files')
             //this.emit('complete', 'download')
             await this.processDlQueues()

@@ -90,6 +90,7 @@ function setDownloadPercentage(value, max, percent = ((value/max)*100)){
  */
 function setLaunchEnabled(val){
     document.getElementById('launch_button').disabled = !val
+    document.getElementById('server_selection_button').disabled = !val
 }
 
 
