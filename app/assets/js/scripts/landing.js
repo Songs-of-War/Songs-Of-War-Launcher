@@ -28,7 +28,8 @@ const user_text               = document.getElementById('user_text')
 // Variable for checking if the user joined the server
 let joinedServer = false
 
-
+// Variable for checking if people launched the game
+let GameInstanceStarted = false
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
@@ -598,7 +599,7 @@ function useDefaultOptions(optionsPath) {
 }
 
 
-let GameInstanceStarted = false
+
 function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -1124,7 +1125,8 @@ function dlAsync(login = true){
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
                                         CustomAssetsWatcher.close()
-                                    } else if(data == 'GameStarted') {
+                                    }
+                                    if(data == 'GameStarted') {
                                         GameInstanceStarted = true
                                     }
                                 })

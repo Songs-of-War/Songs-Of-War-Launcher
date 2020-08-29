@@ -73,9 +73,12 @@ class ProcessBuilder {
         const loggerMCstdout = LoggerUtil('%c[Minecraft]', 'color: #36b030; font-weight: bold')
         const loggerMCstderr = LoggerUtil('%c[Minecraft]', 'color: #b03030; font-weight: bold')
 
-        child.emit('message', 'GameStarted')
 
         let hasstoppednormally = false
+
+        child.setMaxListeners(50)
+        logger.log('Game started message passed')
+        child.emit('message', 'GameStarted')
 
         child.stdout.on('data', (data) => {
             loggerMCstdout.log(data)
