@@ -510,6 +510,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
             switch(m.data){
                 case 'download':
                     // Downloading..
+                    setLaunchDetails(`Downloading (${Math.round(m.value/1000000)}/${Math.round(m.total/1000000)} MB)`)
                     setDownloadPercentage(m.value, m.total, m.percent)
                     break
             }
@@ -786,6 +787,7 @@ function dlAsync(login = true){
                     break
                 }
                 case 'download':
+                    setLaunchDetails(`Downloading (${Math.round(m.value/1000000)}/${Math.round(m.total/1000000)} MB)`)
                     setDownloadPercentage(m.value, m.total, m.percent)
                     break
                 case 'extract': {
