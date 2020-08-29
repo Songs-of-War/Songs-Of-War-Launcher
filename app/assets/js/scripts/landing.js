@@ -28,7 +28,8 @@ const user_text               = document.getElementById('user_text')
 // Variable for checking if the user joined the server
 let joinedServer = false
 
-
+// Variable for checking if people launched the game
+let GameInstanceStarted = false
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
@@ -509,6 +510,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
             switch(m.data){
                 case 'download':
                     // Downloading..
+                    setLaunchDetails(`Downloading (${Math.round(m.value/1000000)}/${Math.round(m.total/1000000)} MB)`)
                     setDownloadPercentage(m.value, m.total, m.percent)
                     break
             }
@@ -598,7 +600,7 @@ function useDefaultOptions(optionsPath) {
 }
 
 
-let GameInstanceStarted = false
+
 function dlAsync(login = true){
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -785,6 +787,7 @@ function dlAsync(login = true){
                     break
                 }
                 case 'download':
+                    setLaunchDetails(`Downloading (${Math.round(m.value/1000000)}/${Math.round(m.total/1000000)} MB)`)
                     setDownloadPercentage(m.value, m.total, m.percent)
                     break
                 case 'extract': {
@@ -1124,7 +1127,8 @@ function dlAsync(login = true){
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
                                         CustomAssetsWatcher.close()
-                                    } else if(data == 'GameStarted') {
+                                    }
+                                    if(data == 'GameStarted') {
                                         GameInstanceStarted = true
                                     }
                                 })
@@ -1171,13 +1175,15 @@ function dlAsync(login = true){
                                 })
                                 
 
-                                ///This is very fucking stupid but oh well
+                                ///This is very stupid but oh well
                                 let ModifyError = false
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
+                                    if(!joinedServer) {
+                                        ModifyError = true
+                                        proc.kill()
+                                    }
                                 })
                                 CustomAssetsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
