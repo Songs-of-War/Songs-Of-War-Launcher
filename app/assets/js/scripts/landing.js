@@ -924,12 +924,14 @@ function dlAsync(login = true){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
                         DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
-                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
+                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
                         showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
-                        if(data.indexOf('Could not find or load main class cpw.mods.modlauncher.Launcher') > -1){
-                            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
-                            loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
-                            showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
+                    }
+                    if(data.indexOf('Could not find or load main class cpw.mods.modlauncher.Launcher') > -1){
+                        DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
+                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
+                        showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
+                    }
                 }
 
 
