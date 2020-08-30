@@ -18,14 +18,20 @@ logger.log('AssetExec Started')
 process.on('unhandledRejection', r => logger.log(r))
 
 let percent = 0
+let mbytes = 0
 function assignListeners(){
     tracker.on('validate', (data) => {
         process.send({context: 'validate', data})
     })
     tracker.on('progress', (data, acc, total) => {
         const currPercent = parseInt((acc/total) * 100)
-        percent = currPercent
-        process.send({context: 'progress', data, value: acc, total, percent})
+        const currMB = parseInt(Math.round(acc/1000000))
+        // Updating the bar everytime data is received lags the launcher out so we check if there is a change in download amount and only update the bar if there is a change
+        if(currMB !== mbytes) {
+            percent = currPercent
+            mbytes = currMB
+            process.send({context: 'progress', data, value: acc, total, percent})
+        }
     })
     tracker.on('complete', (data, ...args) => {
         process.send({context: 'complete', data, args})
