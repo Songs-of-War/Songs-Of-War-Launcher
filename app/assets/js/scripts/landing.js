@@ -834,7 +834,32 @@ function dlAsync(login = true){
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
                     } else {
-                        showLaunchFailure('Download Error', '\nAn error occured while downloading')
+                        showNotClosableMessage(
+                            'Please wait...',
+                            'The launcher is currently gathering information, this won\'t take long!'
+                        )
+                
+                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
+                
+                        (async function() {
+                            await new Promise((resolve, reject) => {
+                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                            })
+                            try {
+                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                    form: {
+                                        ReportData: reportdata
+                                    },
+                                }).json()
+                                if(body['message'] == 'Success') {
+                                    showLaunchFailure('Download Error', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                } else {
+                                    showLaunchFailure('Download Error', ' \nWe were not able to make an error report automatically.')
+                                }
+                            } catch(err) {
+                                showLaunchFailure('Download Error', '\nWe were not able to make an error report automatically.' + err)
+                            }
+                        })()
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)
@@ -924,8 +949,26 @@ function dlAsync(login = true){
                     data = data.trim()
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
                         DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
-                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
-                        showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
+                        loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
+                        (async function() {
+                            await new Promise((resolve, reject) => {
+                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
+                            })
+                            try {
+                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
+                                    form: {
+                                        ReportData: reportdata
+                                    },
+                                }).json()
+                                if(body['message'] == 'Success') {
+                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
+                                } else {
+                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.')
+                                }
+                            } catch(err) {
+                                showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.' + err)
+                            }
+                        })()
                     }
                 }
 
