@@ -925,26 +925,11 @@ function dlAsync(login = true){
                     if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
                         DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                         loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
-                        (async function() {
-                            await new Promise((resolve, reject) => {
-                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                            })
-                            try {
-                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                    form: {
-                                        ReportData: reportdata
-                                    },
-                                }).json()
-                                if(body['message'] == 'Success') {
-                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                                } else {
-                                    showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.')
-                                }
-                            } catch(err) {
-                                showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href="https://github.com/Songs-of-War/Songs-Of-War-Launcher/issues">submit an issue</a> and let us know what antivirus software you use. \nWe were not able to make an error report automatically.' + err)
-                            }
-                        })()
-                    }
+                        showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
+                        if(data.indexOf('Could not find or load main class cpw.mods.modlauncher.Launcher') > -1){
+                            DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
+                            loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.');
+                            showLaunchFailure('Error During Launch', 'The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.')
                 }
 
 
