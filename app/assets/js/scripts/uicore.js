@@ -206,9 +206,9 @@ $(document).on('click', 'a[href^="http"]', function(event) {
  * This will crash the program if you are using multiple
  * DevTools, for example the chrome debugger in VS Code. 
  */
-document.addEventListener('keydown', function (e) {
+/*document.addEventListener('keydown', function (e) {
     if((e.key === 'I' || e.key === 'i') && e.ctrlKey && e.shiftKey){
         let window = remote.getCurrentWindow()
         window.toggleDevTools()
     }
-})
+})*/
