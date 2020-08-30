@@ -833,7 +833,7 @@ function dlAsync(login = true){
                             'Download Error',
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
-                    } else {                
+                    } else {
                         showLaunchFailure('Download Error', '\nAn error occured while downloading')
                     }
 
