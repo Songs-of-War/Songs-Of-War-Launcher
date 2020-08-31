@@ -29,11 +29,10 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - uses: egordm/gha-yarn-node-cache@v1
       - name: Install JS Modules
         run: yarn install
       - name: Checking code syntax
-        run: yarn install
+        run: yarn lint
       - run: npm test
       - run: npm run dist:linux
       - name: Upload Artifact 1
@@ -97,7 +96,6 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - uses: egordm/gha-yarn-node-cache@v1
       - name: Install JS Modules
         run: yarn install
       - name: Checking code syntax
