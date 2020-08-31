@@ -33,7 +33,7 @@ jobs:
       - name: Install JS Modules
         uses: borales/actions-yarn@v2.0.0
         with:
-          cmd: install
+          cmd: install --ignore-engines --ignore-engines
       - name: Checking code syntax
         uses: borales/actions-yarn@v2.0.0
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Install JS Modules
         uses: borales/actions-yarn@v2.0.0
         with:
-          cmd: install
+          cmd: install --ignore-engines
       - name: Checking code syntax
         uses: borales/actions-yarn@v2.0.0
         with:
@@ -109,7 +109,7 @@ jobs:
       - name: Install JS Modules
         uses: borales/actions-yarn@v2.0.0
         with:
-          cmd: install
+          cmd: install --ignore-engines --ignore-engines
       - name: Checking code syntax
         uses: borales/actions-yarn@v2.0.0
         with:
