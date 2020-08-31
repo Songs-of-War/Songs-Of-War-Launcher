@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+// Eslint complains for no reason here, so, disable the check for the entire file
 const Application = require('spectron').Application
 const electronPath = require('electron')
 const path = require('path')
