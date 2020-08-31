@@ -30,12 +30,14 @@ jobs:
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
       - uses: egordm/gha-yarn-node-cache@v1
-      - name: Install JS dependencies
-        run: yarn install
-      - name: Checking code syntax
-        uses: CultureHQ/actions-yarn@master
+      - name: Install JS Modules
+        uses: borales/actions-yarn@v2.0.0
         with:
-          args: lint
+          cmd: install
+      - name: Checking code syntax
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: lint
       - run: npm test
       - run: npm run dist:linux
       - name: Upload Artifact 1
@@ -63,13 +65,14 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - uses: egordm/gha-yarn-node-cache@v1
-      - name: Install JS dependencies
-        run: yarn install
-      - name: Checking code syntax
-        uses: CultureHQ/actions-yarn@master
+      - name: Install JS Modules
+        uses: borales/actions-yarn@v2.0.0
         with:
-          args: lint
+          cmd: install
+      - name: Checking code syntax
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: lint
       - run: npm test
       - run: npm run dist:mac
       - name: Upload Artifact 1
@@ -103,12 +106,14 @@ jobs:
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
       - uses: egordm/gha-yarn-node-cache@v1
-      - name: Install JS dependencies
-        run: yarn install
-      - name: Checking code syntax
-        uses: CultureHQ/actions-yarn@master
+      - name: Install JS Modules
+        uses: borales/actions-yarn@v2.0.0
         with:
-          args: lint
+          cmd: install
+      - name: Checking code syntax
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: lint
       - run: npm test
       - run: npm run dist:win
       - name: Upload Artifact 1
