@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
       tags:
         description: 'Test scenario tags'
 jobs:
-  build:
+  CI_Linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,19 +27,27 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - run: npm install
+      - name: Module Installation
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: install
+      - name: Checking code syntax
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: lint
+      - run: npm test
       - run: npm run dist:linux
-      - name: Upload Builded Things 1
+      - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-      - name: Upload Builded Things 2
+      - name: Upload Artifact 2
         uses: actions/upload-artifact@v2
         with:
           name: latest-linux.yml
           path: dist/latest-linux.yml
-  build_2:
+  CI_MacOS:
     runs-on: macos-latest
     strategy:
       matrix:
@@ -52,24 +60,32 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - run: npm install
+      - name: Module Installation
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: install
+      - name: Checking code syntax
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: lint
+      - run: npm test
       - run: npm run dist:mac
-      - name: Upload Builded Things 1
+      - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-      - name: Upload Builded Things 2
+      - name: Upload Artifact 2
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-      - name: Upload Builded Things 3
+      - name: Upload Artifact 3
         uses: actions/upload-artifact@v2
         with:
           name: latest-mac.yml
           path: dist/latest-mac.yml
-  build_3:
+  CI_Windows:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -82,19 +98,27 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - run: npm install
+      - name: Module Installation
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: install
+      - name: Checking code syntax
+        uses: CultureHQ/actions-yarn@master
+        with:
+          args: lint
+      - run: npm test
       - run: npm run dist:win
-      - name: Upload Builded Things 1
+      - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-      - name: Upload Builded Things 2
+      - name: Upload Artifact 2
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-      - name: Upload Builded Things 3
+      - name: Upload Artifact 3
         uses: actions/upload-artifact@v2
         with:
           name: latest.yml
