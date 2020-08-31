@@ -21,16 +21,17 @@ jobs:
         operating-system: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
+      - name: Check GitHub Status
+        uses: crazy-max/ghaction-github-status@v1
       - name: Setup node 12
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - name: Module Installation
-        uses: CultureHQ/actions-yarn@master
-        with:
-          args: install
+      - uses: egordm/gha-yarn-node-cache@v1
+      - name: Install JS dependencies
+        run: yarn install
       - name: Checking code syntax
         uses: CultureHQ/actions-yarn@master
         with:
@@ -54,16 +55,17 @@ jobs:
         operating-system: [macos-latest]
     steps:
       - uses: actions/checkout@v2
+      - name: Check GitHub Status
+        uses: crazy-max/ghaction-github-status@v1
       - name: Setup node 12
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - name: Module Installation
-        uses: CultureHQ/actions-yarn@master
-        with:
-          args: install
+      - uses: egordm/gha-yarn-node-cache@v1
+      - name: Install JS dependencies
+        run: yarn install
       - name: Checking code syntax
         uses: CultureHQ/actions-yarn@master
         with:
@@ -92,16 +94,17 @@ jobs:
         operating-system: [windows-latest]
     steps:
       - uses: actions/checkout@v2
+      - name: Check GitHub Status
+        uses: crazy-max/ghaction-github-status@v1
       - name: Setup node 12
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
       - name: package-version
         uses: nyaascii/package-version@1.0.2-pre
-      - name: Module Installation
-        uses: CultureHQ/actions-yarn@master
-        with:
-          args: install
+      - uses: egordm/gha-yarn-node-cache@v1
+      - name: Install JS dependencies
+        run: yarn install
       - name: Checking code syntax
         uses: CultureHQ/actions-yarn@master
         with:
