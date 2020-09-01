@@ -9,6 +9,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "start": "electron .",
     "cilinux": "node build.js WINDOWS && node build.js LINUX",
     "cidarwin": "node build.js MAC",
@@ -44,7 +45,10 @@
     "cross-env": "^7.0.2",
     "electron": "^9.2.1",
     "electron-builder": "^22.8.0",
-    "eslint": "^7.7.0"
+    "eslint": "^7.7.0",
+    "jest": "^26.4.2",
+    "jest-electron": "^0.1.11",
+    "spectron": "^11.1.0"
   },
   "repository": {
     "type": "git",
