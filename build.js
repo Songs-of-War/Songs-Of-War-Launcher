@@ -50,11 +50,10 @@ builder.build({
         },
         linux: {
             target: [
-                'AppImage' // Only AppImage supports auto updating
-                /*'snap',
+                'AppImage', // Only AppImage supports auto updating
                 'deb',
                 'rpm',
-                'freebsd'*/
+                'freebsd'
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
