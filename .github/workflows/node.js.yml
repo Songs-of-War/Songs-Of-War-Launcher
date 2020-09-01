@@ -38,23 +38,23 @@ jobs:
       - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
       - name: Upload deb package
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.deb
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.deb
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.deb
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.deb
       - name: Upload rpm package
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
       - name: Upload freedbsd package
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
       - name: Upload latest-linux file
         uses: actions/upload-artifact@v2
         with:
@@ -84,18 +84,18 @@ jobs:
       - name: Upload dmg
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
       - name: Upload pkg
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
       - name: Upload blockmap
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
       - name: Upload latest-mac file
         uses: actions/upload-artifact@v2
         with:
@@ -125,13 +125,13 @@ jobs:
       - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
       - name: Upload Artifact 2
         uses: actions/upload-artifact@v2
         with:
-          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
       - name: Upload Artifact 3
         uses: actions/upload-artifact@v2
         with:

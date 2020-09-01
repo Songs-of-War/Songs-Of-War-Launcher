@@ -20,7 +20,7 @@ builder.build({
     config: {
         appId: 'SoWLauncher',
         productName: 'Songs of War Launcher',
-        artifactName: 'Songs-of-War-Launcher-setup-${version}.${ext}',
+        artifactName: 'songs-of-war-launcher-setup-${version}.${ext}',
         copyright: 'Copyright © 2020-2021 lucasboss45',
         directories: {
             buildResources: 'build',
@@ -50,11 +50,11 @@ builder.build({
         },
         linux: {
             target: [
-                'AppImage', // Only AppImage supports auto updating
-                'snap',
+                'AppImage' // Only AppImage supports auto updating
+                /*'snap',
                 'deb',
                 'rpm',
-                'freebsd'
+                'freebsd'*/
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',

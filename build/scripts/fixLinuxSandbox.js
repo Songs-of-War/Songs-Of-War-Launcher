@@ -21,14 +21,14 @@ async function fixLinuxSandbox(targets, cwd) {
 
     if (!isLinux(targets)) return
 
-    const scriptPath = path.join(cwd, 'Songs-of-War-Launcher'),
-        script = '#!/bin/bash\n"${BASH_SOURCE%/*}"/Songs-of-War-Launcher.bin "$@" --no-sandbox'
+    const scriptPath = path.join(cwd, 'songs-of-war-launcher'),
+        script = '#!/bin/bash\n"${BASH_SOURCE%/*}"/songs-of-war-launcher.bin "$@" --no-sandbox'
 
     await execa('mv', ['songs-of-war-launcher', 'songs-of-war-launcher.bin'], { cwd })
 
     fs.writeFileSync(scriptPath, script)
 
-    await execa('chmod', ['+x', 'Songs-of-War-Launcher'], { cwd })
+    await execa('chmod', ['+x', 'songs-of-war-launcher'], { cwd })
 
 }
 
