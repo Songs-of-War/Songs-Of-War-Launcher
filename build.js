@@ -54,8 +54,7 @@ builder.build({
                 'snap',
                 'deb',
                 'rpm',
-                'freebsd',
-                'pacman'
+                'freebsd'
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',

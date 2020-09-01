@@ -35,12 +35,27 @@ jobs:
         run: yarn lint
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process
       - run: npm run dist -- LINUX
-      - name: Upload Artifact 1
+      - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-      - name: Upload Artifact 2
+      - name: Upload deb package
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.deb
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.deb
+      - name: Upload rpm package
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
+      - name: Upload freedbsd package
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
+      - name: Upload latest-linux file
         uses: actions/upload-artifact@v2
         with:
           name: latest-linux.yml
@@ -66,17 +81,22 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- MAC
-      - name: Upload Artifact 1
+      - name: Upload dmg
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-      - name: Upload Artifact 2
+      - name: Upload pkg
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
+          path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
+      - name: Upload blockmap
         uses: actions/upload-artifact@v2
         with:
           name: Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
           path: dist/Songs-of-War-Launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-      - name: Upload Artifact 3
+      - name: Upload latest-mac file
         uses: actions/upload-artifact@v2
         with:
           name: latest-mac.yml
