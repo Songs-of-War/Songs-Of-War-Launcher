@@ -41,12 +41,22 @@ builder.build({
             allowToChangeInstallationDirectory: true,
         },
         mac: {
-            target: 'dmg',
+            target: [
+                'dmg',
+                'pkg'
+            ],
             category: 'public.app-category.games',
             compression: 'maximum'
         },
         linux: {
-            target: 'AppImage',
+            target: [
+                'AppImage',
+                'snap',
+                'deb',
+                'rpm',
+                'freebsd',
+                'pacman'
+            ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
