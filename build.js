@@ -63,7 +63,7 @@ builder.build({
             category: 'Game',
         },
         files: [
-            '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js}'
+            '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js,.github,.nsis}'
         ],
         extraResources: [
             'libraries'
