@@ -21,7 +21,7 @@ builder.build({
         appId: 'SoWLauncher',
         productName: 'Songs of War Launcher',
         artifactName: 'songs-of-war-launcher-setup-${version}.${ext}',
-        copyright: 'Copyright © 2020-2021 lucasboss45',
+        copyright: 'Copyright © 2020-2020 lucasboss45',
         directories: {
             buildResources: 'build',
             output: 'dist'
@@ -59,7 +59,8 @@ builder.build({
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
             description: 'Launcher for the Songs of War Minecraft Server.',
-            category: 'Game'
+            category: 'Game',
+            icon: './build/icon.png'
         },
         files: [
             '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js,.github,.nsis}'
