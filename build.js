@@ -60,7 +60,7 @@ builder.build({
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
             description: 'Launcher for the Songs of War Minecraft Server.',
-            category: 'Game',
+            category: 'Game'
         },
         files: [
             '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js,.github,.nsis}'

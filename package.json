@@ -19,6 +19,9 @@
     "dist:linux": "npm run dist -- LINUX",
     "lint": "eslint --config .eslintrc.json ."
   },
+  "build": {
+    "afterPack": "./build/scripts/afterPackHook.js",
+  },
   "engines": {
     "node": "12.x.x"
   },
