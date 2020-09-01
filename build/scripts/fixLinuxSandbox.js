@@ -24,7 +24,7 @@ async function fixLinuxSandbox(targets, cwd) {
     const scriptPath = path.join(cwd, 'Songs-of-War-Launcher'),
         script = '#!/bin/bash\n"${BASH_SOURCE%/*}"/Songs-of-War-Launcher.bin "$@" --no-sandbox'
 
-    await execa('mv', ['Songs-of-War-Launcher', 'Songs-of-War-Launcher.bin'], { cwd })
+    await execa('mv', ['songs-of-war-launcher', 'songs-of-war-launcher.bin'], { cwd })
 
     fs.writeFileSync(scriptPath, script)
 
