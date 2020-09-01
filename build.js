@@ -62,9 +62,8 @@ builder.build({
             synopsis: 'Modded Minecraft Launcher',
             description: 'Launcher for the Songs of War Minecraft Server.',
             category: 'Game',
-            compression: 'maximum'
+            compression: 'gz'
         },
-        compression: 'maximum',
         files: [
             '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js}'
         ],
