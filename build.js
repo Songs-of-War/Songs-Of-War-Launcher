@@ -50,7 +50,7 @@ builder.build({
         },
         linux: {
             target: [
-                'AppImage',
+                'AppImage', // Only AppImage supports auto updating
                 'snap',
                 'deb',
                 'rpm',
