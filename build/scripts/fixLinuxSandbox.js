@@ -1,9 +1,9 @@
 
 /* IMPORT */
 
-const execa = require('execa'),
-    fs = require('fs'),
-    path = require('path')
+const execa = require('execa')
+const fs = require('fs')
+const path = require('path')
 
 /* HELPERS */
 
@@ -21,14 +21,14 @@ async function fixLinuxSandbox(targets, cwd) {
 
     if (!isLinux(targets)) return
 
-    const scriptPath = path.join(cwd, 'Ganache'),
-        script = '#!/bin/bash\n"${BASH_SOURCE%/*}"/Ganache.bin "$@" --no-sandbox'
+    const scriptPath = path.join(cwd, 'Songs-of-War-Launcher'),
+        script = '#!/bin/bash\n"${BASH_SOURCE%/*}"/Songs-of-War-Launcher.bin "$@" --no-sandbox'
 
-    await execa('mv', ['Ganache', 'Ganache.bin'], { cwd })
+    await execa('mv', ['Songs-of-War-Launcher', 'Songs-of-War-Launcher.bin'], { cwd })
 
     fs.writeFileSync(scriptPath, script)
 
-    await execa('chmod', ['+x', 'Ganache'], { cwd })
+    await execa('chmod', ['+x', 'Songs-of-War-Launcher'], { cwd })
 
 }
 

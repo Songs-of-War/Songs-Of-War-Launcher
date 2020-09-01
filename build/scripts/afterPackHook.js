@@ -1,6 +1,8 @@
 
 /* IMPORT */
 
+// Fixes #37
+
 const fixLinuxSandbox = require('./fixLinuxSandbox')
 
 /* AFTER PACK */
