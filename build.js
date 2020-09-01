@@ -20,8 +20,8 @@ builder.build({
     config: {
         appId: 'SoWLauncher',
         productName: 'Songs of War Launcher',
-        artifactName: 'Songs-of-War-Launcher-setup-${version}.${ext}',
-        copyright: 'Copyright © 2020-2021 lucasboss45',
+        artifactName: 'songs-of-war-launcher-setup-${version}.${ext}',
+        copyright: 'Copyright © 2020-2020 lucasboss45',
         directories: {
             buildResources: 'build',
             output: 'dist'
@@ -41,22 +41,29 @@ builder.build({
             allowToChangeInstallationDirectory: true,
         },
         mac: {
-            target: 'dmg',
+            target: [
+                'dmg',
+                'pkg'
+            ],
             category: 'public.app-category.games',
             compression: 'maximum'
         },
         linux: {
-            target: 'AppImage',
+            target: [
+                'AppImage', // Only AppImage supports auto updating
+                'deb',
+                'rpm',
+                'freebsd'
+            ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
             description: 'Launcher for the Songs of War Minecraft Server.',
             category: 'Game',
-            compression: 'maximum'
+            icon: './build/icon.png'
         },
-        compression: 'maximum',
         files: [
-            '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js}'
+            '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js,.github,.nsis}'
         ],
         extraResources: [
             'libraries'

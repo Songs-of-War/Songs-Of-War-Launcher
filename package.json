@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "productName": "Songs of War Launcher",
   "description": "Songs of War Minecraft Server",
   "author": "lucasboss45",
@@ -9,6 +9,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "start": "electron .",
     "cilinux": "node build.js WINDOWS && node build.js LINUX",
     "cidarwin": "node build.js MAC",
@@ -17,6 +18,9 @@
     "dist:mac": "npm run dist -- MAC",
     "dist:linux": "npm run dist -- LINUX",
     "lint": "eslint --config .eslintrc.json ."
+  },
+  "build": {
+    "afterPack": "./build/scripts/afterPackHook.js"
   },
   "engines": {
     "node": "12.x.x"
@@ -28,6 +32,7 @@
     "ejs": "^3.1.5",
     "ejs-electron": "^2.1.1",
     "electron-updater": "^4.3.4",
+    "execa": "^4.0.3",
     "extract-dmg": "^1.0.0",
     "follow-redirects": "^1.13.0",
     "fs-extra": "^9.0.1",
@@ -44,10 +49,13 @@
     "cross-env": "^7.0.2",
     "electron": "^9.2.1",
     "electron-builder": "^22.8.0",
-    "eslint": "^7.7.0"
+    "eslint": "^7.7.0",
+    "jest": "^26.4.2",
+    "jest-electron": "^0.1.11",
+    "spectron": "^11.1.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasboss45/Songs-Of-War-Launcher.git"
+    "url": "git+https://github.com/Songs-of-War/Songs-of-War-Launcher.git"
   }
 }
