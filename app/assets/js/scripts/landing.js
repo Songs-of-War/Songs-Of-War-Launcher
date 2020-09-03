@@ -1172,6 +1172,9 @@ function dlAsync(login = true){
                                             }
                                         })()
                                     }
+                                    if(data == 'OutOfMemory') {
+                                        showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
+                                    }
                                 })
                                 
 
