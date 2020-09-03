@@ -61,24 +61,25 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- MAC
+
       - name: Upload Dmg
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Mac File
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/latest-mac.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: latest-mac.yml
+          path: dist/latest-mac.yml
+          repo-token: ${{ secrets.GIT_TOKEN }}
   BuildForWindows:
     runs-on: windows-latest
     strategy:
@@ -103,21 +104,21 @@ jobs:
       - run: npm run dist -- WINDOWS
 
       - name: Upload Exe
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest File
-        uses: JasonEtco/upload-to-release@master
+      - uses: Shopify/upload-to-release
         with:
-          args: dist/latest.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          name: latest.yml
+          path: dist/latest.yml
+          repo-token: ${{ secrets.GIT_TOKEN }}
 
