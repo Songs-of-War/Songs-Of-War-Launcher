@@ -59,7 +59,7 @@ jobs:
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process
       - run: npm run dist -- LINUX
       - name: Upload Release Asset AppImage
-        id: upload-release-asset 
+        id: upload-release-asset1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
           asset_name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
           asset_content_type: application/exe
       - name: Upload Release Asset Latest Linux Yaml File
-        id: upload-release-asset 
+        id: upload-release-asset2
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
