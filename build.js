@@ -51,9 +51,9 @@ builder.build({
         linux: {
             target: [
                 'AppImage', // Only AppImage supports auto updating
-                /*'deb',
+                'deb',
                 'rpm',
-                'freebsd'*/ // Temporary: So that it doesn't take 5 years to build every time I test something
+                'freebsd'
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
