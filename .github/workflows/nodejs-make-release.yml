@@ -63,19 +63,19 @@ jobs:
       - run: npm run dist -- MAC
 
       - name: Upload Dmg
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Mac File
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: latest-mac.yml
           path: dist/latest-mac.yml
@@ -104,19 +104,19 @@ jobs:
       - run: npm run dist -- WINDOWS
 
       - name: Upload Exe
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest File
-      - uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release
         with:
           name: latest.yml
           path: dist/latest.yml
