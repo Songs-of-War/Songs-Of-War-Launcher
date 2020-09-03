@@ -1,6 +1,8 @@
 name: Upload release assets to release
 
-on: release
+on: 
+  release:
+    types: [published, unpublished, created, edited, deleted, prereleased, released]
 
 jobs:
   BuildForLinux:
@@ -28,13 +30,13 @@ jobs:
       - name: Upload AppImage
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage application/octet-stream
+          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Linux File
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/latest-linux.yml text/plain
+          args: dist/latest-linux.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
   BuildForMacOS:
