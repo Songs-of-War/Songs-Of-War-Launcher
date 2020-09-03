@@ -39,7 +39,7 @@ jobs:
       - name: Upload Latest Linux File
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/latest-linux.yml
+          args: dist/latest-linux.yml text/yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
   BuildForMacOS:
