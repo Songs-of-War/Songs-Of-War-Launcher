@@ -46,13 +46,6 @@ jobs:
         operating-system: [macos-latest]
     steps:
       - uses: nelonoel/branch-name@v1
-      - name: Wait for release creation
-        uses: lewagon/wait-on-check-action@v0.1-beta.2
-        with:
-          ref: ${BRANCH_NAME}
-          check-name: CreateRelease
-          repo-token: ${{ secrets.GIT_TOKEN }}
-          wait-interval: 20 # seconds
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
@@ -68,26 +61,25 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- MAC
-      - name: Upload dmg
-        uses: actions/upload-artifact@v2
+
+      - name: Upload Dmg
+      - uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-      - name: Upload pkg
-        uses: actions/upload-artifact@v2
-        with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
-      - name: Upload blockmap
-        uses: actions/upload-artifact@v2
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Blockmap
+      - uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-      - name: Upload latest-mac file
-        uses: actions/upload-artifact@v2
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Latest Mac File
+      - uses: Shopify/upload-to-release
         with:
           name: latest-mac.yml
           path: dist/latest-mac.yml
+          repo-token: ${{ secrets.GIT_TOKEN }}
   BuildForWindows:
     runs-on: windows-latest
     strategy:
@@ -95,13 +87,6 @@ jobs:
         operating-system: [windows-latest]
     steps:
       - uses: nelonoel/branch-name@v1
-      - name: Wait for release creation
-        uses: lewagon/wait-on-check-action@v0.1-beta.2
-        with:
-          ref: ${BRANCH_NAME}
-          check-name: CreateRelease
-          repo-token: ${{ secrets.GIT_TOKEN }}
-          wait-interval: 20 # seconds
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
@@ -117,19 +102,23 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- WINDOWS
-      - name: Upload Artifact 1
-        uses: actions/upload-artifact@v2
+
+      - name: Upload Exe
+      - uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-      - name: Upload Artifact 2
-        uses: actions/upload-artifact@v2
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Blockmap
+      - uses: Shopify/upload-to-release
         with:
           name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
           path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-      - name: Upload Artifact 3
-        uses: actions/upload-artifact@v2
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Latest File
+      - uses: Shopify/upload-to-release
         with:
           name: latest.yml
           path: dist/latest.yml
+          repo-token: ${{ secrets.GIT_TOKEN }}
 
