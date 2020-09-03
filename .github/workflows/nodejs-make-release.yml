@@ -61,7 +61,6 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- MAC
-
       - name: Upload Dmg
         uses: Shopify/upload-to-release
         with:
