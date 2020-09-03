@@ -1,37 +1,8 @@
-name: Make release
+name: Upload release assets to release
 
-on:
-  # Only allow release manually
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'info'
-      tags:
-        description: 'Generate a release'
+on: release
+
 jobs:
-  CreateRelease:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        operating-system: [ubuntu-latest]
-    steps:
-      - uses: actions/checkout@v2
-      # Must checkout before getting version
-      - name: Get Launcher Version
-        uses: nyaascii/package-version@1.0.2-pre
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-        with:
-          tag_name: v${{ env.PACKAGE_VERSION }}
-          release_name: v${{ env.PACKAGE_VERSION }}
-          draft: true
-          prerelease: false
-
   BuildForLinux:
     runs-on: ubuntu-latest
     strategy:
@@ -39,13 +10,6 @@ jobs:
         operating-system: [ubuntu-latest]
     steps:
       - uses: nelonoel/branch-name@v1
-      - name: Wait for release creation
-        uses: lewagon/wait-on-check-action@v0.1-beta.2
-        with:
-          ref: ${BRANCH_NAME}
-          check-name: CreateRelease
-          repo-token: ${{ secrets.GIT_TOKEN }}
-          wait-interval: 20 # seconds
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
@@ -61,26 +25,18 @@ jobs:
         run: yarn lint
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process
       - run: npm run dist -- LINUX
-      - name: Upload Release Asset AppImage
-        id: upload-release-asset1
-        uses: actions/upload-release-asset@v1
+      - name: Upload AppImage
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Latest Linux File
+        uses: JasonEtco/upload-to-release@master
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-          asset_name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-          asset_content_type: application/exe
-      - name: Upload Release Asset Latest Linux Yaml File
-        id: upload-release-asset2
-        uses: actions/upload-release-asset@v1
+          args: dist/latest-linux.yml text/plain
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: dist/latest-linux.yml
-          asset_name: latest-linux.yml
-          asset_content_type: text/yaml
   BuildForMacOS:
     runs-on: macos-latest
     strategy:
