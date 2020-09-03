@@ -33,7 +33,7 @@ jobs:
       - name: Upload AppImage
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
+          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage xdg/shared-mime-info
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Linux File
