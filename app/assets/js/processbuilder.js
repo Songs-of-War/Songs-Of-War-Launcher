@@ -82,6 +82,10 @@ class ProcessBuilder {
             if(data.includes('[Render thread/INFO]: Stopping!')) {
                 hasstoppednormally = true
             }
+            if(data.includes('Could not reserve enough space for object heap')) {
+                hasstoppednormally = true
+                child.emit('message', 'OutOfMemory')
+            }
             if(!instanceStarted) instanceStarted = true; child.emit('message', 'GameStarted')
         })
         child.stderr.on('data', (data) => {
