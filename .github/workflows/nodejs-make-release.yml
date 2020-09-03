@@ -3,6 +3,7 @@ name: Upload release assets to release
 on: 
   release:
     types: [published, unpublished, created, edited, deleted, prereleased, released]
+  workflow_dispatch
 
 jobs:
   BuildForLinux:
@@ -61,7 +62,6 @@ jobs:
         run: yarn lint
       - run: npm test
       - run: npm run dist -- MAC
-
       - name: Upload Dmg
         uses: Shopify/upload-to-release
         with:
