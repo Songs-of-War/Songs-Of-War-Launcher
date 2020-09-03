@@ -17,6 +17,8 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
     steps:
+      - uses: actions/checkout@v2
+      # Must checkout before getting version
       - name: Get Launcher Version
         uses: nyaascii/package-version@1.0.2-pre
       - name: Create Release
@@ -36,10 +38,11 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
     steps:
+      - uses: nelonoel/branch-name@v1
       - name: Wait for release creation
         uses: lewagon/wait-on-check-action@v0.1-beta.2
         with:
-          ref: master
+          ref: ${BRANCH_NAME}
           check-name: CreateRelease
           repo-token: ${{ secrets.GIT_TOKEN }}
           wait-interval: 20 # seconds
@@ -84,10 +87,11 @@ jobs:
       matrix:
         operating-system: [macos-latest]
     steps:
+      - uses: nelonoel/branch-name@v1
       - name: Wait for release creation
         uses: lewagon/wait-on-check-action@v0.1-beta.2
         with:
-          ref: master
+          ref: ${BRANCH_NAME}
           check-name: CreateRelease
           repo-token: ${{ secrets.GIT_TOKEN }}
           wait-interval: 20 # seconds
@@ -132,10 +136,11 @@ jobs:
       matrix:
         operating-system: [windows-latest]
     steps:
+      - uses: nelonoel/branch-name@v1
       - name: Wait for release creation
         uses: lewagon/wait-on-check-action@v0.1-beta.2
         with:
-          ref: master
+          ref: ${BRANCH_NAME}
           check-name: CreateRelease
           repo-token: ${{ secrets.GIT_TOKEN }}
           wait-interval: 20 # seconds
