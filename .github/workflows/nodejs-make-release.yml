@@ -27,13 +27,13 @@ jobs:
         run: yarn lint
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process
       - run: npm run dist -- LINUX
-        name: Upload AppImage
+      - name: Upload AppImage
         uses: JasonEtco/upload-to-release@master
         with:
           args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-        name: Upload Latest Linux File
+      - name: Upload Latest Linux File
         uses: JasonEtco/upload-to-release@master
         with:
           args: dist/latest-linux.yml
