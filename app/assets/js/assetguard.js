@@ -14,6 +14,9 @@ const got           = require('got')
 // Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
+process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
+
+
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
