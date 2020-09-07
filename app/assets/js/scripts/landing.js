@@ -7,7 +7,7 @@ const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
 const got = require('got')
-const { app, ipcMain } = require('electron')
+const { app, ipcMain, electron} = require('electron')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -15,6 +15,7 @@ const Mojang                  = require('./assets/js/mojang')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 const ServerStatus            = require('./assets/js/serverstatus')
 const { report } = require('process')
+const AdmZip = require('adm-zip')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -30,6 +31,10 @@ let joinedServer = false
 
 // Variable for checking if people launched the game
 let GameInstanceStarted = false
+
+let TrayObject
+
+let WindowHidden = false
 
 const loggerLanding = LoggerUtil('%c[Landing]', 'color: #000668; font-weight: bold')
 
@@ -1111,7 +1116,26 @@ function dlAsync(login = true){
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
                                 proc = pb.build()
                                 
-                                                        
+
+                                remote.getCurrentWindow().hide()
+                                WindowHidden = true
+                                const { Tray, Menu } = require('electron').remote
+
+                                TrayObject = new Tray('./build/icon.png')
+                                TrayObject.setToolTip('Songs of War Launcher - Game Running')
+                                const contextMenu = Menu.buildFromTemplate([
+                                    { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
+                                ])
+                                TrayObject.setContextMenu(contextMenu)
+                                TrayObject.on('double-click', () => {
+                                    if(WindowHidden) {
+                                        remote.getCurrentWindow().show()
+                                        WindowHidden = false
+                                    } else {
+                                        remote.getCurrentWindow().hide()
+                                        WindowHidden = true
+                                    }
+                                })
                                 
                                 // Bind listeners to stdout.
                                 proc.stdout.on('data', tempListener)
@@ -1127,6 +1151,9 @@ function dlAsync(login = true){
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
                                         CustomAssetsWatcher.close()
+                                        remote.getCurrentWindow().show()
+                                        TrayObject.destroy()
+                                        WindowHidden = false
                                     }
                                     if(data == 'GameStarted') {
                                         GameInstanceStarted = true
@@ -1136,6 +1163,9 @@ function dlAsync(login = true){
                                 //Receive crash message
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
+                                        remote.getCurrentWindow().show()
+                                        TrayObject.destroy()
+                                        WindowHidden = false
                                         setLaunchEnabled(true)
                                         joinedServer = false
                                         showNotClosableMessage(
@@ -1173,6 +1203,9 @@ function dlAsync(login = true){
                                         })()
                                     }
                                     if(data == 'OutOfMemory') {
+                                        remote.getCurrentWindow().show()
+                                        TrayObject.destroy()
+                                        WindowHidden = false
                                         showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
                                     }
                                 })
