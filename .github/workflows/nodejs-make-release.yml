@@ -2,10 +2,8 @@ name: Upload release assets to release
 
 on: 
   release:
-    types: [published, unpublished, created, edited, deleted, prereleased, released]
-  workflow_dispatch:
-    logLevel:
-        description: 'Yes'     
+    types: [published, edited, prereleased, released]
+ 
 
 jobs:
   BuildForLinux:
