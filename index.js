@@ -47,7 +47,7 @@ function initAutoUpdater(event, data) {
         if(process.platform === 'win32') {
             console.log('New update available, sending Balloon');
             (async () => {
-                const TrayBallon = new Tray('./build/icon.png')
+                const TrayBallon = new Tray(path.join(__dirname, '/app/assets/images/icon.png'))
                 console.log('Waiting 5 seconds')
                 setTimeout(function() {
                     TrayBallon.displayBalloon({
@@ -72,7 +72,7 @@ function initAutoUpdater(event, data) {
         if(process.platform === 'win32') {
             console.log('New update ready, sending Balloon');
             (async () => {
-                const TrayBallon = new Tray('./build/icon.png')
+                const TrayBallon = new Tray(path.join(__dirname, '/app/assets/images/icon.png'))
                 console.log('Waiting 5 seconds')
                 setTimeout(function() {
                     TrayBallon.displayBalloon({

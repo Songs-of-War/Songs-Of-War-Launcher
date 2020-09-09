@@ -837,32 +837,7 @@ function dlAsync(login = true){
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
                     } else {
-                        showNotClosableMessage(
-                            'Please wait...',
-                            'The launcher is currently gathering information, this won\'t take long!'
-                        )
-                
-                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                
-                        (async function() {
-                            await new Promise((resolve, reject) => {
-                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                            })
-                            try {
-                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                    form: {
-                                        ReportData: reportdata
-                                    },
-                                }).json()
-                                if(body['message'] == 'Success') {
-                                    showLaunchFailure('Download Error', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                                } else {
-                                    showLaunchFailure('Download Error', ' \nWe were not able to make an error report automatically.')
-                                }
-                            } catch(err) {
-                                showLaunchFailure('Download Error', '\nWe were not able to make an error report automatically.' + err)
-                            }
-                        })()
+                        showLaunchFailure('Download Error', '\nWe were not able to download some files. Error info: ' + err)
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)
@@ -881,7 +856,6 @@ function dlAsync(login = true){
 
                 DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                 loggerLaunchSuite.error('Validation Error')
-                loggerLaunchSuite.error(JSON.stringify(m.result))
                 loggerLaunchSuite.error('Error during launch', m.result.error);
                 (async function() {
                     await new Promise((resolve, reject) => {
@@ -1122,7 +1096,7 @@ function dlAsync(login = true){
                                     const { Tray, Menu } = require('electron').remote
                                     
 
-                                    TrayObject = new Tray('./build/icon.png')
+                                    TrayObject = new Tray(path.join(__dirname, '/assets/images/icon.png'))
                                     TrayObject.setToolTip('Songs of War Launcher - Game Running')
                                     const contextMenu = Menu.buildFromTemplate([
                                         { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
