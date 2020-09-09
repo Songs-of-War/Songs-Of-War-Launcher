@@ -1858,7 +1858,7 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('error', (err) => {
-                    self.emit('error', 'download', err + ' Code: ' + req.RequestError)
+                    self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
                 })
 
                 req.on('data', (chunk) => {
