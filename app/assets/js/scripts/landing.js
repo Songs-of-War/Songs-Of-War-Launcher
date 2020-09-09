@@ -7,15 +7,13 @@ const crypto                  = require('crypto')
 const {URL}                   = require('url')
 const fs                      = require('fs')
 const got = require('got')
-const { app, ipcMain, electron} = require('electron')
+const { app, ipcMain, electron, Main} = require('electron')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
 const Mojang                  = require('./assets/js/mojang')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 const ServerStatus            = require('./assets/js/serverstatus')
-const { report } = require('process')
-const AdmZip = require('adm-zip')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -839,32 +837,7 @@ function dlAsync(login = true){
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
                     } else {
-                        showNotClosableMessage(
-                            'Please wait...',
-                            'The launcher is currently gathering information, this won\'t take long!'
-                        )
-                
-                        let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
-                
-                        (async function() {
-                            await new Promise((resolve, reject) => {
-                                setTimeout(function() { resolve() }, 3000) //Wait 3 seconds
-                            })
-                            try {
-                                let body = await got.post('https://mysql.songs-of-war.com/reporting/reporting.php', {
-                                    form: {
-                                        ReportData: reportdata
-                                    },
-                                }).json()
-                                if(body['message'] == 'Success') {
-                                    showLaunchFailure('Download Error', '\nIf you require further assistance please write this code down and ask on our discord:\n' + body['ReportID'])
-                                } else {
-                                    showLaunchFailure('Download Error', ' \nWe were not able to make an error report automatically.')
-                                }
-                            } catch(err) {
-                                showLaunchFailure('Download Error', '\nWe were not able to make an error report automatically.' + err)
-                            }
-                        })()
+                        showLaunchFailure('Download Error', '\nWe were not able to download some files. Error info: ' + err)
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)
@@ -882,6 +855,7 @@ function dlAsync(login = true){
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
                 DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
+                loggerLaunchSuite.error('Validation Error')
                 loggerLaunchSuite.error('Error during launch', m.result.error);
                 (async function() {
                     await new Promise((resolve, reject) => {
@@ -1115,27 +1089,29 @@ function dlAsync(login = true){
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
                                 proc = pb.build()
-                                
 
                                 remote.getCurrentWindow().hide()
                                 WindowHidden = true
-                                const { Tray, Menu } = require('electron').remote
+                                if(process.platform === 'win32') {
+                                    const { Tray, Menu } = require('electron').remote
+                                    
 
-                                TrayObject = new Tray('./build/icon.png')
-                                TrayObject.setToolTip('Songs of War Launcher - Game Running')
-                                const contextMenu = Menu.buildFromTemplate([
-                                    { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
-                                ])
-                                TrayObject.setContextMenu(contextMenu)
-                                TrayObject.on('double-click', () => {
-                                    if(WindowHidden) {
-                                        remote.getCurrentWindow().show()
-                                        WindowHidden = false
-                                    } else {
-                                        remote.getCurrentWindow().hide()
-                                        WindowHidden = true
-                                    }
-                                })
+                                    TrayObject = new Tray(path.join(__dirname, '/assets/images/icon.png'))
+                                    TrayObject.setToolTip('Songs of War Launcher - Game Running')
+                                    const contextMenu = Menu.buildFromTemplate([
+                                        { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
+                                    ])
+                                    TrayObject.setContextMenu(contextMenu)
+                                    TrayObject.on('double-click', () => {
+                                        if(WindowHidden) {
+                                            remote.getCurrentWindow().show()
+                                            WindowHidden = false
+                                        } else {
+                                            remote.getCurrentWindow().hide()
+                                            WindowHidden = true
+                                        }
+                                    })
+                                }
                                 
                                 // Bind listeners to stdout.
                                 proc.stdout.on('data', tempListener)
@@ -1152,7 +1128,8 @@ function dlAsync(login = true){
                                         ModsWatcher.close()
                                         CustomAssetsWatcher.close()
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        
+                                        if(process.platform === 'win32') TrayObject.destroy(); loggerLanding.log('Open window, trigger')
                                         WindowHidden = false
                                     }
                                     if(data == 'GameStarted') {
@@ -1164,7 +1141,7 @@ function dlAsync(login = true){
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        if(process.platform === 'win32') TrayObject.destroy(); loggerLanding.log('Open window, trigger')
                                         WindowHidden = false
                                         setLaunchEnabled(true)
                                         joinedServer = false
@@ -1204,7 +1181,7 @@ function dlAsync(login = true){
                                     }
                                     if(data == 'OutOfMemory') {
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                         showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
                                     }
@@ -1233,12 +1210,16 @@ function dlAsync(login = true){
         
                                 DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
                                 setLaunchEnabled(true)
+                                remote.getCurrentWindow().show()
+                                WindowHidden = false
                                 joinedServer = false
                                 showNotClosableMessage(
                                     'Please wait...',
                                     'The launcher is currently gathering information, this won\'t take long!'
                                 )
-                                loggerLaunchSuite.error('Error during launch', err)
+                                loggerLaunchSuite.error('Error during launch ', err)
+                                loggerLaunchSuite.error('Error Data:')
+                                loggerLaunchSuite.error(err)
                                 let reportdata = fs.readFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', 'utf-8');
                                 (async function() {
                                     await new Promise((resolve, reject) => {

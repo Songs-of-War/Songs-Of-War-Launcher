@@ -14,6 +14,9 @@ const got           = require('got')
 // Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
+process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
+
+
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
@@ -1855,7 +1858,7 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('error', (err) => {
-                    self.emit('error', 'download', err + ' Code: ' + req.RequestError)
+                    self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
                 })
 
                 req.on('data', (chunk) => {

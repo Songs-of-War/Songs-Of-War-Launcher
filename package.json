@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "productName": "Songs of War Launcher",
   "description": "Songs of War Minecraft Server",
   "author": "lucasboss45",
@@ -38,6 +38,7 @@
     "fs-extra": "^9.0.1",
     "github-syntax-dark": "^0.5.0",
     "got": "^11.5.1",
+    "http-parser-js": "^0.5.2",
     "jquery": "^3.5.1",
     "request": "^2.88.2",
     "semver": "^7.3.2",
@@ -47,7 +48,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "electron": "^9.2.1",
+    "electron": "^10.1.1",
     "electron-builder": "^22.8.0",
     "eslint": "^7.8.1",
     "jest": "^26.4.2",
