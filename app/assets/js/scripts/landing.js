@@ -1119,23 +1119,25 @@ function dlAsync(login = true){
 
                                 remote.getCurrentWindow().hide()
                                 WindowHidden = true
-                                const { Tray, Menu } = require('electron').remote
+                                if(process.platform === 'win32') {
+                                    const { Tray, Menu } = require('electron').remote
 
-                                TrayObject = new Tray('./build/icon.png')
-                                TrayObject.setToolTip('Songs of War Launcher - Game Running')
-                                const contextMenu = Menu.buildFromTemplate([
-                                    { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
-                                ])
-                                TrayObject.setContextMenu(contextMenu)
-                                TrayObject.on('double-click', () => {
-                                    if(WindowHidden) {
-                                        remote.getCurrentWindow().show()
-                                        WindowHidden = false
-                                    } else {
-                                        remote.getCurrentWindow().hide()
-                                        WindowHidden = true
-                                    }
-                                })
+                                    TrayObject = new Tray('./build/icon.png')
+                                    TrayObject.setToolTip('Songs of War Launcher - Game Running')
+                                    const contextMenu = Menu.buildFromTemplate([
+                                        { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
+                                    ])
+                                    TrayObject.setContextMenu(contextMenu)
+                                    TrayObject.on('double-click', () => {
+                                        if(WindowHidden) {
+                                            remote.getCurrentWindow().show()
+                                            WindowHidden = false
+                                        } else {
+                                            remote.getCurrentWindow().hide()
+                                            WindowHidden = true
+                                        }
+                                    })
+                                }
                                 
                                 // Bind listeners to stdout.
                                 proc.stdout.on('data', tempListener)
@@ -1152,7 +1154,7 @@ function dlAsync(login = true){
                                         ModsWatcher.close()
                                         CustomAssetsWatcher.close()
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                     }
                                     if(data == 'GameStarted') {
@@ -1164,7 +1166,7 @@ function dlAsync(login = true){
                                 proc.on('message', (data) => {
                                     if(data == 'Crashed') {
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                         setLaunchEnabled(true)
                                         joinedServer = false
@@ -1204,7 +1206,7 @@ function dlAsync(login = true){
                                     }
                                     if(data == 'OutOfMemory') {
                                         remote.getCurrentWindow().show()
-                                        TrayObject.destroy()
+                                        if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                         showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
                                     }

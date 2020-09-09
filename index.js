@@ -44,45 +44,49 @@ function initAutoUpdater(event, data) {
     }
     autoUpdater.on('update-available', (info) => {
         event.sender.send('autoUpdateNotification', 'update-available', info)
-        console.log('New update available, sending Balloon');
-        (async () => {
-            const TrayBallon = new Tray('./build/icon.png')
-            console.log('Waiting 5 seconds')
-            setTimeout(function() {
-                TrayBallon.displayBalloon({
-                    title: 'New update available for download',
-                    content: 'A new update for the launcher is available! You should download it!',
-                    icon: './build/icon.png'
-                })
-                console.log('Sent balloon notification')
-                TrayBallon.once('balloon-closed', () => {
-                    TrayBallon.destroy()
-                })
-            }, 5000)            
-        })()
-        
-        /*TrayBallon.on('balloon-closed', () => {
-            TrayBallon.destroy()
-        })*/
+        if(process.platform === 'win32') {
+            console.log('New update available, sending Balloon');
+            (async () => {
+                const TrayBallon = new Tray('./build/icon.png')
+                console.log('Waiting 5 seconds')
+                setTimeout(function() {
+                    TrayBallon.displayBalloon({
+                        title: 'New update available for download',
+                        content: 'A new update for the launcher is available! You should download it!',
+                        icon: './build/icon.png'
+                    })
+                    console.log('Sent balloon notification')
+                    TrayBallon.once('balloon-closed', () => {
+                        TrayBallon.destroy()
+                    })
+                }, 5000)            
+            })()
+            
+            /*TrayBallon.on('balloon-closed', () => {
+                TrayBallon.destroy()
+            })*/
+        }
     })
     autoUpdater.on('update-downloaded', (info) => {
         event.sender.send('autoUpdateNotification', 'update-downloaded', info)
-        console.log('New update ready, sending Balloon');
-        (async () => {
-            const TrayBallon = new Tray('./build/icon.png')
-            console.log('Waiting 5 seconds')
-            setTimeout(function() {
-                TrayBallon.displayBalloon({
-                    title: 'New update ready',
-                    content: 'A new update for the launcher is ready for installation!',
-                    icon: './build/icon.png'
-                })
-                console.log('Sent balloon notification')
-                TrayBallon.once('balloon-closed', () => {
-                    TrayBallon.destroy()
-                })
-            }, 5000)            
-        })()
+        if(process.platform === 'win32') {
+            console.log('New update ready, sending Balloon');
+            (async () => {
+                const TrayBallon = new Tray('./build/icon.png')
+                console.log('Waiting 5 seconds')
+                setTimeout(function() {
+                    TrayBallon.displayBalloon({
+                        title: 'New update ready',
+                        content: 'A new update for the launcher is ready for installation!',
+                        icon: './build/icon.png'
+                    })
+                    console.log('Sent balloon notification')
+                    TrayBallon.once('balloon-closed', () => {
+                        TrayBallon.destroy()
+                    })
+                }, 5000)            
+            })()
+        }
     })
     autoUpdater.on('update-not-available', (info) => {
         event.sender.send('autoUpdateNotification', 'update-not-available', info)
