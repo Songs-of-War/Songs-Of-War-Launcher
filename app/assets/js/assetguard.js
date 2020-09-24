@@ -1797,12 +1797,11 @@ class AssetGuard extends EventEmitter {
 
         if(dlQueue.length > 0){
             console.log('DLQueue', dlQueue)
-
             async.eachLimit(dlQueue, limit, (asset, cb) => {
 
                 fs.ensureDirSync(path.join(asset.to, '..'))
 
-                let req = got.stream(asset.from, { throwHttpErrors: false })
+                let req = got.stream(asset.from, { throwHttpErrors: false, retry: 5 })
                 req.pause()
 
                 req.on('response', (resp) => {
@@ -1858,7 +1857,9 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('error', (err) => {
-                    self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
+                    if(req.retryCount === 5) {
+                        self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
+                    }
                 })
 
                 req.on('data', (chunk) => {
