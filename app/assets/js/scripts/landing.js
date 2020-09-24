@@ -837,7 +837,7 @@ function dlAsync(login = true){
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
                         )
                     } else {
-                        showLaunchFailure('Download Error', '\nWe were not able to download some files. Error info: ' + err)
+                        showLaunchFailure('Download Error', '\nWe were not able to download some files. Error info: ' + m.error)
                     }
 
                     remote.getCurrentWindow().setProgressBar(-1)

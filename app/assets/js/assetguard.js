@@ -1800,6 +1800,8 @@ class AssetGuard extends EventEmitter {
 
             async.eachLimit(dlQueue, limit, (asset, cb) => {
 
+                let instanceDownloadedData = 0
+
                 fs.ensureDirSync(path.join(asset.to, '..'))
 
                 let req = got.stream(asset.from, { throwHttpErrors: false })
@@ -1854,6 +1856,12 @@ class AssetGuard extends EventEmitter {
                         cb()
 
                     }
+                    req.once('retry', (data) => {
+                        console.log(`Failed to download ${asset.id}`)
+                        console.log(`Retrying file ${asset.id}`)
+                        this.totaldlsize -= self.progress
+                        self.progress = 0
+                    })
 
                 })
 
@@ -1864,6 +1872,10 @@ class AssetGuard extends EventEmitter {
                 req.on('data', (chunk) => {
                     self.progress += chunk.length
                     self.emit('progress', 'download', self.progress, self.totaldlsize)
+                })
+
+                req.on('end', () => {
+                    self.progress = 0
                 })
 
             }, (err) => {
