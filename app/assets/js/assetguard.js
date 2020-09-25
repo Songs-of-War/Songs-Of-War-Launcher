@@ -1836,16 +1836,20 @@ class AssetGuard extends EventEmitter {
 
         if(dlQueue.length > 0){
             console.log('DLQueue', dlQueue)
-
             async.eachLimit(dlQueue, limit, (asset, cb) => {
-
-                const ExecuteDownload = (retryCount = 0) => {
+                
+                function ExecuteDownload(retryCount = 0) {
 
                     let instanceDownloadedData = 0
+                    let writeStream
 
                     fs.ensureDirSync(path.join(asset.to, '..'))
 
-                    let req = got.stream(asset.from, { throwHttpErrors: false })
+                    let req = got.stream(asset.from, { throwHttpErrors: false, retry: 8, timeout: {
+                        lookup: 2000,
+                        connect: 2000,
+                        secureConnect: 4000,
+                    }})
                     // Update the retry count from the stream
                     req.retryCount = retryCount
                     req.pause()
@@ -1869,8 +1873,8 @@ class AssetGuard extends EventEmitter {
                                 doHashCheck = true
 
                                 // Adjust download
-                                this.totaldlsize -= parseInt(asset.size)
-                                this.totaldlsize += parseInt(contentLength)
+                                self.totaldlsize -= parseInt(asset.size)
+                                self.totaldlsize += parseInt(contentLength)
                             }
 
                             if(writeStream) {
@@ -1878,7 +1882,7 @@ class AssetGuard extends EventEmitter {
                                 writeStream.destroy()
                             }
 
-                            let writeStream = fs.createWriteStream(asset.to)
+                            writeStream = fs.createWriteStream(asset.to)
                             writeStream.on('close', () => {
                                 if(dlTracker.callback != null){
                                     dlTracker.callback.apply(dlTracker, [asset, self])
@@ -1910,28 +1914,37 @@ class AssetGuard extends EventEmitter {
 
                     })
 
-                    req.once('retry', (retries) => {
+                    req.once('retry', (retries, err) => {
                         console.log(`Failed to download ${asset.id}`)
+                        console.error(err)
                         console.log(`Retrying file ${asset.id}`)
-                        this.totaldlsize -= instanceDownloadedData
+                        self.progress -= instanceDownloadedData
                         instanceDownloadedData = 0
-                        // eslint-disable-next-line no-unused-vars
-                        ExecuteDownload(retries)
+                        try {
+                            ExecuteDownload(retries)
+                            console.log('Retrial successful!')
+                        } catch (error) {
+                            console.log('Retrial failed')
+                        }
                     })
 
                     req.on('error', (err) => {
+                        console.log('Failed to download')
                         self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
+                        
                     })
 
                     req.on('data', (chunk) => {
                         self.progress += chunk.length
+                        instanceDownloadedData += chunk.length
                         self.emit('progress', 'download', self.progress, self.totaldlsize)
                     })
 
-                    req.on('end', () => {
+                    /*req.on('close', () => {
                         instanceDownloadedData = 0
-                    })
+                    })*/
                 }
+                ExecuteDownload()
 
             }, (err) => {
 
