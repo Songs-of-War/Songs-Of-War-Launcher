@@ -79,7 +79,7 @@ jobs:
         run: yarn install
       - name: Checking code syntax
         run: yarn lint
-      - run: npm test
+      #- run: npm test
       - run: npm run dist -- MAC
       - name: Upload dmg
         uses: actions/upload-artifact@v2
@@ -120,7 +120,7 @@ jobs:
         run: yarn install
       - name: Checking code syntax
         run: yarn lint
-      - run: npm test
+      #- run: npm test
       - run: npm run dist -- WINDOWS
       - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
