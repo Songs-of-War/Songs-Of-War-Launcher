@@ -53,7 +53,7 @@ function initAutoUpdater(event, data) {
                     TrayBallon.displayBalloon({
                         title: 'New update available for download',
                         content: 'A new update for the launcher is available! You should download it!',
-                        icon: './build/icon.png'
+                        icon: path.join(__dirname, '/app/assets/images/icon.png')
                     })
                     console.log('Sent balloon notification')
                     TrayBallon.once('balloon-closed', () => {
@@ -78,7 +78,7 @@ function initAutoUpdater(event, data) {
                     TrayBallon.displayBalloon({
                         title: 'New update ready',
                         content: 'A new update for the launcher is ready for installation!',
-                        icon: './build/icon.png'
+                        icon: path.join(__dirname, '/app/assets/images/icon.png')
                     })
                     console.log('Sent balloon notification')
                     TrayBallon.once('balloon-closed', () => {
