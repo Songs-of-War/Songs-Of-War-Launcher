@@ -10,7 +10,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "electron . --no-sandbox",
+    "start": "electron .",
     "cilinux": "node build.js WINDOWS && node build.js LINUX",
     "cidarwin": "node build.js MAC",
     "dist": "cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true node build.js",
