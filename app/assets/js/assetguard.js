@@ -1811,6 +1811,8 @@ class AssetGuard extends EventEmitter {
 
                     if(resp.statusCode === 200){
 
+                        instanceDownloadedData = 0
+
                         let doHashCheck = false
                         const contentLength = parseInt(resp.headers['content-length'])
 
@@ -1856,13 +1858,14 @@ class AssetGuard extends EventEmitter {
                         cb()
 
                     }
-                    req.once('retry', (data) => {
-                        console.log(`Failed to download ${asset.id}`)
-                        console.log(`Retrying file ${asset.id}`)
-                        this.totaldlsize -= self.progress
-                        self.progress = 0
-                    })
 
+                })
+
+                req.once('retry', (data) => {
+                    console.log(`Failed to download ${asset.id}`)
+                    console.log(`Retrying file ${asset.id}`)
+                    this.totaldlsize -= instanceDownloadedData
+                    instanceDownloadedData = 0
                 })
 
                 req.on('error', (err) => {
@@ -1875,7 +1878,7 @@ class AssetGuard extends EventEmitter {
                 })
 
                 req.on('end', () => {
-                    self.progress = 0
+                    instanceDownloadedData = 0
                 })
 
             }, (err) => {
