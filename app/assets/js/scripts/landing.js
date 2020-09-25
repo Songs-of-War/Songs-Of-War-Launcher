@@ -199,7 +199,30 @@ server_selection_button.onclick = (e) => {
 
     let allowchecking = false
 
-    if(!allowchecking) {
+    try {
+        const statuses = await Mojang.status()
+        greenCount = 0
+        greyCount = 0
+
+        for(let i=0; i<statuses.length; i++){
+            const service = statuses[i]
+
+            // Mojang API is broken for these two. https://bugs.mojang.com/browse/WEB-2303
+            if(service.service === 'sessionserver.mojang.com' || service.service === 'minecraft.net') {
+                service.status = 'green'
+            }
+
+            if(service.essential){
+                tooltipEssentialHTML += `<div class="mojangStatusContainer">
+                    <span class="mojangStatusIcon" style="color: ${Mojang.statusToHex(service.status)};">&#8226;</span>
+                    <span class="mojangStatusName">${service.name}</span>
+                </div>`
+            } else {
+                tooltipNonEssentialHTML += `<div class="mojangStatusContainer">
+                    <span class="mojangStatusIcon" style="color: ${Mojang.statusToHex(service.status)};">&#8226;</span>
+                    <span class="mojangStatusName">${service.name}</span>
+                </div>`
+            }
 
         let status = 'grey'
         let tooltipEssentialHTML = ''
