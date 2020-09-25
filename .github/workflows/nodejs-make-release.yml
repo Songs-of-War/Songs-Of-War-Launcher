@@ -2,7 +2,7 @@ name: Upload release assets to release
 
 on: 
   release:
-    types: [published, edited, prereleased, released]
+    types: [published, edited]
  
 
 jobs:
