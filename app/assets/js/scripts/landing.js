@@ -14,7 +14,6 @@ const DiscordWrapper          = require('./assets/js/discordwrapper')
 const Mojang                  = require('./assets/js/mojang')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 const ServerStatus            = require('./assets/js/serverstatus')
-
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
 const launch_details          = document.getElementById('launch_details')
@@ -626,8 +625,76 @@ function useDefaultOptions(optionsPath) {
 }
 
 
+/**
+ * Copied from uibinder.js
+ * 
+ * Verify login tokens
+ * 
+ * @returns boolean
+ */
+async function landingValidateSelectedAccount(){
+    const selectedAcc = ConfigManager.getSelectedAccount()
+    if(selectedAcc != null){
+        const val = await AuthManager.validateSelected()
+        if(!val){
+            ConfigManager.removeAuthAccount(selectedAcc.uuid)
+            ConfigManager.save()
+            const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
+            setOverlayContent(
+                'Failed to Refresh Login',
+                `We were unable to refresh the login for <strong>${selectedAcc.displayName}</strong>. Please ${accLen > 0 ? 'select another account or ' : ''} login again.`,
+                'Login',
+                'Select Another Account'
+            )
+            setOverlayHandler(() => {
+                document.getElementById('loginUsername').value = selectedAcc.username
+                validateEmail(selectedAcc.username)
+                loginViewOnSuccess = getCurrentView()
+                loginViewOnCancel = getCurrentView()
+                if(accLen > 0){
+                    loginViewCancelHandler = () => {
+                        ConfigManager.addAuthAccount(selectedAcc.uuid, selectedAcc.accessToken, selectedAcc.username, selectedAcc.displayName)
+                        ConfigManager.save()
+                        validateSelectedAccount()
+                    }
+                    loginCancelEnabled(true)
+                }
+                toggleOverlay(false)
+                switchView(getCurrentView(), VIEWS.login)
+            })
+            setDismissHandler(() => {
+                if(accLen > 1){
+                    prepareAccountSelectionList()
+                    $('#overlayContent').fadeOut(250, () => {
+                        bindOverlayKeys(true, 'accountSelectContent', true)
+                        $('#accountSelectContent').fadeIn(250)
+                    })
+                } else {
+                    const accountsObj = ConfigManager.getAuthAccounts()
+                    const accounts = Array.from(Object.keys(accountsObj), v => accountsObj[v])
+                    // This function validates the account switch.
+                    setSelectedAccount(accounts[0].uuid)
+                    toggleOverlay(false)
+                }
+            })
+            toggleOverlay(true, accLen > 0)
+        } else {
+            return true
+        }
+    } else {
+        return true
+    }
+}
 
 function dlAsync(login = true){
+
+
+    // Check if the connection token is still valid while starting the game, this prevents users from having to restart
+    // The launcher and only have to restart the game to fix the "Failed to verify username" error
+    setLaunchDetails('Validating Token...')
+    toggleLaunchArea(true)
+    if(!landingValidateSelectedAccount()) return
+
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
     // launching the game.
@@ -637,7 +704,7 @@ function dlAsync(login = true){
             loggerLanding.error('You must be logged into an account.')
             return
         }
-    }
+    }  
 
     if(GameInstanceStarted) {
         setLaunchEnabled(false)
@@ -1114,6 +1181,8 @@ function dlAsync(login = true){
                                 proc = pb.build()
 
                                 remote.getCurrentWindow().hide()
+                                // Show the normal launch area after the game starts
+                                toggleLaunchArea(false)
                                 WindowHidden = true
                                 if(process.platform === 'win32') {
                                     const { Tray, Menu } = require('electron').remote
