@@ -1181,6 +1181,8 @@ function dlAsync(login = true){
                                 proc = pb.build()
 
                                 remote.getCurrentWindow().hide()
+                                // Show the normal launch area after the game starts
+                                toggleLaunchArea(false)
                                 WindowHidden = true
                                 if(process.platform === 'win32') {
                                     const { Tray, Menu } = require('electron').remote
