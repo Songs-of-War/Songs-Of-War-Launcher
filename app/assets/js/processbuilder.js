@@ -738,11 +738,16 @@ class ProcessBuilder {
 
                         // Extract the file.
                         if(!shouldExclude){
-                            fs.writeFile(path.join(tempNativePath, fileName), zipEntries[i].getData(), (err) => {
-                                if(err){
-                                    logger.error('Error while extracting native library:', err)
-                                }
-                            })
+                            if(fileName.indexOf('..') == -1) {
+                                fs.writeFile(path.join(tempNativePath, fileName), zipEntries[i].getData(), (err) => {
+                                    if(err){
+                                        logger.error('Error while extracting native library:', err)
+                                    }
+                                })
+                            } else {
+                                logger.warn('Skipping bad file path ', fileName)
+                            }
+                            
                         }
     
                     }
