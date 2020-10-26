@@ -556,7 +556,19 @@ class JavaGuard extends EventEmitter {
                 child_process.exec('"' + binaryExecPath + '" -XshowSettings:properties', (err, stdout, stderr) => {
                     try {
                         // Output is stored in stderr?
-                        resolve(this._validateJVMProperties(stderr))
+                        if(process.platform === 'darwin') {
+                            got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json').then((val) => {
+                                let expectedVersion = /(?<=1\.8\.0_)\d+(?=\.\d+)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
+                                let curBinary = this._validateJVMProperties(stderr)
+                                if(curBinary['version']['update'] === expectedVersion) {
+                                    resolve(this._validateJVMProperties(stderr))
+                                } else {
+                                    resolve({valid: false})
+                                }
+                            })
+                        } else {
+                            resolve(this._validateJVMProperties(stderr))
+                        }
                     } catch (err){
                         // Output format might have changed, validation cannot be completed.
                         resolve({valid: false})
