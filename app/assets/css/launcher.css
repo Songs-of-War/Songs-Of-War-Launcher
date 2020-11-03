@@ -3778,10 +3778,11 @@ input:checked + .toggleSwitchSlider:before {
     position: absolute;
     z-index: 400;
     display: flex;
+    align-self: center;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: calc(100% - 22px);
+    height: calc(100% - 22px)
 }
 
 /* Loading content container. */
@@ -3789,8 +3790,24 @@ input:checked + .toggleSwitchSlider:before {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+}
+
+#loadingMessage {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Avenir Book';
+    font: 800;
+    font-size: x-large;
+    padding-top: 35%;
+    animation-duration: 5s;
+    animation-name: LoadingTextFade;
+}
+
+@keyframes LoadingTextFade {
+    0% { opacity: 0; }
+    60% { opacity: 0; }
+    100% { opacity: 100; }
 }
 
 /* Spinner container. */

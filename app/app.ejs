@@ -42,12 +42,25 @@
                 <img id="loadSpinnerImage" class="rotating" src="assets/images/LoadingText.png">
             </div>
         </div>
+        <div id="loadingMessage">
+            <span>Loading</span>
+        </div>
     </div>
     <script>
         // Load language
         for(let key of Object.keys(Lang.query('html'))){
             document.getElementById(key).innerHTML = Lang.query(`html.${key}`)
         }
+    </script>
+    <script>
+        async function UpdateDots() {
+            let text = document.getElementById("loadingMessage");
+            text.textContent = text.textContent + "."
+            if(text.textContent.includes("...")) {
+                text.textContent = text.textContent = "Loading"
+            }
+        }
+        setInterval(UpdateDots(), 500)
     </script>
 </body>
 </html>
