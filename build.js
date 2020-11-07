@@ -38,7 +38,6 @@ builder.build({
             oneClick: true,
             perMachine: false,
             allowElevation: true,
-            allowToChangeInstallationDirectory: true,
         },
         mac: {
             target: [
