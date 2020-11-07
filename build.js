@@ -35,7 +35,7 @@ builder.build({
             ]
         },
         nsis: {
-            oneClick: false,
+            oneClick: true,
             perMachine: false,
             allowElevation: true,
             allowToChangeInstallationDirectory: true,
