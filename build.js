@@ -42,7 +42,6 @@ builder.build({
         mac: {
             target: [
                 'dmg',
-                'pkg'
             ],
             category: 'public.app-category.games',
             compression: 'maximum'
@@ -50,9 +49,6 @@ builder.build({
         linux: {
             target: [
                 'AppImage', // Only AppImage supports auto updating
-                'deb',
-                'rpm',
-                'freebsd'
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
