@@ -9,27 +9,27 @@ class LoggerUtil {
 
     log(){
         console.log.apply(null, [this.prefix, this.style, ...arguments])
-        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[LOG]' + this.prefix + JSON.stringify(arguments) + '\n')
+        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[LOG] ' + arguments[0] + '\n')
     }
 
     info(){
         console.info.apply(null, [this.prefix, this.style, ...arguments])
-        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[INFO]' + this.prefix + JSON.stringify(arguments) + '\n')
+        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[INFO] ' + arguments[0] + '\n')
     }
 
     warn(){
         console.warn.apply(null, [this.prefix, this.style, ...arguments])
-        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[WARN]' + this.prefix + JSON.stringify(arguments) + '\n')
+        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[WARN] ' + arguments[0] + '\n')
     }
 
     debug(){
         console.debug.apply(null, [this.prefix, this.style, ...arguments])
-        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[DEBUG]' + this.prefix + JSON.stringify(arguments) + '\n')
+        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[DEBUG] ' + arguments[0] + '\n')
     }
 
     error(){
         console.error.apply(null, [this.prefix, this.style, ...arguments])
-        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[ERROR]' + this.prefix + JSON.stringify(arguments) + '\n')
+        fs.appendFileSync(ConfigManager.getLauncherDirectory() + '/latest.log', '[ERROR] ' + arguments[0] + '\n')
     }
 
 }

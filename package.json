@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.8.11",
+  "version": "1.8.12",
   "productName": "Songs of War Launcher",
   "description": "Songs of War Minecraft Server",
   "author": "lucasboss45",
@@ -21,9 +21,6 @@
   },
   "build": {
     "afterPack": "./build/scripts/afterPackHook.js"
-  },
-  "engines": {
-    "node": "12.x.x"
   },
   "dependencies": {
     "adm-zip": "^0.4.16",
