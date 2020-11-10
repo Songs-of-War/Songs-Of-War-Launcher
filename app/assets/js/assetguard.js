@@ -1243,6 +1243,12 @@ class AssetGuard extends EventEmitter {
                 stream.on('finish', () => {
                     resolve(JSON.parse(fs.readFileSync(versionFile)))
                 })
+                stream.on('error', (err) => {
+                    console.error('Error loading version data')
+                    console.error(err)
+                    this.emit('error', 'download', err)
+                    reject()
+                })
             } else {
                 resolve(JSON.parse(fs.readFileSync(versionFile)))
             }
@@ -1327,6 +1333,12 @@ class AssetGuard extends EventEmitter {
                     self._assetChainValidateAssets(versionData, data).then(() => {
                         resolve()
                     })
+                })
+                stream.on('error', (err) => {
+                    console.error('Error loading chain index data')
+                    console.error(err)
+                    this.emit('error', 'download', err)
+                    reject()
                 })
             } else {
                 data = JSON.parse(fs.readFileSync(assetIndexLoc, 'utf-8'))
@@ -1894,7 +1906,12 @@ class AssetGuard extends EventEmitter {
                                 writeStream.destroy()
                             }
 
-                            writeStream = fs.createWriteStream(asset.to)
+                            try {
+                                writeStream = fs.createWriteStream(asset.to)
+                            } catch(err) {
+                                console.error(err)
+                                self.emit('error', 'download', err)
+                            }
                             writeStream.on('close', () => {
                                 if(dlTracker.callback != null){
                                     dlTracker.callback.apply(dlTracker, [asset, self])
@@ -1911,6 +1928,13 @@ class AssetGuard extends EventEmitter {
 
                                 cb()
                             })
+
+                            writeStream.on('error', (err) => {
+                                console.error(err)
+                                self.emit('error', 'download', err)
+                                req.destroy()
+                            })
+
                             req.pipe(writeStream)
                             req.resume()
 
@@ -1941,7 +1965,7 @@ class AssetGuard extends EventEmitter {
                     })
 
                     req.on('error', (err) => {
-                        console.log('Failed to download')
+                        console.error('Failed to download')
                         self.emit('error', 'download', err + ' Code: ' + err.RequestError + ' More error info: ' + JSON.stringify(err.options))
                         
                     })
@@ -2135,6 +2159,12 @@ class AssetGuard extends EventEmitter {
                                 })
                                 
                             }
+                        })
+                        .on('error', (err) => {
+                            console.error('Error setting up forge')
+                            console.error(err)
+                            this.emit('error', 'download', err)
+                            reject()
                         })
                 })
             }
