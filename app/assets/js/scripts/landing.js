@@ -780,6 +780,7 @@ function dlAsync(login = true){
     aEx.on('close', (code, signal) => {
         if(code !== 0){
             loggerLaunchSuite.error(`AssetExec exited with code ${code}, assuming error.`)
+            loggerLaunchSuite.error(signal)
             DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
             showNotClosableMessage(
                 'Please wait...',
@@ -921,10 +922,17 @@ function dlAsync(login = true){
                 case 'download':
                     loggerLaunchSuite.error('Error while downloading:', m.error)
                     DiscordWrapper.updateDetails('In the Launcher', new Date().getTime())
+                    // Failed to connect
                     if(m.error.code === 'ENOENT'){
                         showLaunchFailure(
                             'Download Error',
                             'Could not connect to the file server. Ensure that you are connected to the internet and try again.'
+                        )
+                    // No space
+                    } else if(m.error.code === 'ENOSPC') {
+                        showLaunchFailure(
+                            'Download Error',
+                            'You are out of disk space.'
                         )
                     } else {
                         showLaunchFailure('Download Error', '\nWe were not able to download some files. Error info: ' + m.error)

@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.8.12",
+  "version": "1.8.13",
   "productName": "Songs of War Launcher",
   "description": "Songs of War Minecraft Server",
   "author": "lucasboss45",
@@ -28,7 +28,7 @@
     "discord-rpc": "^3.1.4",
     "ejs": "^3.1.5",
     "ejs-electron": "^2.1.1",
-    "electron-updater": "^4.3.4",
+    "electron-updater": "^4.3.5",
     "execa": "^4.0.3",
     "extract-dmg": "^1.0.0",
     "follow-redirects": "^1.13.0",
@@ -40,13 +40,13 @@
     "request": "^2.88.2",
     "semver": "^7.3.2",
     "shelljs": "^0.8.4",
-    "tar-fs": "^2.1.0",
+    "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "electron": "^7.2.4",
-    "electron-builder": "^22.8.0",
+    "electron": "^10.1.5",
+    "electron-builder": "^22.9.1",
     "eslint": "^7.9.0",
     "jest": "^26.4.2",
     "jest-electron": "^0.1.11",

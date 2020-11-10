@@ -13,7 +13,10 @@ let tracker = new target(...(process.argv.splice(3)))
 logger.log('AssetExec Started')
 
 // Temporary for debug purposes.
-process.on('unhandledRejection', r => logger.log(r))
+process.on('unhandledRejection', r => {
+    console.error('Unhandled rejection in aEX!')
+    console.error(r)
+})
 
 let percent = 0
 function assignListeners(){
