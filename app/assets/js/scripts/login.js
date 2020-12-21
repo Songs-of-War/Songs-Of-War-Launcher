@@ -231,7 +231,7 @@ function getPlatformIcon(filename){
             break
     }
 
-    return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
+    return path.join(__dirname, 'assets', 'images', `${filename}.${ext}`)
 }
 
 function XboxLiveError(XErr) {
@@ -384,10 +384,11 @@ microsoftLoginButton.addEventListener('click', async () => {
 
     if(loginWindow !== undefined) {
         if (!loginWindow.isDestroyed()) {
-            loginWindow.focus()
             return
         }
     }
+
+    console.log(getPlatformIcon('SealCircle'))
 
     loginWindow = new elec.remote.BrowserWindow({
         width: 450,
@@ -395,12 +396,10 @@ microsoftLoginButton.addEventListener('click', async () => {
         frame: true,
         movable: false,
         minimizable: false,
-        alwaysOnTop: true,
         parent: elec.remote.getCurrentWindow(),
         fullscreenable: false,
         modal: true,
         title: 'Microsoft Login',
-        // FIXME: For some reason this isn't working, debug
         icon: getPlatformIcon('SealCircle'),
         webPreferences: {
             nodeIntegration: true,

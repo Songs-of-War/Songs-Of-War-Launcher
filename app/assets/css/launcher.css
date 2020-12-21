@@ -417,6 +417,11 @@ div#launch_details_percent {
     background: rgba(0, 0, 0, 0.50);
 }
 
+#MicrosoftLoginButton:disabled {
+    color: rgba(255, 255, 255, 0.75);
+    pointer-events: none;
+}
+
 /* Login cancel button styles. */
 #loginCancelContainer {
     position: absolute;
