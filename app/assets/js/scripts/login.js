@@ -3,6 +3,7 @@
  */
 
 
+import got from 'got'
 
 // Validation Regexes.
 const validUsername         = /^[a-zA-Z0-9_]{1,16}$/
@@ -233,8 +234,152 @@ function getPlatformIcon(filename){
     return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
 
+function XboxLiveError(XErr) {
 
-microsoftLoginButton.addEventListener('click', () => {
+    let msgString = 'Something went wrong connecting to Xbox Live services. Please try again later.'
+
+    if(XErr === 2148916233) {
+        msgString = 'Your Microsoft account is yet to become an Xbox account. Sign in with Microsoft at minecraft.net to create one.'
+    } else if(XErr === 2148916238) {
+        msgString = 'It seems that this account belongs to a minor. Ask an adult to add your account to a Family.'
+    }
+
+
+    setOverlayContent(
+        'Xbox Live Authentication Error',
+        'Something went wrong connecting to Xbox Live services. Please try again later.',
+        'Okay'
+    )
+    setOverlayHandler(null)
+    toggleOverlay(true)
+
+}
+
+async function handleAuthProcedures(initialLink) {
+    let link = initialLink
+    link = link + '&process=true'
+
+    let RpsToken = await got.post(link, {
+        throwHttpErrors: false
+    })
+    RpsToken = JSON.parse(RpsToken.body)['Ticket']
+
+
+    let XboxXBLAuth = await got.post('https://user.auth.xboxlive.com/user/authenticate', {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept' : 'application/json'
+        },
+        throwHttpErrors: false,
+        body: '{\n' +
+            '    "RelyingParty": "http://auth.xboxlive.com",\n' +
+            '    "TokenType": "JWT",\n' +
+            '    "Properties": {\n' +
+            '        "AuthMethod": "RPS",\n' +
+            '        "SiteName": "user.auth.xboxlive.com",\n' +
+            `        "RpsTicket": "d=${RpsToken}"\n` +
+            '    }\n' +
+            '}'
+    })
+    if(XboxXBLAuth.statusCode !== 200) {
+        XboxLiveError(undefined)
+        return
+    }
+
+    let xblResponse = JSON.parse(XboxXBLAuth.body)
+    let token = xblResponse['Token']
+    let uhs =  xblResponse.DisplayClaims.xui[0].uhs
+
+    let XboxXSTSAuth = await got.post('https://xsts.auth.xboxlive.com/xsts/authorize', {
+        body: ' {\n' +
+            '    "Properties": {\n' +
+            '        "SandboxId": "RETAIL",\n' +
+            '        "UserTokens": [\n' +
+            `            "${token}"\n` +
+            '        ]\n' +
+            '    },\n' +
+            '    "RelyingParty": "rp://api.minecraftservices.com/",\n' +
+            '    "TokenType": "JWT"\n' +
+            ' }',
+        throwHttpErrors: false
+    })
+    if(XboxXSTSAuth.statusCode !== 200) {
+        if(XboxXSTSAuth.statusCode === 401) {
+            let XSTSResponse = JSON.parse(XboxXSTSAuth.body)
+            if(XSTSResponse['XErr'] !== undefined) {
+                XboxLiveError(XSTSResponse['XErr'])
+                return
+            } else {
+                XboxLiveError(undefined)
+                return
+            }
+        }
+    }
+    let XSTSResponse = JSON.parse(XboxXSTSAuth.body)
+    let XSTSToken = XSTSResponse['Token']
+
+    let minecraftXboxLogin = await got.post('https://api.minecraftservices.com/authentication/login_with_xbox', {
+        body: '{\n' +
+            `    "identityToken": "XBL3.0 x=${uhs};${XSTSToken}"\n` +
+            '}',
+        throwHttpErrors: false
+    })
+
+    if(minecraftXboxLogin.statusCode !== 200) {
+        XboxLiveError(XSTSResponse['XErr'])
+        return
+    }
+
+    let mcXboxToken = JSON.parse(minecraftXboxLogin.body)['access_token']
+
+    let minecraftOwnership = await got('https://api.minecraftservices.com/entitlements/mcstore', {
+        headers: {
+            Authorization: `Bearer ${mcXboxToken}`
+        },
+        throwHttpErrors: false
+    })
+
+    if(minecraftOwnership.statusCode !== 200) {
+        XboxLiveError(undefined)
+        return
+    }
+
+    let minecraftOwnershipData = JSON.parse(minecraftOwnership.body).items
+
+    let minecraftOwnershipConfirmation1 = false
+    let minecraftOwnershipConfirmation2 = false
+
+    minecraftOwnershipData.forEach(value => {
+        if(value.name === 'product_minecraft') {
+            minecraftOwnershipConfirmation1 = true
+        }
+        if(value.name === 'game_minecraft') {
+            minecraftOwnershipConfirmation2 = true
+        }
+    })
+
+    if(minecraftOwnershipConfirmation2 && minecraftOwnershipConfirmation1) {
+        let minecraftProfile = await got('https://api.minecraftservices.com/minecraft/profile', {
+            headers: {
+                Authorization: `Bearer ${mcXboxToken}`
+            }
+        })
+        if(minecraftProfile.statusCode !== 200) {
+            let minecraftProfileData = JSON.parse(minecraftProfile.body)
+            let minecraftUsername = minecraftProfileData.name
+            let minecraftUUID = minecraftProfileData.id
+        }
+    } else {
+        XboxLiveError(undefined)
+    }
+
+
+    microsoftLoginButton.disabled = true
+
+}
+
+
+microsoftLoginButton.addEventListener('click', async () => {
     const elec = require('electron')
 
     if(loginWindow !== undefined) {
@@ -265,14 +410,29 @@ microsoftLoginButton.addEventListener('click', () => {
         },
     })
 
-
-
     loginWindow.setMenu(null)
-
-    loginWindow.loadURL('https://login.live.com/oauth20_authorize.srf%20?client_id=34be85e8-151d-45f2-8241-3954da296908%20&response_type=code&redirect_uri=https%3A%2F%2Fsongs-of-war.com%2Fxbox%2Fauthenticate.php%20&scope=XboxLive.signin Xboxlive.offline_access')
-
     loginWindow.resizable = false
+    await loginWindow.loadURL('https://login.live.com/oauth20_authorize.srf%20?client_id=34be85e8-151d-45f2-8241-3954da296908%20&response_type=code&redirect_uri=https%3A%2F%2Fsongs-of-war.com%2Fxbox%2Fauthenticate.php%20&scope=XboxLive.signin Xboxlive.offline_access')
+
+    let URLUpdateEvent = loginWindow.webContents.on('update-target-url', () => {
+        if(loginWindow.webContents.getURL().startsWith('https://songs-of-war.com/xbox/authenticate.php')) {
+        }
+    })
+
+    let FinishLoadingEvent = loginWindow.webContents.on('did-finish-load', async () => {
+        if(loginWindow.webContents.getURL().startsWith('https://songs-of-war.com/xbox/authenticate.php')) {
+
+            handleAuthProcedures(loginWindow.webContents.getURL())
+            loginWindow.webContents.removeAllListeners()
+
+
+        }
+    })
+
 })
+
+
+
 
 
 
