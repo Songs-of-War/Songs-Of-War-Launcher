@@ -1,18 +1,18 @@
 /**
  * Script for login.ejs
  */
+
+
+
 // Validation Regexes.
 const validUsername         = /^[a-zA-Z0-9_]{1,16}$/
 const basicEmail            = /^\S+@\S+\.\S+$/
 //const validEmail          = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
 
+let loginWindow
+
 // Login Elements
-const loginCancelContainer  = document.getElementById('loginCancelContainer')
-const loginCancelButton     = document.getElementById('loginCancelButton')
-const loginEmailError       = document.getElementById('loginEmailError')
-const loginUsername         = document.getElementById('loginUsername')
-const loginPasswordError    = document.getElementById('loginPasswordError')
-const loginPassword         = document.getElementById('loginPassword')
+const microsoftLoginButton  = document.getElementById('MicrosoftLoginButton')
 const checkmarkContainer    = document.getElementById('checkmarkContainer')
 const loginRememberOption   = document.getElementById('loginRememberOption')
 const loginButton           = document.getElementById('loginButton')
@@ -60,7 +60,6 @@ function validateEmail(value){
             loginDisabled(true)
             lu = false
         } else {
-            loginEmailError.style.opacity = 0
             lu = true
             if(lp){
                 loginDisabled(false)
@@ -68,7 +67,7 @@ function validateEmail(value){
         }
     } else {
         lu = false
-        showError(loginEmailError, Lang.queryJS('login.error.requiredValue'))
+        showError(Lang.queryJS('login.error.requiredValue'))
         loginDisabled(true)
     }
 }
@@ -80,7 +79,6 @@ function validateEmail(value){
  */
 function validatePassword(value){
     if(value){
-        loginPasswordError.style.opacity = 0
         lp = true
         if(lu){
             loginDisabled(false)
@@ -92,23 +90,6 @@ function validatePassword(value){
     }
 }
 
-// Emphasize errors with shake when focus is lost.
-loginUsername.addEventListener('focusout', (e) => {
-    validateEmail(e.target.value)
-    shakeError(loginEmailError)
-})
-loginPassword.addEventListener('focusout', (e) => {
-    validatePassword(e.target.value)
-    shakeError(loginPasswordError)
-})
-
-// Validate input for each field.
-loginUsername.addEventListener('input', (e) => {
-    validateEmail(e.target.value)
-})
-loginPassword.addEventListener('input', (e) => {
-    validatePassword(e.target.value)
-})
 
 /**
  * Enable or disable the login button.
@@ -143,9 +124,6 @@ function loginLoading(v){
  */
 function formDisabled(v){
     loginDisabled(v)
-    loginCancelButton.disabled = v
-    loginUsername.disabled = v
-    loginPassword.disabled = v
     if(v){
         checkmarkContainer.setAttribute('disabled', v)
     } else {
@@ -239,17 +217,64 @@ function loginCancelEnabled(val){
     }
 }
 
-loginCancelButton.onclick = (e) => {
-    switchView(getCurrentView(), loginViewOnCancel, 500, 500, () => {
-        loginUsername.value = ''
-        loginPassword.value = ''
-        loginCancelEnabled(false)
-        if(loginViewCancelHandler != null){
-            loginViewCancelHandler()
-            loginViewCancelHandler = null
-        }
-    })
+function getPlatformIcon(filename){
+    let ext
+    switch(process.platform) {
+        case 'win32':
+            ext = 'ico'
+            break
+        case 'darwin':
+        case 'linux':
+        default:
+            ext = 'png'
+            break
+    }
+
+    return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
+
+
+microsoftLoginButton.addEventListener('click', () => {
+    const elec = require('electron')
+
+    if(loginWindow !== undefined) {
+        if (!loginWindow.isDestroyed()) {
+            loginWindow.focus()
+            return
+        }
+    }
+
+    loginWindow = new elec.remote.BrowserWindow({
+        width: 450,
+        height: 600,
+        frame: true,
+        movable: false,
+        minimizable: false,
+        alwaysOnTop: true,
+        parent: elec.remote.getCurrentWindow(),
+        fullscreenable: false,
+        modal: true,
+        title: 'Microsoft Login',
+        // FIXME: For some reason this isn't working, debug
+        icon: getPlatformIcon('SealCircle'),
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true,
+            worldSafeExecuteJavaScript: true
+        },
+    })
+
+
+
+    loginWindow.setMenu(null)
+
+    loginWindow.loadURL('https://login.live.com/oauth20_authorize.srf%20?client_id=34be85e8-151d-45f2-8241-3954da296908%20&response_type=code&redirect_uri=https%3A%2F%2Fsongs-of-war.com%2Fxbox%2Fauthenticate.php%20&scope=XboxLive.signin Xboxlive.offline_access')
+
+    loginWindow.resizable = false
+})
+
+
 
 // Disable default form behavior.
 loginForm.onsubmit = () => { return false }
