@@ -23,7 +23,7 @@
     "afterPack": "./build/scripts/afterPackHook.js"
   },
   "dependencies": {
-    "adm-zip": "^0.4.16",
+    "adm-zip": "^0.5.1",
     "async": "^3.2.0",
     "discord-rpc": "^3.1.4",
     "ejs": "^3.1.5",
