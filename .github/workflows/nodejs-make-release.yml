@@ -12,7 +12,6 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
     steps:
-      - uses: nelonoel/branch-name@v1
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
@@ -46,7 +45,6 @@ jobs:
       matrix:
         operating-system: [macos-latest]
     steps:
-      - uses: nelonoel/branch-name@v1
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
@@ -86,7 +84,6 @@ jobs:
       matrix:
         operating-system: [windows-latest]
     steps:
-      - uses: nelonoel/branch-name@v1
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
