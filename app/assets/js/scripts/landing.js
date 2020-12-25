@@ -1074,7 +1074,7 @@ function dlAsync(login = true){
                                     fs.readdirSync(paths.mods).forEach((file) => {
                                         // Prevent optifine to be deleted here because of Java Path issues
                                         // Shit patch but honestly I don't care, I don't have time to implement something better
-                                        if(file != 'OptiFine_1.15.2.jar' && file != 'MixinBootstrap.jar') {
+                                        if(file !== 'OptiFine_1.15.2.jar' && file !== 'MixinBootstrap.jar') {
                                             fs.unlinkSync(path.join(paths.mods, file))
                                         }
                                     })
