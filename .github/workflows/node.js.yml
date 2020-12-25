@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 12.x
       - name: package-version
-        uses: nyaascii/package-version@1.0.2-pre
+        uses: nyaa8/package-version@v1.0.3
       - name: Install JS Modules
         run: yarn install
       - name: Checking code syntax
