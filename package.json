@@ -38,7 +38,7 @@
     "http-parser-js": "^0.5.2",
     "jquery": "^3.5.1",
     "request": "^2.88.2",
-    "semver": "^7.3.2",
+    "semver": "^7.3.4",
     "shelljs": "^0.8.4",
     "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
