@@ -34,7 +34,7 @@
     "follow-redirects": "^1.13.1",
     "fs-extra": "^9.0.1",
     "github-syntax-dark": "^0.5.0",
-    "got": "^11.6.2",
+    "got": "^11.8.1",
     "http-parser-js": "^0.5.2",
     "jquery": "^3.5.1",
     "request": "^2.88.2",
