@@ -508,7 +508,7 @@ class JavaGuard extends EventEmitter {
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
                 // Nobody uses the linux version and I can't find the java mojang manifest for linux so this will have to wait
                 // TODO: Add the Mojang linux java manifest
-                if(process.platform === 'darwin' || (this._getPrimaryGPU().toLowerCase().includes("intel") && process.platform === 'win32')) {
+                if(process.platform === 'darwin' || (this._getPrimaryGPU().toLowerCase().includes('intel') && process.platform === 'win32')) {
                     let downloadUrl
                     runningCompatibilityMode = true
                     if(process.platform === 'darwin') {
@@ -518,7 +518,7 @@ class JavaGuard extends EventEmitter {
                     }
 
                     got(downloadUrl).then((val) => {
-                        let expectedVersion = /(?<=1\.8\.0_)\d+(?=\.\d+)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
+                        let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
                         let curBinary = this._validateJVMProperties(stderr)
                         if(curBinary['version']['update'] === expectedVersion) {
                             compatibility_ExpectedJavaUpdateRevision = expectedVersion
@@ -527,7 +527,7 @@ class JavaGuard extends EventEmitter {
                 }
 
                 if(runningCompatibilityMode) {
-                    if(verOb.major === 8 && verOb.update > 50){
+                    if(verOb.major === 8 && verOb.update === compatibility_ExpectedJavaUpdateRevision){
                         meta.version = verOb
                         ++checksum
                         if(checksum === goal){
@@ -1042,7 +1042,11 @@ class AssetGuard extends EventEmitter {
         this.java = new DLTracker([], 0)
         this.extractQueue = []
         this.commonPath = commonPath
-        this.javaexec = javaexec
+        this.javaexec = javaexec;
+
+        (async () => {
+            this.primaryGPUInfo = (await si.graphics()).controllers[0].name
+        })()
     }
 
     // Static Utility Functions
@@ -1643,10 +1647,84 @@ class AssetGuard extends EventEmitter {
     // Java (Category=''') Validation (download) Functions
     // #region
 
+    _getPrimaryGPU() {
+        return this.primaryGPUInfo
+    }
+
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
             // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform !== 'darwin') {
+            if(process.platform === 'darwin' || (process.platform === 'win32' && this._getPrimaryGPU().toLowerCase().includes('intel'))) {
+                let manifestUrl
+                let unixBasedSystem = false
+                if(process.platform === 'darwin') {
+                    // Mac
+                    manifestUrl = 'https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json'
+                    unixBasedSystem = true
+                } else {
+                    // Windows
+                    manifestUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
+                }
+                try {
+                    // Download the Java stuff from Mojang themselves
+                    (async () => {
+                        dataDir = path.join(dataDir, 'runtime', 'x64')
+                        let manifest = await got(manifestUrl)
+                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
+                        let javamanifest = await got(javamanifesturl)
+                        javamanifest = JSON.parse(javamanifest.body)['files']
+                        let JavaAssets = []
+                        for (const key of Object.keys(javamanifest)) {
+
+
+                            // Create the path string with only the folder paths
+                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
+
+                            // Create file name without the folder paths
+                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
+
+                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
+                                // Make directories, will create intermediate directories if necessary, makes my life a lot easier
+                                shelljs.mkdir('-p', dataDir + pathDir)
+                            }
+
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
+
+                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
+                            console.log(javamanifest[key].downloads.raw.url)
+                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
+                                response.pipe(filepath)
+                            })*/
+
+                        }
+                        let FileSizes = 0
+                        JavaAssets.forEach(element => {
+                            FileSizes += element.size
+                        })
+                        let AssetSize = JavaAssets.length
+                        let CurExecTimes = 0
+                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                            if(unixBasedSystem) {
+                                child_process.execSync('chmod +x ' + '"' + a.to + '"')
+                            }
+                            CurExecTimes += 1
+                            if(CurExecTimes == AssetSize) {
+                                new Promise((resolve, reject) => {
+                                    setTimeout(function() {
+                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                                        resolve()
+                                    }, 1000) //Wait 1 second
+                                })
+
+                            }
+                        })
+                        resolve(true)
+
+                    })()
+                } catch(err) {
+                    console.log('Error ' + err)
+                }
+            } else {
                 JavaGuard._latestOpenJDK('8').then(verData => {
                     if(verData != null){
                         dataDir = path.join(dataDir, 'runtime', 'x64')
@@ -1706,64 +1784,6 @@ class AssetGuard extends EventEmitter {
                         resolve(false)
                     }
                 })
-            } else {
-                try {
-                    // Download the Java stuff from Mojang themselves
-                    (async () => {
-                        dataDir = path.join(dataDir, 'runtime', 'x64')
-                        let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
-                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
-                        let javamanifest = await got(javamanifesturl)
-                        javamanifest = JSON.parse(javamanifest.body)['files']
-                        let JavaAssets = []
-                        for (const key of Object.keys(javamanifest)) {
-                    
-
-                            // Create the path string with only the folder paths
-                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
-
-                            // Create file name without the folder paths
-                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
-                    
-                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
-                                // Make directories, will create intermediate directories if necessary, makes my life a lot easier
-                                shelljs.mkdir('-p', dataDir + pathDir)
-                            }
-
-                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
-                        
-                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
-                            console.log(javamanifest[key].downloads.raw.url)
-                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
-                                response.pipe(filepath)
-                            })*/
-                            
-                        }
-                        let FileSizes = 0
-                        JavaAssets.forEach(element => {
-                            FileSizes += element.size
-                        })
-                        let AssetSize = JavaAssets.length
-                        let CurExecTimes = 0
-                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
-                            child_process.execSync('chmod +x ' + '"' + a.to + '"')
-                            CurExecTimes += 1
-                            if(CurExecTimes == AssetSize) {
-                                new Promise((resolve, reject) => {
-                                    setTimeout(function() { 
-                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
-                                        resolve()
-                                    }, 1000) //Wait 1 second
-                                })
-                                
-                            }
-                        })
-                        resolve(true)
-                        
-                    })()
-                } catch(err) {
-                    console.log('Error ' + err)
-                }
                 
             }
         })
