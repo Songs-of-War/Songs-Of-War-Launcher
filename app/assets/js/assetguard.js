@@ -11,6 +11,7 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
+const si = require('systeminformation')
 // Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
@@ -223,9 +224,16 @@ class Util {
 
 class JavaGuard extends EventEmitter {
 
+
+
     constructor(mcVersion){
         super()
-        this.mcVersion = mcVersion
+        this.mcVersion = mcVersion;
+
+
+        (async () => {
+            this.primaryGPUInfo = (await si.graphics()).controllers[0].name
+        })()
     }
 
     // /**
@@ -464,7 +472,7 @@ class JavaGuard extends EventEmitter {
 
     /**
      * Validates the output of a JVM's properties. Currently validates that a JRE is x64
-     * and that the major = 8, update > 52.
+     * and that the major = 8, update > 50.
      * 
      * @param {string} stderr The output to validate.
      * 
@@ -479,6 +487,8 @@ class JavaGuard extends EventEmitter {
         let checksum = 0
 
         const meta = {}
+        let runningCompatibilityMode = false
+        let compatibility_ExpectedJavaUpdateRevision = 0
 
         for(let i=0; i<props.length; i++){
             if(props[i].indexOf('sun.arch.data.model') > -1){
@@ -496,9 +506,28 @@ class JavaGuard extends EventEmitter {
                 let verString = props[i].split('=')[1].trim()
                 console.log(props[i].trim())
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
-                if(verOb.major < 9){
-                    // Java 8
-                    if(verOb.major === 8 && verOb.update > 52){
+                // Nobody uses the linux version and I can't find the java mojang manifest for linux so this will have to wait
+                // TODO: Add the Mojang linux java manifest
+                if(process.platform === 'darwin' || (this._getPrimaryGPU().toLowerCase().includes("intel") && process.platform === 'win32')) {
+                    let downloadUrl
+                    runningCompatibilityMode = true
+                    if(process.platform === 'darwin') {
+                        downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json'
+                    } else {
+                        downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
+                    }
+
+                    got(downloadUrl).then((val) => {
+                        let expectedVersion = /(?<=1\.8\.0_)\d+(?=\.\d+)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
+                        let curBinary = this._validateJVMProperties(stderr)
+                        if(curBinary['version']['update'] === expectedVersion) {
+                            compatibility_ExpectedJavaUpdateRevision = expectedVersion
+                        }
+                    })
+                }
+
+                if(runningCompatibilityMode) {
+                    if(verOb.major === 8 && verOb.update > 50){
                         meta.version = verOb
                         ++checksum
                         if(checksum === goal){
@@ -506,16 +535,29 @@ class JavaGuard extends EventEmitter {
                         }
                     }
                 } else {
-                    // Java 9+
-                    if(Util.mcVersionAtLeast('1.13', this.mcVersion)){
-                        console.log('Java 9+ not yet tested.')
-                        /* meta.version = verOb
-                        ++checksum
-                        if(checksum === goal){
-                            break
-                        } */
+                    if(verOb.major < 9){
+                        // Java 8
+                        if(verOb.major === 8 && verOb.update > 50){
+                            meta.version = verOb
+                            ++checksum
+                            if(checksum === goal){
+                                break
+                            }
+                        }
+                    } else {
+                        // Java 9+
+                        if(Util.mcVersionAtLeast('1.13', this.mcVersion)){
+                            console.log('Java 9+ not yet tested.')
+                            /* meta.version = verOb
+                            ++checksum
+                            if(checksum === goal){
+                                break
+                            } */
+                        }
                     }
                 }
+
+
                 // Space included so we get only the vendor.
             } else if(props[i].lastIndexOf('java.vendor ') > -1) {
                 let vendorName = props[i].split('=')[1].trim()
@@ -555,20 +597,7 @@ class JavaGuard extends EventEmitter {
                 }
                 child_process.exec('"' + binaryExecPath + '" -XshowSettings:properties', (err, stdout, stderr) => {
                     try {
-                        // Output is stored in stderr?
-                        if(process.platform === 'darwin') {
-                            got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json').then((val) => {
-                                let expectedVersion = /(?<=1\.8\.0_)\d+(?=\.\d+)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
-                                let curBinary = this._validateJVMProperties(stderr)
-                                if(curBinary['version']['update'] === expectedVersion) {
-                                    resolve(this._validateJVMProperties(stderr))
-                                } else {
-                                    resolve({valid: false})
-                                }
-                            })
-                        } else {
-                            resolve(this._validateJVMProperties(stderr))
-                        }
+                        resolve(this._validateJVMProperties(stderr))
                     } catch (err){
                         // Output format might have changed, validation cannot be completed.
                         resolve({valid: false})
@@ -975,6 +1004,9 @@ class JavaGuard extends EventEmitter {
         return await this['_' + process.platform + 'JavaValidate'](dataDir)
     }
 
+    _getPrimaryGPU() {
+        return this.primaryGPUInfo
+    }
 }
 
 
