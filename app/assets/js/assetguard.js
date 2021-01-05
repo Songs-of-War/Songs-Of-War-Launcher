@@ -232,7 +232,7 @@ class JavaGuard extends EventEmitter {
 
 
         (async () => {
-            this.primaryGPUInfo = (await si.graphics()).controllers[0].name
+            this.primaryGPUInfo = (await si.graphics()).controllers[0].model
         })()
     }
 
@@ -1045,7 +1045,7 @@ class AssetGuard extends EventEmitter {
         this.javaexec = javaexec;
 
         (async () => {
-            this.primaryGPUInfo = (await si.graphics()).controllers[0].name
+            this.primaryGPUInfo = (await si.graphics()).controllers[0].model
         })()
     }
 
