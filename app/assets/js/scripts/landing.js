@@ -1072,7 +1072,9 @@ function dlAsync(login = true){
                                 // Delete forbidden mods
                                 if (fs.existsSync(paths.mods)) {
                                     fs.readdirSync(paths.mods).forEach((file) => {
-                                        if(!file.includes('OptiFine_1.15.2_HD_U_G1_pre30_MOD.jar')) { // Prevent optifine to be deleted here because of Java Path issues
+                                        // Prevent optifine to be deleted here because of Java Path issues
+                                        // Shit patch but honestly I don't care, I don't have time to implement something better
+                                        if(file !== 'OptiFine_1.15.2.jar' && file !== 'MixinBootstrap.jar') {
                                             fs.unlinkSync(path.join(paths.mods, file))
                                         }
                                     })
