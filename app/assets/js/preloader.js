@@ -23,7 +23,8 @@ ConfigManager.load()
 // Load Strings
 LangLoader.loadLanguage('en_US')
 
-function onDistroLoad(data){
+async function onDistroLoad(data){
+    await compatibility.initCompatibilityMode()
     if(data != null){
         
         // Resolve the selected server if its value has yet to be set.
@@ -38,7 +39,6 @@ function onDistroLoad(data){
     if(distro.discord != null) {
         DiscordWrapper.initRPC(distro.discord, 'In the Launcher', new Date().getTime())
     }
-    compatibility.initCompatibilityMode()
 }
 
 

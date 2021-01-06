@@ -7,7 +7,7 @@ const isDev                         = require('./app/assets/js/isdev')
 const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
-const compatiblity                  = require('./app/assets/js/javacompatibilitymode')
+
 
 let myWindow = null
 
@@ -150,7 +150,7 @@ app.allowRendererProcessReuse = true
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 
-function createWindow() {
+async function createWindow() {
 
     win = new BrowserWindow({
         darkTheme: true,

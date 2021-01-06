@@ -4,6 +4,7 @@ const semver = require('semver')
 
 const { JavaGuard } = require('./assets/js/assetguard')
 const DropinModUtil  = require('./assets/js/dropinmodutil')
+const compatibility = require('./assets/js/javacompatibilitymode')
 
 const settingsState = {
     invalid: new Set()
@@ -40,36 +41,45 @@ document.addEventListener('click', closeSettingsSelect)
 
 bindSettingsSelect()
 
-
 function bindFileSelectors(){
     for(let ele of document.getElementsByClassName('settingsFileSelButton')){
-        
-        ele.onclick = async e => {
-            const isJavaExecSel = ele.id === 'settingsJavaExecSel'
-            const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
-            const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
 
-            const options = {
-                properties
-            }
+        if(!compatibility.isCompatibilityEnabled()) {
+            ele.onclick = async e => {
+                const isJavaExecSel = ele.id === 'settingsJavaExecSel'
+                const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
+                const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
 
-            if(ele.hasAttribute('dialogTitle')) {
-                options.title = ele.getAttribute('dialogTitle')
-            }
-
-            if(isJavaExecSel && process.platform === 'win32') {
-                options.filters = [
-                    { name: 'Executables', extensions: ['exe'] },
-                    { name: 'All Files', extensions: ['*'] }
-                ]
-            }
-
-            const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
-            if(!res.canceled) {
-                ele.previousElementSibling.value = res.filePaths[0]
-                if(isJavaExecSel) {
-                    populateJavaExecDetails(ele.previousElementSibling.value)
+                const options = {
+                    properties
                 }
+
+                if (ele.hasAttribute('dialogTitle')) {
+                    options.title = ele.getAttribute('dialogTitle')
+                }
+
+                if (isJavaExecSel && process.platform === 'win32') {
+                    options.filters = [
+                        {name: 'Executables', extensions: ['exe']},
+                        {name: 'All Files', extensions: ['*']}
+                    ]
+                }
+
+                const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
+                if (!res.canceled) {
+                    ele.previousElementSibling.value = res.filePaths[0]
+                    if (isJavaExecSel) {
+                        populateJavaExecDetails(ele.previousElementSibling.value)
+                    }
+                }
+            }
+        } else {
+            ele.onclick = async function() {
+                remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+                    type: 'warning',
+                    title: 'Songs of War - Java Compatibility Warning',
+                    detail: 'The java installation cannot be changed at this time.'
+                })
             }
         }
     }
@@ -77,6 +87,20 @@ function bindFileSelectors(){
 
 bindFileSelectors()
 
+async function waitForCompModeCheck() {
+    await new Promise(resolve => {
+        setTimeout(resolve, 2000)
+    })
+    while(!compatibility.scanComplete()) {
+        await new Promise(resolve => {
+            setTimeout(resolve, 1000)
+        })
+    }
+    bindFileSelectors()
+
+}
+
+waitForCompModeCheck()
 
 /**
  * General Settings Functions
