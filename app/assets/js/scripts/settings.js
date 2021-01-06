@@ -87,6 +87,14 @@ function bindFileSelectors(){
 
 bindFileSelectors()
 
+function disableCompatibilitySwitch() {
+    let element1 = document.getElementById('compModeCheckbox')
+    element1.checked = true
+    element1.disabled = true
+    let element = document.getElementById('compSliderSwitchModel')
+    element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+}
+
 async function waitForCompModeCheck() {
     await new Promise(resolve => {
         setTimeout(resolve, 2000)
@@ -97,6 +105,9 @@ async function waitForCompModeCheck() {
         })
     }
     bindFileSelectors()
+    if(compatibility.isCompatibilityEnabled() && !compatibility.isManualCompatibility()) {
+        disableCompatibilitySwitch()
+    }
 
 }
 
@@ -1185,6 +1196,26 @@ function populateJavaExecDetails(execPath){
 function prepareJavaTab(){
     bindRangeSlider()
     populateMemoryStatus()
+    document.getElementById('compModeCheckbox').onclick = function () {
+        saveSettingsValues()
+        remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            title: 'Songs of War Launcher - Restart required',
+            detail: 'This setting requires a restart to be applied, would you like to restart the launcher now?',
+            type: 'info',
+            buttons: [
+                'No',
+                'Yes'
+            ],
+            cancelId: 0,
+            defaultId: 1
+        }).then(value => {
+            if(value.response === 1) {
+                remote.app.relaunch()
+                remote.app.exit()
+            }
+        })
+    }
+
 }
 
 /**
@@ -1372,6 +1403,7 @@ function prepareSettings(first = false) {
     prepareAccountsTab()
     prepareJavaTab()
     prepareAboutTab()
+    disableCompatibilitySwitch()
 }
 
 // Prepare the settings UI on startup.

@@ -104,7 +104,8 @@ const DEFAULT_CONFIG = {
             allowPrerelease: false,
             dataDirectory: dataPath,
             shaderMirroring: true,
-            compatibilityModeWarningDisplayed: false
+            compatibilityModeWarningDisplayed: false,
+            manualCompatibilityMode : false,
         }
     },
     newsCache: {
@@ -726,11 +727,27 @@ exports.getCompatibilityWarningShowed = function () {
 /**
  * Sets the compatibility warning status
  *
- * @param {boolean} Whether the warning has been showed before
+ * @param {boolean} hasBeenShowed Whether the warning has been showed before
  */
 exports.setCompatibilityWarningShowed = function (hasBeenShowed) {
     config.settings.launcher.compatibilityModeWarningDisplayed = hasBeenShowed
     this.save()
+}
+
+/**
+ * @param {boolean} isEnabled Whether to enable the manual compatibility mode
+ */
+exports.setCompatibilityModeSwitch = function (isEnabled) {
+    config.settings.launcher.manualCompatibilityMode = isEnabled
+}
+
+/**
+ * Gets if the manual compatibility mode is enabled
+ *
+ * @returns {boolean} Whether the manual compatibility mode has been enabled
+ */
+exports.getCompatibilityModeSwitch = function() {
+    return config.settings.launcher.manualCompatibilityMode
 }
 
 /**

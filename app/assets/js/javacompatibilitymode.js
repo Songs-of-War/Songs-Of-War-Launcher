@@ -8,12 +8,18 @@ let expectedJavaRevision = 52
 
 let isFinished = false
 
+let isManualMode = false
+
 exports.isCompatibilityEnabled = function () {
     return compatibilityMode
 }
 
 exports.getExpectedJava8UpdateRevision = function () {
     return expectedJavaRevision
+}
+
+exports.isManualCompatibility = function () {
+    return isManualMode
 }
 
 exports.scanComplete = function () {
@@ -42,6 +48,19 @@ function warnUserOfCompatiblity(reason) {
     }
 }
 
+function setManual() {
+    if(compatibilityMode) {
+        return
+    }
+
+    // eslint-disable-next-line no-undef
+    if (ConfigManager.getCompatibilityModeSwitch()) {
+        isManualMode = true
+        compatibilityMode = true
+        warnUserOfCompatiblity('User enabled compatibility mode')
+    }
+}
+
 exports.initCompatibilityMode = async function() {
     console.log('Compatibility mode check initiated')
 
@@ -53,6 +72,7 @@ exports.initCompatibilityMode = async function() {
             compatibilityMode = true
             warnUserOfCompatiblity('MacOS detected')
             console.info('Done! Got MacOS')
+            setManual()
             isFinished = true
             break
         case 'win32': {
@@ -78,6 +98,7 @@ exports.initCompatibilityMode = async function() {
                 }
             })
             console.info('Done! Got Windows')
+            setManual()
             isFinished = true
             break
         }
@@ -99,8 +120,10 @@ exports.initCompatibilityMode = async function() {
                 warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
             }
             console.info('Done! Got Linux')
+            setManual()
             isFinished = true
             break
         }
+
     }
 }

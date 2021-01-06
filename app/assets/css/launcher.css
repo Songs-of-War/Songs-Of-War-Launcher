@@ -1973,6 +1973,19 @@ input:checked + .toggleSwitchSlider:before {
     width: 89%;
 }
 
+/* Description of the compatibility option setting */
+#settingsCompatibilitymodeDesc {
+    font-size: 10px;
+    margin: 20px 0px;
+    color: lightgrey;
+    font-weight: bold;
+    width: 89%;
+}
+
+#settingsCompatibilityContainer {
+    width: 75%;
+}
+
 /* * *
 * Settings View (Launcher Tab)
 * * */
