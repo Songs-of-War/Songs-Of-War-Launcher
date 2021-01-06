@@ -1,20 +1,34 @@
 const si = require('systeminformation')
 const { remote } = require('electron')
+const childprocess = require('child_process')
 
 let compatibilityMode = false
+// Default
+let expectedJavaRevision = 52
 
-function isCompatiblityModeEnabled() {
+let isFinished = false
+
+exports.isCompatibilityEnabled = function () {
     return compatibilityMode
 }
 
+exports.getExpectedJava8UpdateRevision = function () {
+    return expectedJavaRevision
+}
+
+exports.scanComplete = function () {
+    return isFinished
+}
+
 function warnUserOfCompatiblity(reason) {
-    console.warn('Warning user of comp mode')
+    isFinished = true
+    console.log('Warning user of comp mode')
     // eslint-disable-next-line no-undef
     if(!ConfigManager.getCompatibilityWarningShowed()) {
-        console.warn('User wanred')
-        remote.dialog.showMessageBox({
-            title: 'Compatibility Mode',
-            message: 'The compatibility mode has been automatically activated on this system due to potential outdated hardware in your system, you may suffer performance issues during your play sessions.',
+        console.log('User warned')
+        remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            title: 'Songs of War Launcher - Compatibility Warning',
+            message: 'The compatibility mode has been automatically activated on this system. You may suffer performance issues.',
             detail: 'Reason for activation: ' + reason,
             type: 'warning',
             checkboxChecked: false,
@@ -30,6 +44,7 @@ function warnUserOfCompatiblity(reason) {
 
 exports.initCompatibilityMode = async function() {
     console.log('Compatibility mode check initiated')
+
     switch (process.platform) {
         case 'darwin':
             // We're always gonna run on compatibility mode on MacOS because FUCK. IT.
@@ -38,14 +53,37 @@ exports.initCompatibilityMode = async function() {
             compatibilityMode = true
             warnUserOfCompatiblity('MacOS detected')
             console.info('Done! Got MacOS')
+            isFinished = true
             break
-        case 'win32':
+        case 'win32': {
             // TODO: Do the windows side use: wmic path win32_VideoController get name
+
+            let stdoutLog = []
+
+            childprocess.exec('wmic path win32_VideoController get name', {
+                encoding: 'utf-8',
+            }, (error, stdout, stderr) => {
+                if (error) {
+                    warnUserOfCompatiblity('Internal Windows Error')
+                    return
+                }
+                stdoutLog.push(stdout.toString().split('\n'))
+                // Primary graphics device
+                let graphicsDevice = stdoutLog[0][1]
+                console.log('Found primary graphics device: ' + graphicsDevice)
+
+                if(graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) {
+                    compatibilityMode = true
+                    warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
+                }
+            })
             console.info('Done! Got Windows')
+            isFinished = true
             break
-        case 'linux':
+        }
+        case 'linux': {
             let graphics = await si.graphics()
-            if(graphics.controllers[0] === undefined) {
+            if (graphics.controllers[0] === undefined) {
                 compatibilityMode = true
                 warnUserOfCompatiblity('Unable to detect graphics device')
                 console.info('Done! Got Linux')
@@ -56,11 +94,13 @@ exports.initCompatibilityMode = async function() {
             let graphicss = graphics.controllers[0].model.toLowerCase()
             console.log('Linux: Got graphics! ' + graphicss)
 
-            if(graphicss.includes('intel') || graphicss.includes('hd graphics')) {
+            if (graphicss.includes('intel') || graphicss.includes('hd graphics')) {
                 compatibilityMode = true
                 warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
             }
             console.info('Done! Got Linux')
+            isFinished = true
             break
+        }
     }
 }

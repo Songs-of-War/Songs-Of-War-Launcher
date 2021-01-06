@@ -11,6 +11,7 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
+const compatiblity  = require('./javacompatibilitymode')
 // Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
@@ -474,6 +475,7 @@ class JavaGuard extends EventEmitter {
      * The validity is stored inside the `valid` property.
      */
     _validateJVMProperties(stderr){
+
         const res = stderr
         const props = res.split('\n')
 
@@ -481,8 +483,7 @@ class JavaGuard extends EventEmitter {
         let checksum = 0
 
         const meta = {}
-        let runningCompatibilityMode = false
-        let compatibility_ExpectedJavaUpdateRevision = 0
+        let compatibility_ExpectedJavaUpdateRevision = compatiblity.getExpectedJava8UpdateRevision()
 
         for(let i=0; i<props.length; i++){
             if(props[i].indexOf('sun.arch.data.model') > -1){
@@ -500,27 +501,9 @@ class JavaGuard extends EventEmitter {
                 let verString = props[i].split('=')[1].trim()
                 console.log(props[i].trim())
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
-                // Nobody uses the linux version and I can't find the java mojang manifest for linux so this will have to wait
-                // TODO: Add the Mojang linux java manifest
-                if(process.platform === 'darwin' || (this._getPrimaryGPU().toLowerCase().includes('intel') && process.platform === 'win32')) {
-                    let downloadUrl
-                    runningCompatibilityMode = true
-                    if(process.platform === 'darwin') {
-                        downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json'
-                    } else {
-                        downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
-                    }
 
-                    got(downloadUrl).then((val) => {
-                        let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
-                        let curBinary = this._validateJVMProperties(stderr)
-                        if(curBinary['version']['update'] === expectedVersion) {
-                            compatibility_ExpectedJavaUpdateRevision = expectedVersion
-                        }
-                    })
-                }
-
-                if(runningCompatibilityMode) {
+                // TODO: Linux support
+                if(compatiblity.isCompatibilityEnabled() && process.platform !== 'linux') {
                     if(verOb.major === 8 && verOb.update === compatibility_ExpectedJavaUpdateRevision){
                         meta.version = verOb
                         ++checksum
@@ -561,7 +544,7 @@ class JavaGuard extends EventEmitter {
         }
 
         meta.valid = checksum === goal
-        
+
         return meta
     }
 
@@ -996,10 +979,6 @@ class JavaGuard extends EventEmitter {
      */
     async validateJava(dataDir){
         return await this['_' + process.platform + 'JavaValidate'](dataDir)
-    }
-
-    _getPrimaryGPU() {
-        return this.primaryGPUInfo
     }
 }
 
@@ -1643,8 +1622,8 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
-            // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform === 'darwin' || (process.platform === 'win32' && this._getPrimaryGPU().toLowerCase().includes('intel'))) {
+            // TODO: Add compatibility support to linux
+            if(process.platform !== 'linux' && compatiblity.isCompatibilityEnabled()) {
                 let manifestUrl
                 let unixBasedSystem = false
                 if(process.platform === 'darwin') {
