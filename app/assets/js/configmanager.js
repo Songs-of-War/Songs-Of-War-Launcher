@@ -103,7 +103,8 @@ const DEFAULT_CONFIG = {
         launcher: {
             allowPrerelease: false,
             dataDirectory: dataPath,
-            shaderMirroring: true
+            shaderMirroring: true,
+            compatibilityModeWarningDisplayed: false
         }
     },
     newsCache: {
@@ -711,6 +712,25 @@ exports.getShaderMirroring = function() {
  */
 exports.setShaderMirroring = function(value) {
     config.settings.launcher.shaderMirroring = value
+}
+
+/**
+ * Check if the compatibility warning has been showed before
+ *
+ * @returns {boolean} Whether the compatibility warning has been shown before
+ */
+exports.getCompatibilityWarningShowed = function () {
+    return config.settings.launcher.compatibilityModeWarningDisplayed
+}
+
+/**
+ * Sets the compatibility warning status
+ *
+ * @param {boolean} Whether the warning has been showed before
+ */
+exports.setCompatibilityWarningShowed = function (hasBeenShowed) {
+    config.settings.launcher.compatibilityModeWarningDisplayed = hasBeenShowed
+    this.save()
 }
 
 /**

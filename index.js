@@ -7,6 +7,7 @@ const isDev                         = require('./app/assets/js/isdev')
 const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
+const compatiblity                  = require('./app/assets/js/javacompatibilitymode')
 
 let myWindow = null
 
@@ -188,6 +189,7 @@ function createWindow() {
     win.on('closed', () => {
         win = null
     })
+
 }
 
 function createMenu() {

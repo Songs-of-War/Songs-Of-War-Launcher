@@ -11,7 +11,6 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
-const si = require('systeminformation')
 // Screw it, I didn't want to spend my time making an algorithm to loop over the path
 const shelljs = require('shelljs')
 
@@ -228,12 +227,7 @@ class JavaGuard extends EventEmitter {
 
     constructor(mcVersion){
         super()
-        this.mcVersion = mcVersion;
-
-
-        (async () => {
-            this.primaryGPUInfo = (await si.graphics()).controllers[1].model
-        })()
+        this.mcVersion = mcVersion
     }
 
     // /**
@@ -1042,11 +1036,7 @@ class AssetGuard extends EventEmitter {
         this.java = new DLTracker([], 0)
         this.extractQueue = []
         this.commonPath = commonPath
-        this.javaexec = javaexec;
-
-        (async () => {
-            this.primaryGPUInfo = (await si.graphics()).controllers[1].model
-        })()
+        this.javaexec = javaexec
     }
 
     // Static Utility Functions

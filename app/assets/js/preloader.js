@@ -11,6 +11,7 @@ const LangLoader    = require('./langloader')
 const LoggerUtils = require('./loggerutil')
 const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
 const DiscordWrapper = require('./discordwrapper')
+const compatibility = require('./javacompatibilitymode')
 
 logger.log('Loading..')
 
@@ -37,6 +38,7 @@ function onDistroLoad(data){
     if(distro.discord != null) {
         DiscordWrapper.initRPC(distro.discord, 'In the Launcher', new Date().getTime())
     }
+    compatibility.initCompatibilityMode()
 }
 
 
