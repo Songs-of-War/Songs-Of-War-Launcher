@@ -98,7 +98,7 @@ exports.initCompatibilityMode = async function() {
                 graphicsDevice = stdoutLog[0][1]
 
 
-                if((graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) && stdoutLog[0].length() > 1) {
+                if((graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) && stdoutLog[0].length < 2) {
                     compatibilityMode = true
                     warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
                 }
@@ -121,7 +121,7 @@ exports.initCompatibilityMode = async function() {
             let graphicss = graphics.controllers[0].model.toLowerCase()
             console.log('Linux: Got graphics! ' + graphicss)
 
-            if ((graphicss.includes('intel') || graphicss.includes('hd graphics')) && graphics.controllers.length > 1)  {
+            if ((graphicss.includes('intel') || graphicss.includes('hd graphics')) && graphics.controllers.length < 2)  {
                 compatibilityMode = true
                 warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
             }
