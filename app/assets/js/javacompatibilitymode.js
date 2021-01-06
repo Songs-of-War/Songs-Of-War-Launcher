@@ -9,6 +9,7 @@ function isCompatiblityModeEnabled() {
 
 function warnUserOfCompatiblity(reason) {
     console.warn('Warning user of comp mode')
+    // eslint-disable-next-line no-undef
     if(!ConfigManager.getCompatibilityWarningShowed()) {
         console.warn('User wanred')
         remote.dialog.showMessageBox({
@@ -20,6 +21,7 @@ function warnUserOfCompatiblity(reason) {
             checkboxLabel: 'Don\'t warn me about this again'
         }).then((value) => {
             if(value.checkboxChecked) {
+                // eslint-disable-next-line no-undef
                 ConfigManager.setCompatibilityWarningShowed(true)
             }
         })
