@@ -502,7 +502,7 @@ class JavaGuard extends EventEmitter {
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
                 // Nobody uses the linux version and I can't find the java mojang manifest for linux so this will have to wait
                 // TODO: Add the Mojang linux java manifest
-                if(process.platform === 'darwin' || (this._getPrimaryGPU().toLowerCase().includes('intel') && process.platform === 'win32')) {
+                if(process.platform !== 'linux' && compatiblity.isCompatibilityEnabled()) {
                     let downloadUrl
                     runningCompatibilityMode = true
                     if(process.platform === 'darwin') {
@@ -996,10 +996,6 @@ class JavaGuard extends EventEmitter {
      */
     async validateJava(dataDir){
         return await this['_' + process.platform + 'JavaValidate'](dataDir)
-    }
-
-    _getPrimaryGPU() {
-        return this.primaryGPUInfo
     }
 }
 
@@ -1643,8 +1639,8 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
-            // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform === 'darwin' || (process.platform === 'win32' && this._getPrimaryGPU().toLowerCase().includes('intel'))) {
+            // TODO: Add compatibility support to linux
+            if(process.platform !== 'linux' && compatiblity.isCompatibilityEnabled()) {
                 let manifestUrl
                 let unixBasedSystem = false
                 if(process.platform === 'darwin') {

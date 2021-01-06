@@ -1,9 +1,10 @@
 const si = require('systeminformation')
 const { remote } = require('electron')
+const childprocess = require('child_process')
 
 let compatibilityMode = false
 
-function isCompatiblityModeEnabled() {
+exports.isCompatibilityEnabled = function () {
     return compatibilityMode
 }
 
@@ -11,9 +12,9 @@ function warnUserOfCompatiblity(reason) {
     console.warn('Warning user of comp mode')
     if(!ConfigManager.getCompatibilityWarningShowed()) {
         console.warn('User wanred')
-        remote.dialog.showMessageBox({
-            title: 'Compatibility Mode',
-            message: 'The compatibility mode has been automatically activated on this system due to potential outdated hardware in your system, you may suffer performance issues during your play sessions.',
+        remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            title: 'Songs of War Launcher - Compatibility Warning',
+            message: 'The compatibility mode has been automatically activated on this system. You may suffer performance issues.',
             detail: 'Reason for activation: ' + reason,
             type: 'warning',
             checkboxChecked: false,
@@ -37,10 +38,31 @@ exports.initCompatibilityMode = async function() {
             warnUserOfCompatiblity('MacOS detected')
             console.info('Done! Got MacOS')
             break
-        case 'win32':
+        case 'win32': {
             // TODO: Do the windows side use: wmic path win32_VideoController get name
+
+            let stdoutLog = []
+
+            childprocess.exec('wmic path win32_VideoController get name', {
+                encoding: "utf-8",
+            }, (error, stdout, stderr) => {
+                if (error) {
+                    warnUserOfCompatiblity('Internal Windows Error')
+                    return
+                }
+                stdoutLog.push(stdout.toString().split('\n'))
+                // Primary graphics device
+                let graphicsDevice = stdoutLog[0][1]
+                console.log('Found primary graphics device: ' + graphicsDevice)
+
+                if(graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) {
+                    compatibilityMode = true
+                    warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
+                }
+            })
             console.info('Done! Got Windows')
             break
+        }
         case 'linux':
             let graphics = await si.graphics()
             if(graphics.controllers[0] === undefined) {

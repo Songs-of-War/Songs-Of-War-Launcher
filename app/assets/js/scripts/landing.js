@@ -455,12 +455,23 @@ function asyncSystemScan(mcVersion, launchAfter = true){
             if(m.result == null){
                 // If the result is null, no valid Java installation was found.
                 // Show this information to the user.
-                setOverlayContent(
-                    'No Compatible<br>Java Installation Found',
-                    'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>.',
-                    'Install Java',
-                    'Install Manually'
-                )
+                if(compatibility.isCompatibilityEnabled()) {
+                    // Disallow the manual install of a java version as it requires the mojang specific one which I doubt anyone cares / knows about.
+                    // If the user tries to install a java version themselves anyway it will fail as it will be detected as an invalid version.
+                    setOverlayContent(
+                        'No Compatible<br>Java Installation Found',
+                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>. <a>Warning! You are in compatibility mode, you cannot install one manually.</a>',
+                        'Install Java'
+                    )
+                } else {
+                    setOverlayContent(
+                        'No Compatible<br>Java Installation Found',
+                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>.',
+                        'Install Java',
+                        'Install Manually'
+                    )
+                }
+
                 setOverlayHandler(() => {
                     setLaunchDetails('Preparing Java Download..')
                     sysAEx.send({task: 'changeContext', class: 'AssetGuard', args: [ConfigManager.getCommonDirectory(),ConfigManager.getJavaExecutable()]})
