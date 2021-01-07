@@ -433,7 +433,10 @@ function asyncSystemScan(mcVersion, launchAfter = true){
     // Fork a process to run validations.
     sysAEx = cp.fork(path.join(__dirname, 'assets', 'js', 'assetexec.js'), [
         'JavaGuard',
-        mcVersion
+        mcVersion,
+        compatibility.isCompatibilityEnabled(),
+        compatibility.getExpectedJava8UpdateRevision(),
+        compatibility.getManifestDataForCurrentOS()
     ], {
         env: forkEnv,
         stdio: 'pipe'
@@ -460,7 +463,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
                     // If the user tries to install a java version themselves anyway it will fail as it will be detected as an invalid version.
                     setOverlayContent(
                         'No Compatible<br>Java Installation Found',
-                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>. <a>Warning! You are in compatibility mode, you cannot install one manually.</a>',
+                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>. Warning! You are in compatibility mode, you cannot install one manually.',
                         'Install Java'
                     )
                 } else {
@@ -516,6 +519,8 @@ function asyncSystemScan(mcVersion, launchAfter = true){
                 sysAEx.disconnect()
             }
         } else if(m.context === '_enqueueOpenJDK'){
+
+            console.log(m.result)
 
             if(m.result === true){
 
@@ -602,7 +607,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
 
     // Begin system Java scan.
     setLaunchDetails('Checking system info..')
-    sysAEx.send({task: 'execute', function: 'validateJava', argsArr: [ConfigManager.getDataDirectory()]})
+    sysAEx.send({task: 'execute', function: 'validateJava', argsArr: [ConfigManager.getDataDirectory(), compatibility]})
 
 }
 

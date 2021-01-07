@@ -26,7 +26,7 @@
             "never"
         ],
         "no-var": [
-            "error"
+            0
         ],
         "no-console": [
             0
@@ -49,7 +49,7 @@
     },
     "overrides": [
         {
-          "files": [ "app/assets/js/scripts/*.js" ],
+          "files": [ "app/assets/js/scripts/*.js", "app/assets/js/javacompatibilitymode.js" ],
           "rules": {
             "no-unused-vars": [
                 0

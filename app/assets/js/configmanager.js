@@ -117,7 +117,12 @@ const DEFAULT_CONFIG = {
     selectedServer: null, // Resolved
     selectedAccount: null,
     authenticationDatabase: {},
-    modConfigurations: []
+    modConfigurations: [],
+    special: {
+        compatibility: {
+            disableCheck : false
+        }
+    }
 }
 
 let config = null
@@ -757,4 +762,27 @@ exports.getCompatibilityModeSwitch = function() {
  */
 exports.setAllowPrerelease = function(allowPrerelease){
     config.settings.launcher.allowPrerelease = allowPrerelease
+}
+
+/**
+ * Get if the compability check is disabled
+ * NOTE: This is mostly a debugging feature and should probably remain untouched by regular users
+ * although I'm still providing a manual setting for it in the file in case users are having issues with the detection
+ *
+ * @returns {boolean} Whether the compability check is disabled
+ */
+exports.getCompabilityCheckDisabled = function () {
+    return config.special.compatibility.disableCheck
+}
+
+
+/**
+ * Change if the compability check is disabled
+ * NOTE: You probably shouldn't use this method as the setting can only be changed in the config file
+ * directly anyway
+ *
+ * @param {boolean} isDisabled Whether to disable the compatibility check
+ */
+exports.setCompabilityCheckDisabled = function (isDisabled) {
+    config.special.compatibility.disableCheck = isDisabled
 }

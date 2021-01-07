@@ -87,12 +87,19 @@ function bindFileSelectors(){
 
 bindFileSelectors()
 
-function disableCompatibilitySwitch() {
-    let element1 = document.getElementById('compModeCheckbox')
-    element1.checked = true
-    element1.disabled = true
-    let element = document.getElementById('compSliderSwitchModel')
-    element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+function disableCompatibilitySwitch(force = false) {
+    if(compatibility.isCompatibilityEnabled() && !compatibility.isManualCompatibility()) {
+        let element1 = document.getElementById('compModeCheckbox')
+        element1.checked = true
+        element1.disabled = true
+        let element = document.getElementById('compSliderSwitchModel')
+        element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+    } else if(force) {
+        let element1 = document.getElementById('compModeCheckbox')
+        element1.disabled = true
+        let element = document.getElementById('compSliderSwitchModel')
+        element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+    }
 }
 
 async function waitForCompModeCheck() {
@@ -105,9 +112,8 @@ async function waitForCompModeCheck() {
         })
     }
     bindFileSelectors()
-    if(compatibility.isCompatibilityEnabled() && !compatibility.isManualCompatibility()) {
-        disableCompatibilitySwitch()
-    }
+    disableCompatibilitySwitch()
+
 
 }
 
@@ -1197,7 +1203,11 @@ function prepareJavaTab(){
     bindRangeSlider()
     populateMemoryStatus()
     document.getElementById('compModeCheckbox').onclick = function () {
+        // Save preemptively as closing the launcher doesn't save, if the user clicks restart the setting won't be saved
         saveSettingsValues()
+        saveModConfiguration()
+        saveShaderpackSettings()
+        ConfigManager.save()
         remote.dialog.showMessageBox(remote.getCurrentWindow(), {
             title: 'Songs of War Launcher - Restart required',
             detail: 'This setting requires a restart to be applied, would you like to restart the launcher now?',
@@ -1212,6 +1222,8 @@ function prepareJavaTab(){
             if(value.response === 1) {
                 remote.app.relaunch()
                 remote.app.exit()
+            } else {
+                disableCompatibilitySwitch(true)
             }
         })
     }
