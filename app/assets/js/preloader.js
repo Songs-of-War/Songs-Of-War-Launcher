@@ -13,6 +13,22 @@ const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
 const DiscordWrapper = require('./discordwrapper')
 const compatibility = require('./javacompatibilitymode')
 
+
+const unhandled                     = require('electron-unhandled')
+const {openNewGitHubIssue, debugInfo} = require('electron-util')
+
+unhandled({
+    reportButton: error => {
+        openNewGitHubIssue({
+            user: 'Songs-of-War',
+            repo: 'Songs-of-War-Launcher',
+            body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+        })
+    },
+    showDialog: true
+
+})
+
 logger.log('Loading..')
 
 fsold.unlinkSync(ConfigManager.getLauncherDirectory() + '/latest.log')

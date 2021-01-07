@@ -4,14 +4,20 @@ const { remote } = require('electron')
 let expectedJavaRevision = 52
 let compatibilityMode = false
 
-let manifestData
+let manifestData = ''
 
 let isFinished = false
 
 let isManualMode = false
 
+let standardOSManifestURL = ''
+
 exports.getManifestDataForCurrentOS = function () {
     return manifestData
+}
+
+exports.getStandardOSManifestLink = function () {
+    return standardOSManifestURL
 }
 
 exports.isCompatibilityEnabled = function () {
@@ -64,10 +70,10 @@ function setManual() {
     }
 }
 
-function closeDueToCriticalError() {
+function closeDueToCriticalError(data = '') {
     remote.dialog.showMessageBox(remote.getCurrentWindow(), {
         title: 'Songs of War Launcher',
-        detail: 'A critical error has occurred, check your network connection (COMPATIBILITY_MODE_JAVA_DISTRIBUTION_GETTER_FAILURE)',
+        detail: 'A critical error has occurred, check your network connection (COMPATIBILITY_MODE_JAVA_DISTRIBUTION_GETTER_FAILURE)\n\n' + data,
         type: 'error',
     }).then((value) => {
         remote.app.exit()
@@ -92,7 +98,7 @@ exports.initCompatibilityMode = async function() {
 
             try {
                 let download = await got(downloadUrl)
-                manifestData = (await got(download.body['jre-x64'][0]['manifest']['url'])).body
+                standardOSManifestURL = JSON.parse(download.body)['jre-x64'][0]['manifest']['url']
                 let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(download.body)['jre-x64'][0]['version']['name'])
                 if (expectedVersion === undefined) {
                     closeDueToCriticalError()
@@ -100,8 +106,7 @@ exports.initCompatibilityMode = async function() {
                 }
                 expectedJavaRevision = expectedVersion
             } catch (e) {
-                console.error('[JavaCompatibilityModule] ' + e)
-                closeDueToCriticalError()
+                closeDueToCriticalError(e)
                 return
             }
 
@@ -118,7 +123,7 @@ exports.initCompatibilityMode = async function() {
                 break
             case 'win32': {
                 const wsi = require('wmic-sys-info')
-                let wmicRequest = wsi.getVideoController()
+                let wmicRequest = await wsi.getVideoController()
 
                 // Primary graphics device
                 let graphicsDevice

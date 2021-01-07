@@ -11,11 +11,8 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
-let expectedJavaRevision
-let isRunningCompitibilityMode
+let isRunningCompatibilityMode
 let currentOSJavaManifest
-// Screw it, I didn't want to spend my time making an algorithm to loop over the path
-const shelljs = require('shelljs')
 
 process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
 
@@ -23,6 +20,7 @@ process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+
 
 // Constants
 // const PLATFORM_MAP = {
@@ -227,12 +225,17 @@ class Util {
 class JavaGuard extends EventEmitter {
 
 
-    constructor(mcVersion, compatibilityModeRunning, expectedJavaVersion, OSManifest){
+    // p1 is if comp mode is running, p2 is for expected java revision and p3 is for manifest link
+    constructor(mcVersion, p1, p2, p3){
         super()
         this.mcVersion = mcVersion
-        isRunningCompitibilityMode = compatibilityModeRunning
-        expectedJavaRevision = expectedJavaVersion
-        currentOSJavaManifest = OSManifest
+        if(p1 !== undefined) {
+            isRunningCompatibilityMode = p1
+            got(p3).then(d => {
+                currentOSJavaManifest = d.body
+            })
+        }
+
     }
 
     // /**
@@ -487,7 +490,9 @@ class JavaGuard extends EventEmitter {
         let checksum = 0
 
         const meta = {}
+        // eslint-disable-next-line no-undef
         let compatibility_ExpectedJavaUpdateRevision = compatibility.getExpectedJava8UpdateRevision()
+        // eslint-disable-next-line no-undef
         console.log('Compatibility mode is enabled? ' + compatibility.isCompatibilityEnabled() + ' java rev = ' + compatibility_ExpectedJavaUpdateRevision)
 
         for(let i=0; i<props.length; i++){
@@ -508,6 +513,7 @@ class JavaGuard extends EventEmitter {
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
 
                 // TODO: Linux support
+                // eslint-disable-next-line no-undef
                 if(compatibility.isCompatibilityEnabled() && process.platform !== 'linux') {
                     if(verOb.major === 8 && verOb.update === compatibility_ExpectedJavaUpdateRevision){
                         meta.version = verOb
@@ -1631,15 +1637,10 @@ class AssetGuard extends EventEmitter {
     // Java (Category=''') Validation (download) Functions
     // #region
 
-    _getPrimaryGPU() {
-        return this.primaryGPUInfo
-    }
-
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
             // TODO: Add compatibility support to linux
-            console.log(isRunningCompitibilityMode)
-            if(process.platform !== 'linux' && isRunningCompitibilityMode) {
+            if(process.platform !== 'linux' && isRunningCompatibilityMode) {
                 let unixBasedSystem = false
                 if(process.platform === 'darwin') {
                     // Mac
@@ -1655,18 +1656,30 @@ class AssetGuard extends EventEmitter {
                     for (const key of Object.keys(javamanifest)) {
 
 
-                        // Create the path string with only the folder paths
+                        /*// Create the path string with only the folder paths
                         let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
 
                         // Create file name without the folder paths
                         let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
 
+
+                        console.log(pathDir)
+                        console.log(fileName)
+
                         if(!fs.existsSync(path.join(dataDir + pathDir))) {
                             // Make directories, will create intermediate directories if necessary, makes my life a lot easier
+                            console.log('Prepared directory: ' + dataDir + pathDir)
                             shelljs.mkdir('-p', dataDir + pathDir)
+
+                        }*/
+
+                        let fileName = /(?<=\/).+/gm.exec(key)
+
+                        if(javamanifest[key]['downloads'] !== undefined) {
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key]['downloads']['raw']['size'], javamanifest[key]['downloads']['raw']['url'], path.join(dataDir + '/' + key)))
                         }
 
-                        JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
+
 
                         /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
                         console.log(javamanifest[key].downloads.raw.url)
@@ -1698,6 +1711,7 @@ class AssetGuard extends EventEmitter {
                         resolve(true)
 
                     })
+                    resolve(true)
                 } catch(err) {
                     console.log(err)
                 }

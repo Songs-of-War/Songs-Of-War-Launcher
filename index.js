@@ -7,7 +7,19 @@ const isDev                         = require('./app/assets/js/isdev')
 const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
+/*const unhandled                     = require('electron-unhandled')
+const {openNewGitHubIssue, debugInfo} = require('electron-util')
 
+unhandled({
+    reportButton: error => {
+        openNewGitHubIssue({
+            user: 'Songs-of-War',
+            repo: 'Songs-of-War-Launcher',
+            body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+        })
+    },
+    showDialog: true
+})*/
 
 let myWindow = null
 

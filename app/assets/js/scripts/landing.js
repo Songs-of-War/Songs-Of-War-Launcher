@@ -430,13 +430,20 @@ function asyncSystemScan(mcVersion, launchAfter = true){
     const forkEnv = JSON.parse(JSON.stringify(process.env))
     forkEnv.CONFIG_DIRECT_PATH = ConfigManager.getLauncherDirectory()
 
+    compMode = compatibility.isCompatibilityEnabled()
+    let p2 = compatibility.getExpectedJava8UpdateRevision()
+    let p3 = compatibility.getStandardOSManifestLink()
+
+
+
+
     // Fork a process to run validations.
     sysAEx = cp.fork(path.join(__dirname, 'assets', 'js', 'assetexec.js'), [
         'JavaGuard',
         mcVersion,
-        compatibility.isCompatibilityEnabled(),
-        compatibility.getExpectedJava8UpdateRevision(),
-        compatibility.getManifestDataForCurrentOS()
+        compMode,
+        p2,
+        p3
     ], {
         env: forkEnv,
         stdio: 'pipe'

@@ -14,6 +14,20 @@ const loggerUICore             = LoggerUtil('%c[UICore]', 'color: #000668; font-
 const loggerAutoUpdater        = LoggerUtil('%c[AutoUpdater]', 'color: #000668; font-weight: bold')
 const loggerAutoUpdaterSuccess = LoggerUtil('%c[AutoUpdater]', 'color: #209b07; font-weight: bold')
 
+const unhandled                     = require('electron-unhandled')
+const {openNewGitHubIssue, debugInfo} = require('electron-util');
+
+/*unhandled({
+    reportButton: error => {
+        openNewGitHubIssue({
+            user: 'Songs-of-War',
+            repo: 'Songs-of-War-Launcher',
+            body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+        })
+    },
+    showDialog: true
+})*/
+
 // Log deprecation and process warnings.
 process.traceProcessWarnings = true
 process.traceDeprecation = true
