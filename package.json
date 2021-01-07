@@ -42,7 +42,8 @@
     "shelljs": "^0.8.4",
     "systeminformation": "^4.34.2",
     "tar-fs": "^2.1.1",
-    "winreg": "^1.2.4"
+    "winreg": "^1.2.4",
+    "wmic-sys-info": "^0.1.3"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",

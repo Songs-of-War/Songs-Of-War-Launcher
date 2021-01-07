@@ -1,6 +1,6 @@
 const si = require('systeminformation')
 const { remote } = require('electron')
-const childprocess = require('child_process')
+const wsi = require('wmic-sys-info')
 
 let compatibilityMode = false
 // Default
@@ -76,33 +76,25 @@ exports.initCompatibilityMode = async function() {
             isFinished = true
             break
         case 'win32': {
-            // TODO: Do the windows side use: wmic path win32_VideoController get name
+            let wmicRequest = await wsi.getVideoController()
 
-            let stdoutLog = []
-
-            childprocess.exec('wmic path win32_VideoController get name', {
-                encoding: 'utf-8',
-            }, (error, stdout, stderr) => {
-                if (error) {
-                    warnUserOfCompatiblity('Internal Windows Error')
-                    return
+            // Primary graphics device
+            let graphicsDevice
+            for (let i = 0; i < 10; i++) {
+                graphicsDevice = wmicRequest[i]
+                if(graphicsDevice === undefined) {
+                    break
                 }
-                stdoutLog.push(stdout.toString().split('\n'))
-                // Primary graphics device
-                let graphicsDevice
-                for (let i = 1; i < 10; i++) {
-                    graphicsDevice = stdoutLog[0][i]
-                    console.log('Found graphic devices: ' + graphicsDevice)
-                }
+                console.log('Found graphic device: ' + graphicsDevice.VideoProcessor)
+            }
 
-                graphicsDevice = stdoutLog[0][1]
+            graphicsDevice = wmicRequest[0].VideoProcessor
 
 
-                if((graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) && stdoutLog[0].length < 2) {
-                    compatibilityMode = true
-                    warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
-                }
-            })
+            if((graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) && wmicRequest.length < 2) {
+                compatibilityMode = true
+                warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
+            }
             console.info('Done! Got Windows')
             setManual()
             isFinished = true
