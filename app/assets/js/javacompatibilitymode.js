@@ -1,6 +1,6 @@
 const si = require('systeminformation')
 const { remote } = require('electron')
-const wsi = require('wmic-sys-info')
+
 
 let compatibilityMode = false
 // Default
@@ -76,6 +76,7 @@ exports.initCompatibilityMode = async function() {
             isFinished = true
             break
         case 'win32': {
+            const wsi = require('wmic-sys-info')
             let wmicRequest = await wsi.getVideoController()
 
             // Primary graphics device
