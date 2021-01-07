@@ -15,7 +15,7 @@ const loggerAutoUpdater        = LoggerUtil('%c[AutoUpdater]', 'color: #000668; 
 const loggerAutoUpdaterSuccess = LoggerUtil('%c[AutoUpdater]', 'color: #209b07; font-weight: bold')
 
 const unhandled                     = require('electron-unhandled')
-const {openNewGitHubIssue, debugInfo} = require('electron-util');
+const {openNewGitHubIssue, debugInfo} = require('electron-util')
 
 /*unhandled({
     reportButton: error => {
