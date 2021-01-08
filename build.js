@@ -27,6 +27,7 @@ builder.build({
             output: 'dist'
         },
         win: {
+            compression: 'maximum',
             target: [
                 {
                     target: 'nsis',
@@ -50,6 +51,7 @@ builder.build({
             target: [
                 'AppImage', // Only AppImage supports auto updating
             ],
+            compression: 'maximum',
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
             synopsis: 'Modded Minecraft Launcher',
