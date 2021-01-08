@@ -87,6 +87,7 @@ exports.initCompatibilityMode = async function() {
 
     if(!ConfigManager.getCompabilityCheckDisabled()) {
 
+        try {
         // TODO: Add linux manifest
         if(process.platform !== 'linux') {
             let downloadUrl
@@ -96,21 +97,22 @@ exports.initCompatibilityMode = async function() {
                 downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
             }
 
-            try {
-                let download = await got(downloadUrl)
-                standardOSManifestURL = JSON.parse(download.body)['jre-x64'][0]['manifest']['url']
-                let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(download.body)['jre-x64'][0]['version']['name'])
-                if (expectedVersion === undefined) {
-                    closeDueToCriticalError()
-                    return
-                }
-                expectedJavaRevision = expectedVersion
-            } catch (e) {
-                closeDueToCriticalError(e)
+
+            let download = await got(downloadUrl)
+            standardOSManifestURL = JSON.parse(download.body)['jre-x64'][0]['manifest']['url']
+            let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(download.body)['jre-x64'][0]['version']['name'])
+            if (expectedVersion === undefined) {
+                closeDueToCriticalError()
                 return
             }
-
+            expectedJavaRevision = expectedVersion
         }
+        } catch (e) {
+            closeDueToCriticalError(e)
+            return
+        }
+
+    }
 
         switch (process.platform) {
             case 'darwin':
