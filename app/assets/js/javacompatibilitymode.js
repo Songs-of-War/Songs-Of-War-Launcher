@@ -81,37 +81,36 @@ function closeDueToCriticalError(data = '') {
     })
 }
 
-exports.initCompatibilityMode = async function() {
+exports.initCompatibilityMode = async function () {
     console.log('Compatibility mode check initiated')
+
+    try {
+        // TODO: Add linux manifest
+        if(process.platform !== 'linux') {
+            let downloadUrl
+            if (process.platform === 'darwin') {
+                downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json'
+            } else {
+                downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
+            }
+
+
+            let download = await got(downloadUrl)
+            standardOSManifestURL = JSON.parse(download.body)['jre-x64'][0]['manifest']['url']
+            let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(download.body)['jre-x64'][0]['version']['name'])
+            if (expectedVersion === undefined) {
+                closeDueToCriticalError()
+                return
+            }
+            expectedJavaRevision = expectedVersion
+        }
+    } catch (e) {
+        closeDueToCriticalError(e)
+        return
+    }
 
 
     if(!ConfigManager.getCompabilityCheckDisabled()) {
-
-        try {
-            // TODO: Add linux manifest
-            if(process.platform !== 'linux') {
-                let downloadUrl
-                if (process.platform === 'darwin') {
-                    downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json'
-                } else {
-                    downloadUrl = 'https://launchermeta.mojang.com/v1/products/launcher/d03cf0cf95cce259fa9ea3ab54b65bd28bb0ae82/windows-x86.json'
-                }
-
-
-                let download = await got(downloadUrl)
-                standardOSManifestURL = JSON.parse(download.body)['jre-x64'][0]['manifest']['url']
-                let expectedVersion = /(?<=1\.8\.0_)\d+(?=\d*)/gm.exec(JSON.parse(download.body)['jre-x64'][0]['version']['name'])
-                if (expectedVersion === undefined) {
-                    closeDueToCriticalError()
-                    return
-                }
-                expectedJavaRevision = expectedVersion
-            }
-        } catch (e) {
-            closeDueToCriticalError(e)
-            return
-        }
-
 
         switch (process.platform) {
             case 'darwin':
