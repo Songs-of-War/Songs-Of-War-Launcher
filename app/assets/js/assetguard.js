@@ -491,7 +491,7 @@ class JavaGuard extends EventEmitter {
 
         const meta = {}
         // eslint-disable-next-line no-undef
-        let compatibility_ExpectedJavaUpdateRevision = compatibility.getExpectedJava8UpdateRevision()
+        let compatibility_ExpectedJavaUpdateRevision = parseInt(compatibility.getExpectedJava8UpdateRevision().toString())
         // eslint-disable-next-line no-undef
         console.log('Compatibility mode is enabled? ' + compatibility.isCompatibilityEnabled() + ' java rev = ' + compatibility_ExpectedJavaUpdateRevision)
 
@@ -517,7 +517,7 @@ class JavaGuard extends EventEmitter {
                 if(compatibility.isCompatibilityEnabled() && process.platform !== 'linux') {
                     if(verOb.major === 8 && verOb.update === compatibility_ExpectedJavaUpdateRevision){
                         meta.version = verOb
-                        checksum = -2
+                        ++checksum
                         if(checksum === goal){
                             break
                         }
@@ -553,6 +553,8 @@ class JavaGuard extends EventEmitter {
                 meta.vendor = vendorName
             }
         }
+
+        console.log(checksum)
 
         meta.valid = checksum === goal
 
