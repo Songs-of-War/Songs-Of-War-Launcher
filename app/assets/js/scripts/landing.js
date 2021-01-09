@@ -101,7 +101,7 @@ function setLaunchEnabled(val){
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
     DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
-    
+
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
@@ -1209,6 +1209,17 @@ function dlAsync(login = true){
                                     recursive: true
                                 })
                                 
+                                // FancyMenu compatibility mode
+                                if(compatibility.isCompatibilityEnabled()) {
+                                    const configPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'config')
+                                
+                                    let preMenuScreen = fs.readFileSync(path.join(configPath, 'premenuscreen-client.toml'), 'utf8')
+                                    fs.writeFileSync(path.join(configPath, 'premenuscreen-client.toml'), preMenuScreen.replace('shouldappear = false', 'shouldappear = true'))
+
+                                    let fancyMenuConfig = fs.readFileSync(path.join(configPath, 'fancymenu', 'config.txt'), 'utf8')
+                                    fs.writeFileSync(path.join(configPath, 'fancymenu', 'config.txt'), fancyMenuConfig.replace('game_intro', 'disabled'))
+                                }
+
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
                                 proc = pb.build()
