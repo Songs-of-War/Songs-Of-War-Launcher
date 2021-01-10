@@ -1226,9 +1226,6 @@ function dlAsync(login = true){
                                         }
                                     })
                                     fs.writeFileSync(path.join(configPath, 'fancymenu', 'config.txt'), lines.join('\n'))
-
-                                    // Ik ik, shut up
-                                    fs.unlinkSync(path.join(configPath, 'fancymenu', 'animations', 'game_intro', 'properties.txt'))
                                 }
 
                                 // Build Minecraft process.
