@@ -1208,25 +1208,6 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                
-                                // FancyMenu compatibility mode
-                                // This is pretty bad
-                                if(compatibility.isCompatibilityEnabled()) {
-                                    const configPath = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID(), 'config')
-                                
-                                    let preMenuScreen = fs.readFileSync(path.join(configPath, 'premenuscreen-client.toml'), 'utf8')
-                                    // Never changes
-                                    fs.writeFileSync(path.join(configPath, 'premenuscreen-client.toml'), preMenuScreen.replace('shouldappear = false', 'shouldappear = true'))
-
-                                    let fancyMenuConfig = fs.readFileSync(path.join(configPath, 'fancymenu', 'config.txt'), 'utf8')
-                                    let lines = fancyMenuConfig.split('\n')
-                                    lines.forEach((value, index, array) => {
-                                        if(value.startsWith('S:gameintroanimation')) {
-                                            array[index] = 'S:gameintroanimation = \'disabled\';'
-                                        }
-                                    })
-                                    fs.writeFileSync(path.join(configPath, 'fancymenu', 'config.txt'), lines.join('\n'))
-                                }
 
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
