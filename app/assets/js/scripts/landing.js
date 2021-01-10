@@ -1264,7 +1264,7 @@ function dlAsync(login = true){
         
                                 //Receive crash message
                                 proc.on('message', (data) => {
-                                    if(data == 'Crashed') {
+                                    if(data === 'Crashed') {
                                         remote.getCurrentWindow().show()
                                         if(process.platform === 'win32') TrayObject.destroy(); loggerLanding.log('Open window, trigger')
                                         WindowHidden = false
@@ -1304,11 +1304,17 @@ function dlAsync(login = true){
                                             }
                                         })()
                                     }
-                                    if(data == 'OutOfMemory') {
+                                    if(data === 'OutOfMemory') {
                                         remote.getCurrentWindow().show()
                                         if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                         showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
+                                    }
+                                    if(data === 'OpenGLDriverUnavailable') {
+                                        remote.getCurrentWindow.show()
+                                        if(process.platform === 'win32') TrayObject.destroy()
+                                        WindowHidden = false
+                                        showLaunchFailure('Video driver unavailable', 'WGL: The driver does not appear to support OpenGL\n\nPlease try to update your graphics drivers, for more information\nplease refer to <a href="https://aka.ms/mcdriver/">this guide</a>')
                                     }
                                 })
                                 
