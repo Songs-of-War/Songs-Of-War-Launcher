@@ -81,12 +81,17 @@ class ProcessBuilder {
 
         child.stdout.on('data', (data) => {
             loggerMCstdout.log(data)
+            // FIXME: The use of 'includes' is exploitable, switch to regex for proper detection
             if(data.includes('[Render thread/INFO]: Stopping!')) {
                 hasstoppednormally = true
             }
             if(data.includes('Could not reserve enough space for object heap')) {
                 hasstoppednormally = true
                 child.emit('message', 'OutOfMemory')
+            }
+            if(data.includes('WGL: The driver does not appear to support OpenGL')) {
+                hasstoppednormally = true
+                child.emit('message', '[LWJGL] GLFW_API_UNAVAILABLE error')
             }
             if(!instanceStarted) instanceStarted = true; child.emit('message', 'GameStarted')
         })

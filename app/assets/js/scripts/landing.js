@@ -101,7 +101,7 @@ function setLaunchEnabled(val){
 document.getElementById('launch_button').addEventListener('click', function(e){
     loggerLanding.log('Launching game..')
     DiscordWrapper.updateDetails('Preparing to launch...', new Date().getTime())
-    
+
 
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
@@ -206,8 +206,8 @@ server_selection_button.onclick = (e) => {
         for(let i=0; i<statuses.length; i++){
             const service = statuses[i]
 
-            // Mojang API is broken for these two. https://bugs.mojang.com/browse/WEB-2303
-            if(service.service === 'sessionserver.mojang.com' || service.service === 'minecraft.net') {
+            // Mojang API is broken for sessionserver. https://bugs.mojang.com/browse/WEB-2303
+            if(service.service === 'sessionserver.mojang.com') {
                 service.status = 'green'
             }
 
@@ -430,10 +430,20 @@ function asyncSystemScan(mcVersion, launchAfter = true){
     const forkEnv = JSON.parse(JSON.stringify(process.env))
     forkEnv.CONFIG_DIRECT_PATH = ConfigManager.getLauncherDirectory()
 
+    compMode = compatibility.isCompatibilityEnabled()
+    let p2 = compatibility.getExpectedJava8UpdateRevision()
+    let p3 = compatibility.getStandardOSManifestLink()
+
+
+
+
     // Fork a process to run validations.
     sysAEx = cp.fork(path.join(__dirname, 'assets', 'js', 'assetexec.js'), [
         'JavaGuard',
-        mcVersion
+        mcVersion,
+        compMode,
+        p2,
+        p3
     ], {
         env: forkEnv,
         stdio: 'pipe'
@@ -455,12 +465,23 @@ function asyncSystemScan(mcVersion, launchAfter = true){
             if(m.result == null){
                 // If the result is null, no valid Java installation was found.
                 // Show this information to the user.
-                setOverlayContent(
-                    'No Compatible<br>Java Installation Found',
-                    'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>.',
-                    'Install Java',
-                    'Install Manually'
-                )
+                if(compatibility.isCompatibilityEnabled()) {
+                    // Disallow the manual install of a java version as it requires the mojang specific one which I doubt anyone cares / knows about.
+                    // If the user tries to install a java version themselves anyway it will fail as it will be detected as an invalid version.
+                    setOverlayContent(
+                        'No Compatible<br>Java Installation Found',
+                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>. Warning! You are in compatibility mode, you cannot install one manually.',
+                        'Install Java'
+                    )
+                } else {
+                    setOverlayContent(
+                        'No Compatible<br>Java Installation Found',
+                        'In order to join Songs of War, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>.',
+                        'Install Java',
+                        'Install Manually'
+                    )
+                }
+
                 setOverlayHandler(() => {
                     setLaunchDetails('Preparing Java Download..')
                     sysAEx.send({task: 'changeContext', class: 'AssetGuard', args: [ConfigManager.getCommonDirectory(),ConfigManager.getJavaExecutable()]})
@@ -505,6 +526,8 @@ function asyncSystemScan(mcVersion, launchAfter = true){
                 sysAEx.disconnect()
             }
         } else if(m.context === '_enqueueOpenJDK'){
+
+            console.log(m.result)
 
             if(m.result === true){
 
@@ -591,7 +614,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
 
     // Begin system Java scan.
     setLaunchDetails('Checking system info..')
-    sysAEx.send({task: 'execute', function: 'validateJava', argsArr: [ConfigManager.getDataDirectory()]})
+    sysAEx.send({task: 'execute', function: 'validateJava', argsArr: [ConfigManager.getDataDirectory(), compatibility]})
 
 }
 
@@ -1185,7 +1208,7 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                
+
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
                                 proc = pb.build()
@@ -1241,7 +1264,7 @@ function dlAsync(login = true){
         
                                 //Receive crash message
                                 proc.on('message', (data) => {
-                                    if(data == 'Crashed') {
+                                    if(data === 'Crashed') {
                                         remote.getCurrentWindow().show()
                                         if(process.platform === 'win32') TrayObject.destroy(); loggerLanding.log('Open window, trigger')
                                         WindowHidden = false
@@ -1281,11 +1304,17 @@ function dlAsync(login = true){
                                             }
                                         })()
                                     }
-                                    if(data == 'OutOfMemory') {
+                                    if(data === 'OutOfMemory') {
                                         remote.getCurrentWindow().show()
                                         if(process.platform === 'win32') TrayObject.destroy()
                                         WindowHidden = false
                                         showLaunchFailure('Out of memory', 'Failed to allocate enough memory. Try lowering the amount of RAM allocated to Minecraft or close some RAM hungry programs that are running.')
+                                    }
+                                    if(data === 'OpenGLDriverUnavailable') {
+                                        remote.getCurrentWindow.show()
+                                        if(process.platform === 'win32') TrayObject.destroy()
+                                        WindowHidden = false
+                                        showLaunchFailure('Video driver unavailable', 'WGL: The driver does not appear to support OpenGL\n\nPlease try to update your graphics drivers, for more information\nplease refer to <a href="https://aka.ms/mcdriver/">this guide</a>')
                                     }
                                 })
                                 
@@ -1398,7 +1427,6 @@ const newsContent                   = document.getElementById('newsContent')
 const newsArticleTitle              = document.getElementById('newsArticleTitle')
 const newsArticleDate               = document.getElementById('newsArticleDate')
 const newsArticleAuthor             = document.getElementById('newsArticleAuthor')
-const newsArticleComments           = document.getElementById('newsArticleComments')
 const newsNavigationStatus          = document.getElementById('newsNavigationStatus')
 const newsArticleContentScrollable  = document.getElementById('newsArticleContentScrollable')
 const nELoadSpan                    = document.getElementById('nELoadSpan')
@@ -1457,7 +1485,7 @@ function slide_(up){
 }
 
 // Bind news button.
-/*document.getElementById('newsButton').onclick = () => {
+document.getElementById('newsButton').onclick = () => {
     // Toggle tabbing.
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
@@ -1474,7 +1502,7 @@ function slide_(up){
     }
     slide_(!newsActive)
     newsActive = !newsActive
-}*/ //News button doesn't exist so yeet
+}
 
 // Array to store article meta.
 let newsArr = null
@@ -1487,7 +1515,7 @@ let newsLoadingListener = null
  * 
  * @param {boolean} val True to set loading animation, otherwise false.
  */
-/*function setNewsLoading(val){
+function setNewsLoading(val){
     if(val){
         const nLStr = 'Checking for News'
         let dotStr = '..'
@@ -1506,7 +1534,7 @@ let newsLoadingListener = null
             newsLoadingListener = null
         }
     }
-}*/ //News disabled no use for us
+}
 
 // Bind retry button.
 newsErrorRetry.onclick = () => {
@@ -1558,7 +1586,7 @@ function showNewsAlert(){
  * @returns {Promise.<void>} A promise which resolves when the news
  * content has finished loading and transitioning.
  */
-/*function initNews(){
+function initNews(){
 
     return new Promise((resolve, reject) => {
         setNewsLoading(true)
@@ -1658,7 +1686,7 @@ function showNewsAlert(){
         })
         
     })
-}*/ //Disable news, no use for us
+}
 
 /**
  * Add keyboard controls to the news UI. Left and right arrows toggle
@@ -1695,8 +1723,6 @@ function displayArticle(articleObject, index){
     newsArticleTitle.href = articleObject.link
     newsArticleAuthor.innerHTML = 'by ' + articleObject.author
     newsArticleDate.innerHTML = articleObject.date
-    newsArticleComments.innerHTML = articleObject.comments
-    newsArticleComments.href = articleObject.commentsLink
     newsArticleContentScrollable.innerHTML = '<div id="newsArticleContentWrapper"><div class="newsArticleSpacerTop"></div>' + articleObject.content + '<div class="newsArticleSpacerBot"></div></div>'
     Array.from(newsArticleContentScrollable.getElementsByClassName('bbCodeSpoilerButton')).forEach(v => {
         v.onclick = () => {

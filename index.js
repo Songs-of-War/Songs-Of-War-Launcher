@@ -7,6 +7,19 @@ const isDev                         = require('./app/assets/js/isdev')
 const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
+/*const unhandled                     = require('electron-unhandled')
+const {openNewGitHubIssue, debugInfo} = require('electron-util')
+
+unhandled({
+    reportButton: error => {
+        openNewGitHubIssue({
+            user: 'Songs-of-War',
+            repo: 'Songs-of-War-Launcher',
+            body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+        })
+    },
+    showDialog: true
+})*/
 
 let myWindow = null
 
@@ -140,7 +153,9 @@ ipcMain.on('distributionIndexDone', (event, res) => {
 
 // Disable hardware acceleration.
 // https://electronjs.org/docs/tutorial/offscreen-rendering
-app.disableHardwareAcceleration()
+
+
+//app.disableHardwareAcceleration()
 
 // https://github.com/electron/electron/issues/18397
 app.allowRendererProcessReuse = true
@@ -149,7 +164,8 @@ app.allowRendererProcessReuse = true
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 
-function createWindow() {
+async function createWindow() {
+
 
     win = new BrowserWindow({
         darkTheme: true,
@@ -166,6 +182,8 @@ function createWindow() {
         },
         backgroundColor: '#171614'
     })
+
+    console.log(path.join(__dirname, 'app', 'assets', 'js', 'preloader.js').toString())
 
     myWindow = win
 
@@ -188,6 +206,7 @@ function createWindow() {
     win.on('closed', () => {
         win = null
     })
+
 }
 
 function createMenu() {

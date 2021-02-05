@@ -4,6 +4,7 @@ const semver = require('semver')
 
 const { JavaGuard } = require('./assets/js/assetguard')
 const DropinModUtil  = require('./assets/js/dropinmodutil')
+const compatibility = require('./assets/js/javacompatibilitymode')
 
 const settingsState = {
     invalid: new Set()
@@ -40,36 +41,45 @@ document.addEventListener('click', closeSettingsSelect)
 
 bindSettingsSelect()
 
-
 function bindFileSelectors(){
     for(let ele of document.getElementsByClassName('settingsFileSelButton')){
-        
-        ele.onclick = async e => {
-            const isJavaExecSel = ele.id === 'settingsJavaExecSel'
-            const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
-            const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
 
-            const options = {
-                properties
-            }
+        if(!compatibility.isCompatibilityEnabled()) {
+            ele.onclick = async e => {
+                const isJavaExecSel = ele.id === 'settingsJavaExecSel'
+                const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
+                const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
 
-            if(ele.hasAttribute('dialogTitle')) {
-                options.title = ele.getAttribute('dialogTitle')
-            }
-
-            if(isJavaExecSel && process.platform === 'win32') {
-                options.filters = [
-                    { name: 'Executables', extensions: ['exe'] },
-                    { name: 'All Files', extensions: ['*'] }
-                ]
-            }
-
-            const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
-            if(!res.canceled) {
-                ele.previousElementSibling.value = res.filePaths[0]
-                if(isJavaExecSel) {
-                    populateJavaExecDetails(ele.previousElementSibling.value)
+                const options = {
+                    properties
                 }
+
+                if (ele.hasAttribute('dialogTitle')) {
+                    options.title = ele.getAttribute('dialogTitle')
+                }
+
+                if (isJavaExecSel && process.platform === 'win32') {
+                    options.filters = [
+                        {name: 'Executables', extensions: ['exe']},
+                        {name: 'All Files', extensions: ['*']}
+                    ]
+                }
+
+                const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
+                if (!res.canceled) {
+                    ele.previousElementSibling.value = res.filePaths[0]
+                    if (isJavaExecSel) {
+                        populateJavaExecDetails(ele.previousElementSibling.value)
+                    }
+                }
+            }
+        } else {
+            ele.onclick = async function() {
+                remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+                    type: 'warning',
+                    title: 'Songs of War - Java Compatibility Warning',
+                    detail: 'The java installation cannot be changed at this time.'
+                })
             }
         }
     }
@@ -77,6 +87,37 @@ function bindFileSelectors(){
 
 bindFileSelectors()
 
+function disableCompatibilitySwitch(force = false) {
+    if(compatibility.isCompatibilityEnabled() && !compatibility.isManualCompatibility()) {
+        let element1 = document.getElementById('compModeCheckbox')
+        element1.checked = true
+        element1.disabled = true
+        let element = document.getElementById('compSliderSwitchModel')
+        element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+    } else if(force) {
+        let element1 = document.getElementById('compModeCheckbox')
+        element1.disabled = true
+        let element = document.getElementById('compSliderSwitchModel')
+        element.style = 'pointer-events: none; filter: grayscale(40%) brightness(60%);'
+    }
+}
+
+async function waitForCompModeCheck() {
+    await new Promise(resolve => {
+        setTimeout(resolve, 2000)
+    })
+    while(!compatibility.scanComplete()) {
+        await new Promise(resolve => {
+            setTimeout(resolve, 1000)
+        })
+    }
+    bindFileSelectors()
+    disableCompatibilitySwitch()
+
+
+}
+
+waitForCompModeCheck()
 
 /**
  * General Settings Functions
@@ -1161,6 +1202,32 @@ function populateJavaExecDetails(execPath){
 function prepareJavaTab(){
     bindRangeSlider()
     populateMemoryStatus()
+    document.getElementById('compModeCheckbox').onclick = function () {
+        // Save preemptively as closing the launcher doesn't save, if the user clicks restart the setting won't be saved
+        saveSettingsValues()
+        saveModConfiguration()
+        saveShaderpackSettings()
+        ConfigManager.save()
+        remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            title: 'Songs of War Launcher - Restart required',
+            detail: 'This setting requires a restart to be applied, would you like to restart the launcher now?',
+            type: 'info',
+            buttons: [
+                'No',
+                'Yes'
+            ],
+            cancelId: 0,
+            defaultId: 1
+        }).then(value => {
+            if(value.response === 1) {
+                remote.app.relaunch()
+                remote.app.exit()
+            } else {
+                disableCompatibilitySwitch(true)
+            }
+        })
+    }
+
 }
 
 /**
@@ -1348,6 +1415,7 @@ function prepareSettings(first = false) {
     prepareAccountsTab()
     prepareJavaTab()
     prepareAboutTab()
+    disableCompatibilitySwitch()
 }
 
 // Prepare the settings UI on startup.

@@ -11,8 +11,8 @@ const request       = require('request')
 const tar           = require('tar-fs')
 const zlib          = require('zlib')
 const got           = require('got')
-// Screw it, I didn't want to spend my time making an algorithm to loop over the path
-const shelljs = require('shelljs')
+let isRunningCompatibilityMode
+let currentOSJavaManifest
 
 process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
 
@@ -20,6 +20,7 @@ process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser
 const ConfigManager = require('./configmanager')
 const DistroManager = require('./distromanager')
 const isDev         = require('./isdev')
+
 
 // Constants
 // const PLATFORM_MAP = {
@@ -223,9 +224,18 @@ class Util {
 
 class JavaGuard extends EventEmitter {
 
-    constructor(mcVersion){
+
+    // p1 is if comp mode is running, p2 is for expected java revision and p3 is for manifest link
+    constructor(mcVersion, p1, p2, p3){
         super()
         this.mcVersion = mcVersion
+        if(p1 !== undefined) {
+            isRunningCompatibilityMode = p1
+            got(p3).then(d => {
+                currentOSJavaManifest = d.body
+            })
+        }
+
     }
 
     // /**
@@ -464,7 +474,7 @@ class JavaGuard extends EventEmitter {
 
     /**
      * Validates the output of a JVM's properties. Currently validates that a JRE is x64
-     * and that the major = 8, update > 52.
+     * and that the major = 8, update > 50.
      * 
      * @param {string} stderr The output to validate.
      * 
@@ -472,6 +482,7 @@ class JavaGuard extends EventEmitter {
      * The validity is stored inside the `valid` property.
      */
     _validateJVMProperties(stderr){
+
         const res = stderr
         const props = res.split('\n')
 
@@ -479,6 +490,10 @@ class JavaGuard extends EventEmitter {
         let checksum = 0
 
         const meta = {}
+        // eslint-disable-next-line no-undef
+        let compatibility_ExpectedJavaUpdateRevision = parseInt(compatibility.getExpectedJava8UpdateRevision().toString(), 10)
+        // eslint-disable-next-line no-undef
+        console.log('Compatibility mode is enabled? ' + compatibility.isCompatibilityEnabled() + ' java rev = ' + compatibility_ExpectedJavaUpdateRevision)
 
         for(let i=0; i<props.length; i++){
             if(props[i].indexOf('sun.arch.data.model') > -1){
@@ -496,9 +511,11 @@ class JavaGuard extends EventEmitter {
                 let verString = props[i].split('=')[1].trim()
                 console.log(props[i].trim())
                 const verOb = JavaGuard.parseJavaRuntimeVersion(verString)
-                if(verOb.major < 9){
-                    // Java 8
-                    if(verOb.major === 8 && verOb.update > 52){
+
+                // TODO: Linux support
+                // eslint-disable-next-line no-undef
+                if(compatibility.isCompatibilityEnabled() && process.platform !== 'linux') {
+                    if(verOb.major === 8 && verOb.update === compatibility_ExpectedJavaUpdateRevision){
                         meta.version = verOb
                         ++checksum
                         if(checksum === goal){
@@ -506,16 +523,29 @@ class JavaGuard extends EventEmitter {
                         }
                     }
                 } else {
-                    // Java 9+
-                    if(Util.mcVersionAtLeast('1.13', this.mcVersion)){
-                        console.log('Java 9+ not yet tested.')
-                        /* meta.version = verOb
-                        ++checksum
-                        if(checksum === goal){
-                            break
-                        } */
+                    if(verOb.major < 9){
+                        // Java 8
+                        if(verOb.major === 8 && verOb.update > 50){
+                            meta.version = verOb
+                            ++checksum
+                            if(checksum === goal){
+                                break
+                            }
+                        }
+                    } else {
+                        // Java 9+
+                        if(Util.mcVersionAtLeast('1.13', this.mcVersion)){
+                            console.log('Java 9+ not yet tested.')
+                            /* meta.version = verOb
+                            ++checksum
+                            if(checksum === goal){
+                                break
+                            } */
+                        }
                     }
                 }
+
+
                 // Space included so we get only the vendor.
             } else if(props[i].lastIndexOf('java.vendor ') > -1) {
                 let vendorName = props[i].split('=')[1].trim()
@@ -524,8 +554,10 @@ class JavaGuard extends EventEmitter {
             }
         }
 
+        console.log(checksum)
+
         meta.valid = checksum === goal
-        
+
         return meta
     }
 
@@ -555,20 +587,8 @@ class JavaGuard extends EventEmitter {
                 }
                 child_process.exec('"' + binaryExecPath + '" -XshowSettings:properties', (err, stdout, stderr) => {
                     try {
-                        // Output is stored in stderr?
-                        if(process.platform === 'darwin') {
-                            got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json').then((val) => {
-                                let expectedVersion = /(?<=1\.8\.0_)\d+(?=\.\d+)/gm.exec(JSON.parse(val.body)['jre-x64'][0]['version']['name'])
-                                let curBinary = this._validateJVMProperties(stderr)
-                                if(curBinary['version']['update'] === expectedVersion) {
-                                    resolve(this._validateJVMProperties(stderr))
-                                } else {
-                                    resolve({valid: false})
-                                }
-                            })
-                        } else {
-                            resolve(this._validateJVMProperties(stderr))
-                        }
+                        let JVMValidation = this._validateJVMProperties(stderr)
+                        resolve(JVMValidation)
                     } catch (err){
                         // Output format might have changed, validation cannot be completed.
                         resolve({valid: false})
@@ -772,6 +792,8 @@ class JavaGuard extends EventEmitter {
 
         }
 
+        console.log(validArr)
+
         return validArr
 
     }
@@ -874,7 +896,14 @@ class JavaGuard extends EventEmitter {
         }
 
         let pathArr = await this._validateJavaRootSet(uberSet)
+
+        console.log(pathArr)
+
         pathArr = JavaGuard._sortValidJavaArray(pathArr)
+
+        console.log(pathArr)
+
+
 
         if(pathArr.length > 0){
             return pathArr[0].execPath
@@ -967,14 +996,13 @@ class JavaGuard extends EventEmitter {
 
     /**
      * Retrieve the path of a valid x64 Java installation.
-     * 
+     *
      * @param {string} dataDir The base launcher directory.
      * @returns {string} A path to a valid x64 Java installation, null if none found.
      */
     async validateJava(dataDir){
         return await this['_' + process.platform + 'JavaValidate'](dataDir)
     }
-
 }
 
 
@@ -1613,8 +1641,83 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
-            // I am getting severly annoyed at the amount of mac fixes I have to do...
-            if(process.platform !== 'darwin') {
+            // TODO: Add compatibility support to linux
+            if(process.platform !== 'linux' && isRunningCompatibilityMode) {
+                let unixBasedSystem = false
+                if(process.platform === 'darwin') {
+                    // Mac
+                    unixBasedSystem = true
+                }
+                try {
+                    // Download the Java stuff from Mojang themselves
+                    dataDir = path.join(dataDir, 'runtime', 'x64')
+                    let javamanifest = currentOSJavaManifest
+                    console.log(javamanifest)
+                    javamanifest = JSON.parse(javamanifest)['files']
+                    let JavaAssets = []
+                    for (const key of Object.keys(javamanifest)) {
+
+
+                        /*// Create the path string with only the folder paths
+                        let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
+
+                        // Create file name without the folder paths
+                        let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
+
+
+                        console.log(pathDir)
+                        console.log(fileName)
+
+                        if(!fs.existsSync(path.join(dataDir + pathDir))) {
+                            // Make directories, will create intermediate directories if necessary, makes my life a lot easier
+                            console.log('Prepared directory: ' + dataDir + pathDir)
+                            shelljs.mkdir('-p', dataDir + pathDir)
+
+                        }*/
+
+                        let fileName = /(?<=\/).+/gm.exec(key)
+
+                        if(javamanifest[key]['downloads'] !== undefined) {
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key]['downloads']['raw']['size'], javamanifest[key]['downloads']['raw']['url'], path.join(dataDir + '/' + key)))
+                        }
+
+
+
+                        /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
+                        console.log(javamanifest[key].downloads.raw.url)
+                        const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
+                            response.pipe(filepath)
+                        })*/
+
+                    }
+                    let FileSizes = 0
+                    JavaAssets.forEach(element => {
+                        FileSizes += element.size
+                    })
+                    let AssetSize = JavaAssets.length
+                    let CurExecTimes = 0
+                    this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
+                        if(unixBasedSystem) {
+                            child_process.execSync('chmod +x ' + '"' + a.to + '"')
+                        }
+                        CurExecTimes += 1
+                        if(CurExecTimes === AssetSize) {
+                            new Promise((resolve, reject) => {
+                                setTimeout(function() {
+                                    self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
+                                    resolve()
+                                }, 1000) //Wait 1 second
+                            })
+
+                        }
+                        resolve(true)
+
+                    })
+                    resolve(true)
+                } catch(err) {
+                    console.log(err)
+                }
+            } else {
                 JavaGuard._latestOpenJDK('8').then(verData => {
                     if(verData != null){
                         dataDir = path.join(dataDir, 'runtime', 'x64')
@@ -1674,64 +1777,6 @@ class AssetGuard extends EventEmitter {
                         resolve(false)
                     }
                 })
-            } else {
-                try {
-                    // Download the Java stuff from Mojang themselves
-                    (async () => {
-                        dataDir = path.join(dataDir, 'runtime', 'x64')
-                        let manifest = await got('https://launchermeta.mojang.com/v1/products/launcher/022631aeac4a9addbce8e0503dce662152dc198d/mac-os.json')
-                        let javamanifesturl = JSON.parse(manifest.body)['jre-x64'][0]['manifest']['url'] // Kek, I don't see anything wrong with this
-                        let javamanifest = await got(javamanifesturl)
-                        javamanifest = JSON.parse(javamanifest.body)['files']
-                        let JavaAssets = []
-                        for (const key of Object.keys(javamanifest)) {
-                    
-
-                            // Create the path string with only the folder paths
-                            let pathDir = key.substring(10).split('/'); pathDir[pathDir.length - 1] = null; pathDir = pathDir.join('/').toString()
-
-                            // Create file name without the folder paths
-                            let fileName = key.substring(10).split('/'); fileName = fileName[fileName.length - 1]
-                    
-                            if(!fs.existsSync(path.join(dataDir + pathDir))) {
-                                // Make directories, will create intermediate directories if necessary, makes my life a lot easier
-                                shelljs.mkdir('-p', dataDir + pathDir)
-                            }
-
-                            JavaAssets.push(new Asset(fileName, null, javamanifest[key].downloads.raw.size, javamanifest[key].downloads.raw.url, path.join(dataDir + pathDir + fileName)))
-                        
-                            /*const filepath = fs.createWriteStream(path.join('.' + key.substring(10)))
-                            console.log(javamanifest[key].downloads.raw.url)
-                            const request = https.get(javamanifest[key].downloads.raw.url, function(response) {
-                                response.pipe(filepath)
-                            })*/
-                            
-                        }
-                        let FileSizes = 0
-                        JavaAssets.forEach(element => {
-                            FileSizes += element.size
-                        })
-                        let AssetSize = JavaAssets.length
-                        let CurExecTimes = 0
-                        this.java = new DLTracker(JavaAssets, FileSizes, function(a, self) {
-                            child_process.execSync('chmod +x ' + '"' + a.to + '"')
-                            CurExecTimes += 1
-                            if(CurExecTimes == AssetSize) {
-                                new Promise((resolve, reject) => {
-                                    setTimeout(function() { 
-                                        self.emit('complete', 'java', JavaGuard.javaExecFromRoot(dataDir))
-                                        resolve()
-                                    }, 1000) //Wait 1 second
-                                })
-                                
-                            }
-                        })
-                        resolve(true)
-                        
-                    })()
-                } catch(err) {
-                    console.log('Error ' + err)
-                }
                 
             }
         })

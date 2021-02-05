@@ -1973,6 +1973,19 @@ input:checked + .toggleSwitchSlider:before {
     width: 89%;
 }
 
+/* Description of the compatibility option setting */
+#settingsCompatibilitymodeDesc {
+    font-size: 10px;
+    margin: 20px 0px;
+    color: lightgrey;
+    font-weight: bold;
+    width: 89%;
+}
+
+#settingsCompatibilityContainer {
+    width: 75%;
+}
+
 /* * *
 * Settings View (Launcher Tab)
 * * */
@@ -2499,24 +2512,6 @@ input:checked + .toggleSwitchSlider:before {
     background: #a02d2a;
 }
 
-/* News article comments styles. */
-#newsArticleComments {
-    margin-top: 5px;
-    display: inline-block;
-    font-size: 10px;
-    color: #ffffff;
-    text-decoration: none;
-    transition: 0.25s ease;
-    outline: none;
-    text-align: right;
-}
-#newsArticleComments:focus,
-#newsArticleComments:hover {
-    color: #e0e0e0;
-}
-#newsArticleComments:active {
-    color: #c7c7c7;
-}
 
 /* Article content container (right). */
 #newsArticleContainer {

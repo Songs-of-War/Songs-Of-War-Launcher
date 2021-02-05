@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.8.14",
+  "version": "1.9.0",
   "productName": "Songs of War Launcher",
   "description": "Songs of War Minecraft Server",
   "author": "lucasboss45",
@@ -9,7 +9,6 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "jest",
     "start": "electron .",
     "cilinux": "node build.js WINDOWS && node build.js LINUX",
     "cidarwin": "node build.js MAC",
@@ -28,7 +27,10 @@
     "discord-rpc": "^3.1.4",
     "ejs": "^3.1.5",
     "ejs-electron": "^2.1.1",
+    "electron-builder-squirrel-windows": "^22.10.4",
+    "electron-unhandled": "^3.0.2",
     "electron-updater": "^4.3.6",
+    "electron-util": "^0.14.2",
     "execa": "^4.1.0",
     "extract-dmg": "^1.0.0",
     "follow-redirects": "^1.13.1",
@@ -40,20 +42,24 @@
     "request": "^2.88.2",
     "semver": "^7.3.4",
     "shelljs": "^0.8.4",
+    "systeminformation": "^4.34.2",
     "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
   },
   "devDependencies": {
-    "cross-env": "^7.0.2",
-    "electron": "^10.1.5",
+    "cross-env": "^7.0.3",
+    "electron": "^11.0.5",
     "electron-builder": "^22.9.1",
-    "eslint": "^7.9.0",
     "jest": "^26.4.2",
     "jest-electron": "^0.1.11",
-    "spectron": "^11.1.0"
+    "spectron": "^11.1.0",
+    "eslint": "^7.15.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Songs-of-War/Songs-of-War-Launcher.git"
+  },
+  "optionalDependencies": {
+    "wmic-sys-info": "^0.1.3"
   }
 }

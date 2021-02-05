@@ -11,6 +11,23 @@ const LangLoader    = require('./langloader')
 const LoggerUtils = require('./loggerutil')
 const logger = LoggerUtils('%c[Preloader]', 'color: #a02d2a; font-weight: bold')
 const DiscordWrapper = require('./discordwrapper')
+const compatibility = require('./javacompatibilitymode')
+
+
+const unhandled                     = require('electron-unhandled')
+const {openNewGitHubIssue, debugInfo} = require('electron-util')
+
+unhandled({
+    reportButton: error => {
+        openNewGitHubIssue({
+            user: 'Songs-of-War',
+            repo: 'Songs-of-War-Launcher',
+            body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+        })
+    },
+    showDialog: true
+
+})
 
 logger.log('Loading..')
 
@@ -22,7 +39,8 @@ ConfigManager.load()
 // Load Strings
 LangLoader.loadLanguage('en_US')
 
-function onDistroLoad(data){
+async function onDistroLoad(data){
+    await compatibility.initCompatibilityMode()
     if(data != null){
         
         // Resolve the selected server if its value has yet to be set.
