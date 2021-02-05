@@ -99,9 +99,9 @@ function showMainUI(data){
         
     }, 750)
     // Disable tabbing to the news container.
-    /*initNews().then(() => {
+    initNews().then(() => {
         $('#newsContainer *').attr('tabindex', '-1')
-    })*/ //Remove news
+    })
 }
 
 function showFatalStartupError(){
@@ -148,7 +148,7 @@ function showFatalStartupErrorServerMaintenance(){
 function onDistroRefresh(data){
     updateSelectedServer(data.getServer(ConfigManager.getSelectedServer()))
     refreshServerStatus()
-    //initNews() We have no news here
+    initNews()
     syncModConfigurations(data)
 }
 

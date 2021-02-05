@@ -166,6 +166,7 @@ let win
 
 async function createWindow() {
 
+
     win = new BrowserWindow({
         darkTheme: true,
         width: 980,
@@ -181,6 +182,8 @@ async function createWindow() {
         },
         backgroundColor: '#171614'
     })
+
+    console.log(path.join(__dirname, 'app', 'assets', 'js', 'preloader.js').toString())
 
     myWindow = win
 
