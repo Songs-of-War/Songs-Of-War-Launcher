@@ -491,7 +491,7 @@ class JavaGuard extends EventEmitter {
 
         const meta = {}
         // eslint-disable-next-line no-undef
-        let compatibility_ExpectedJavaUpdateRevision = parseInt(compatibility.getExpectedJava8UpdateRevision().toString())
+        let compatibility_ExpectedJavaUpdateRevision = parseInt(compatibility.getExpectedJava8UpdateRevision().toString(), 10)
         // eslint-disable-next-line no-undef
         console.log('Compatibility mode is enabled? ' + compatibility.isCompatibilityEnabled() + ' java rev = ' + compatibility_ExpectedJavaUpdateRevision)
 

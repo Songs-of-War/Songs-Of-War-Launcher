@@ -37,7 +37,7 @@
     "fs-extra": "^9.0.1",
     "github-syntax-dark": "^0.5.0",
     "got": "^11.8.1",
-    "http-parser-js": "^0.5.2",
+    "http-parser-js": "^0.5.3",
     "jquery": "^3.5.1",
     "request": "^2.88.2",
     "semver": "^7.3.4",
