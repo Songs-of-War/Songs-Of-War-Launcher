@@ -206,8 +206,8 @@ server_selection_button.onclick = (e) => {
         for(let i=0; i<statuses.length; i++){
             const service = statuses[i]
 
-            // Mojang API is broken for these two. https://bugs.mojang.com/browse/WEB-2303
-            if(service.service === 'sessionserver.mojang.com' || service.service === 'minecraft.net') {
+            // Mojang API is broken for sessionserver. https://bugs.mojang.com/browse/WEB-2303
+            if(service.service === 'sessionserver.mojang.com') {
                 service.status = 'green'
             }
 
