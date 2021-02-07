@@ -23,6 +23,8 @@ unhandled({
 
 let myWindow = null
 
+let updateWin;
+
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
@@ -36,9 +38,46 @@ if (!gotTheLock) {
         }
     })
 
+    // Start checking for updates screen
+
+    app.on('ready', async () => {
+        updateWin = new BrowserWindow({
+            darkTheme: true,
+            width: 400,
+            height: 300,
+            icon: getPlatformIcon('SealCircle'),
+            frame: false,
+            resizable: false,
+            closable: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false,
+                enableRemoteModule: true,
+                worldSafeExecuteJavaScript: true,
+
+            },
+            backgroundColor: '#171614'
+        })
+
+        updateWin.loadURL(url.format({
+            pathname: path.join(__dirname, 'app', 'updatecheck.ejs'),
+            protocol: 'file:',
+            slashes: true
+        }))
+
+        ipcMain.on('updateDownloadStatusUpdate', (event, args) => {
+            if(args === 'readyToStartUpdate') {
+                initAutoUpdater(event)
+            }
+        })
+
+    })
+
+
+
     // Create myWindow, load the rest of the app, etc...
-    app.on('ready', createWindow)
-    app.on('ready', createMenu)
+    //app.on('ready', createWindow)
+    //app.on('ready', createMenu)
 }
 
 // Setup auto updater.
@@ -80,6 +119,11 @@ function initAutoUpdater(event, data) {
             })*/
         }
     })
+
+    autoUpdater.on('download-progress', (progress, byPs, percent, total, transferred) => {
+        event.sender.send('updateDownloadStatusUpdate', 'downloading', percent)
+    })
+
     autoUpdater.on('update-downloaded', (info) => {
         event.sender.send('autoUpdateNotification', 'update-downloaded', info)
         if(process.platform === 'win32') {
