@@ -56,6 +56,7 @@ if (!gotTheLock) {
             maximizable: false,
             closable: false,
             webPreferences: {
+                devTools: false,
                 nodeIntegration: true,
                 contextIsolation: false,
                 enableRemoteModule: true,
