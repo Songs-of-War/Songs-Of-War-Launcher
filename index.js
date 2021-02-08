@@ -1,5 +1,5 @@
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu, Tray, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, Tray, dialog, shell } = require('electron')
 const autoUpdater                   = require('electron-updater').autoUpdater
 const ejse                          = require('ejs-electron')
 const fs                            = require('fs')
@@ -77,6 +77,19 @@ if (!gotTheLock) {
 
                 // Setup events
 
+                // https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg
+
+                // Shitty mac "support"
+                autoUpdater.on('update-available', (info) => {
+                    dialog.showMessageBox(updateWin, {
+                        title: 'Cannot automatically update on MacOS',
+                        detail: 'The program cannot automatically update on MacOS, please do so manually',
+                        type: 'error'
+                    }).then(buttonid => {
+                        shell.openExternal(`https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg`)
+                        app.exit()
+                    })
+                })
 
                 autoUpdater.on('download-progress', (progress) => {
                     console.log('Downloading progress ' + progress.percent)
