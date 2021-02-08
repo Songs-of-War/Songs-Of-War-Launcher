@@ -1,9 +1,9 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.5.5",
-  "productName": "Songs of War Launcher",
-  "description": "Songs of War Minecraft Server",
-  "author": "lucasboss45",
+  "version": "1.9.1",
+  "productName": "Songs of War Game",
+  "description": "Songs of War Game Launcher",
+  "author": "Dexiam",
   "license": "UNLICENSED",
   "homepage": "https://songs-of-war.com",
   "private": true,

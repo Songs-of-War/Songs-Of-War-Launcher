@@ -18,8 +18,7 @@
         ],
         "linebreak-style": "off",
         "quotes": [
-            "error",
-            "single"
+            0
         ],
         "semi": [
             "error",
@@ -49,7 +48,7 @@
     },
     "overrides": [
         {
-          "files": [ "app/assets/js/scripts/*.js", "app/assets/js/javacompatibilitymode.js" ],
+          "files": [ "app/assets/js/scripts/*.js", "app/assets/js/javacompatibilitymode.js", "app/assets/js/loading-bar.mins.js" ],
           "rules": {
             "no-unused-vars": [
                 0

@@ -1,5 +1,5 @@
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu, Tray } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, Tray, dialog } = require('electron')
 const autoUpdater                   = require('electron-updater').autoUpdater
 const ejse                          = require('ejs-electron')
 const fs                            = require('fs')
@@ -25,6 +25,8 @@ let myWindow = null
 
 let updateWin
 
+let isOnMainUpdateScreen = false
+
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
@@ -48,6 +50,10 @@ if (!gotTheLock) {
             icon: getPlatformIcon('SealCircle'),
             frame: false,
             resizable: true,
+            fullscreenable: false,
+            simpleFullscreen: false,
+            fullscreen: false,
+            maximizable: false,
             closable: false,
             webPreferences: {
                 nodeIntegration: true,
@@ -68,11 +74,53 @@ if (!gotTheLock) {
         ipcMain.on('updateDownloadStatusUpdate', async (event, args) => {
             if(args === 'readyToStartUpdate') {
                 console.log('Ready for update')
-                initAutoUpdater(event)
+
+                // Setup events
+
+
+                autoUpdater.on('download-progress', (progress) => {
+                    console.log('Downloading progress ' + progress.percent)
+                    event.sender.send('updateDownloadStatusUpdate', 'downloading', progress.percent)
+                })
+
+                autoUpdater.on('update-not-available', (info) => {
+                    if(isOnMainUpdateScreen) {
+                        createWindow()
+                        createMenu()
+                        autoUpdater.removeAllListeners(event)
+                        isOnMainUpdateScreen = false
+                        updateWin.destroy()
+                    }
+                })
+
+                autoUpdater.on('update-downloaded', (info) => {
+                    if (isOnMainUpdateScreen) {
+                        autoUpdater.quitAndInstall(false, true)
+                        app.exit(0)
+                    }
+                })
+
+                autoUpdater.on('error', args => {
+                    dialog.showMessageBox(updateWin, {
+                        title: 'Update check failed',
+                        detail: 'The update checking failed, the program cannot proceed, please check your network connection.',
+                        type: 'error',
+                        cancelId: 0,
+                        defaultId: 0,
+                    }).then(buttonPressed => {
+                        app.exit()
+                    })
+                })
+
+
+                // Check the updates after the events have been registered
+
                 let data = await autoUpdater.checkForUpdates()
                 console.log(data)
             }
         })
+
+        isOnMainUpdateScreen = true
 
     })
 
@@ -88,7 +136,7 @@ function initAutoUpdater(event, data) {
 
 
     autoUpdater.allowPrerelease = false
-    autoUpdater.autoInstallOnAppQuit = true
+    autoUpdater.autoInstallOnAppQuit = false
     
     if(isDev){
         autoUpdater.autoInstallOnAppQuit = false
@@ -124,7 +172,6 @@ function initAutoUpdater(event, data) {
     })
 
     autoUpdater.on('download-progress', (progress) => {
-        console.log('Downloading progress ' + progress.percent)
         event.sender.send('updateDownloadStatusUpdate', 'downloading', progress.percent)
     })
 
@@ -150,6 +197,12 @@ function initAutoUpdater(event, data) {
         }
     })
     autoUpdater.on('update-not-available', (info) => {
+        if(isOnMainUpdateScreen) {
+            createWindow()
+            createMenu()
+            isOnMainUpdateScreen = false
+            updateWin.destroy()
+        }
         event.sender.send('autoUpdateNotification', 'update-not-available', info)
     })
     autoUpdater.on('checking-for-update', () => {
