@@ -21,8 +21,10 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaa8/package-version@v1.0.3
+      - name: Setup yarn
+        run: npm i -g yarn
       - name: Install JS Modules
-        run: yarn install --production
+        run: yarn install
       - name: Checking code syntax
         run: yarn lint
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process
