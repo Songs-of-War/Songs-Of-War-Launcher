@@ -51,7 +51,6 @@
     "electron-builder": "^22.9.1",
     "eslint": "^7.15.0",
     "jest": "^26.4.2",
-    "jest-electron": "^0.1.11",
     "spectron": "^11.1.0"
   },
   "repository": {

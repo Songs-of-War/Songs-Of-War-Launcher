@@ -22,7 +22,7 @@ jobs:
       - name: package-version
         uses: nyaa8/package-version@v1.0.3
       - name: Install JS Modules
-        run: yarn install
+        run: yarn install --production
       - name: Checking code syntax
         run: yarn lint
       #- run: npm test - Fuck this, I'm not going to spend 5 hours debugging why the CI can't start a chrome process

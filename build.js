@@ -49,7 +49,11 @@ builder.build({
         },
         linux: {
             target: [
-                'AppImage', // Only AppImage supports auto updating
+                {
+                    target: 'AppImage', // Only AppImage supports auto updating
+                    arch: 'x64'
+                }
+
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
