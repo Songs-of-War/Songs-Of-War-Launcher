@@ -47,7 +47,7 @@ if (!gotTheLock) {
             height: 300,
             icon: getPlatformIcon('SealCircle'),
             frame: false,
-            resizable: false,
+            resizable: true,
             closable: false,
             webPreferences: {
                 nodeIntegration: true,
@@ -65,9 +65,12 @@ if (!gotTheLock) {
             slashes: true
         }))
 
-        ipcMain.on('updateDownloadStatusUpdate', (event, args) => {
+        ipcMain.on('updateDownloadStatusUpdate', async (event, args) => {
             if(args === 'readyToStartUpdate') {
+                console.log('Ready for update')
                 initAutoUpdater(event)
+                let data = await autoUpdater.checkForUpdates()
+                console.log(data)
             }
         })
 
@@ -121,6 +124,7 @@ function initAutoUpdater(event, data) {
     })
 
     autoUpdater.on('download-progress', (progress, byPs, percent, total, transferred) => {
+        console.log('Downloading progress ' + progress)
         event.sender.send('updateDownloadStatusUpdate', 'downloading', percent)
     })
 
