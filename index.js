@@ -119,7 +119,7 @@ if (!gotTheLock) {
                 autoUpdater.on('error', args => {
                     dialog.showMessageBox(updateWin, {
                         title: 'Update check failed',
-                        detail: 'The update checking failed, the program cannot proceed, please check your network connection.',
+                        detail: 'The update checking failed, the program cannot proceed, please check your network connection.\n\n' + args.toString(),
                         type: 'error',
                         cancelId: 0,
                         defaultId: 0,
