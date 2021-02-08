@@ -123,9 +123,9 @@ function initAutoUpdater(event, data) {
         }
     })
 
-    autoUpdater.on('download-progress', (progress, byPs, percent, total, transferred) => {
-        console.log('Downloading progress ' + progress)
-        event.sender.send('updateDownloadStatusUpdate', 'downloading', percent)
+    autoUpdater.on('download-progress', (progress) => {
+        console.log('Downloading progress ' + progress.percent)
+        event.sender.send('updateDownloadStatusUpdate', 'downloading', progress.percent)
     })
 
     autoUpdater.on('update-downloaded', (info) => {
