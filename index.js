@@ -23,7 +23,7 @@ unhandled({
 
 let myWindow = null
 
-let updateWin;
+let updateWin
 
 const gotTheLock = app.requestSingleInstanceLock()
 
@@ -257,6 +257,7 @@ async function createWindow() {
 
 }
 
+// eslint-disable-next-line no-unused-vars
 function createMenu() {
     
     if(process.platform === 'darwin') {
