@@ -1222,7 +1222,7 @@ function dlAsync(login = true){
                                     
 
                                     TrayObject = new Tray(path.join(__dirname, '/assets/images/icon.png'))
-                                    TrayObject.setToolTip('Songs of War Launcher - Game Running')
+                                    TrayObject.setToolTip('Songs of War Game - Game Running')
                                     const contextMenu = Menu.buildFromTemplate([
                                         { label: 'Force close the game', type: 'normal', click: function() { proc.kill() }}
                                     ])
