@@ -117,6 +117,18 @@ if (!gotTheLock) {
                 })
 
                 autoUpdater.on('error', args => {
+                    // Our CI is still generating artifacts for this platform, we have to wait that this is done before forcing an update
+                    if(/Error: could not find .*\.\w in the latest release artifacts/gm.test(args.toString())) {
+                        if(isOnMainUpdateScreen) {
+                            // Here we just launch the program if the update on the CI isn't complete yet
+                            createWindow()
+                            createMenu()
+                            autoUpdater.removeAllListeners(event)
+                            isOnMainUpdateScreen = false
+                            updateWin.destroy()
+                        }
+                    }
+
                     dialog.showMessageBox(updateWin, {
                         title: 'Update check failed',
                         detail: 'The update checking failed, the program cannot proceed, please check your network connection.\n\n' + args.toString(),
