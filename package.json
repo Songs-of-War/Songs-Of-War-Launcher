@@ -41,7 +41,7 @@
     "request": "^2.88.2",
     "semver": "^7.3.4",
     "shelljs": "^0.8.4",
-    "systeminformation": "^4.34.2",
+    "systeminformation": "^4.34.7",
     "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
   },
