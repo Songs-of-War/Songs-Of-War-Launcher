@@ -22,6 +22,7 @@
     "afterPack": "./build/scripts/afterPackHook.js"
   },
   "dependencies": {
+    "@imjs/electron-differential-updater": "^5.1.4",
     "adm-zip": "^0.5.1",
     "async": "^3.2.0",
     "discord-rpc": "^3.1.4",
