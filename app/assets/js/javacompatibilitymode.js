@@ -42,7 +42,7 @@ function warnUserOfCompatiblity(reason) {
     if(!ConfigManager.getCompatibilityWarningShowed()) {
         console.log('User warned')
         remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-            title: 'Songs of War Launcher - Compatibility Warning',
+            title: 'Songs of War Game - Compatibility Warning',
             message: 'The compatibility mode has been automatically activated on this system. You may suffer performance issues.',
             detail: 'Reason for activation: ' + reason,
             type: 'warning',
@@ -72,7 +72,7 @@ function setManual() {
 
 function closeDueToCriticalError(data = '') {
     remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-        title: 'Songs of War Launcher',
+        title: 'Songs of War Game',
         detail: 'A critical error has occurred, check your network connection (COMPATIBILITY_MODE_JAVA_DISTRIBUTION_GETTER_FAILURE)\n\n' + data,
         type: 'error',
     }).then((value) => {

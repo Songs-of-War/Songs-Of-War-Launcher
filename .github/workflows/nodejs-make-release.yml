@@ -21,6 +21,8 @@ jobs:
           node-version: 12.x
       - name: package-version
         uses: nyaa8/package-version@v1.0.3
+      - name: Setup yarn
+        run: npm i -g yarn
       - name: Install JS Modules
         run: yarn install
       - name: Checking code syntax

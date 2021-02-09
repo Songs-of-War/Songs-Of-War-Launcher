@@ -1209,7 +1209,7 @@ function prepareJavaTab(){
         saveShaderpackSettings()
         ConfigManager.save()
         remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-            title: 'Songs of War Launcher - Restart required',
+            title: 'Songs of War Game - Restart required',
             detail: 'This setting requires a restart to be applied, would you like to restart the launcher now?',
             type: 'info',
             buttons: [

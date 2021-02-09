@@ -19,7 +19,7 @@ builder.build({
     targets: (process.argv[2] != null && Platform[process.argv[2]] != null ? Platform[process.argv[2]] : getCurrentPlatform()).createTarget(),
     config: {
         appId: 'SoWLauncher',
-        productName: 'Songs of War Launcher',
+        productName: 'Songs of War Game',
         artifactName: 'songs-of-war-launcher-setup-${version}.${ext}',
         copyright: 'Copyright © 2020-2020 lucasboss45',
         directories: {
@@ -30,10 +30,15 @@ builder.build({
             compression: 'maximum',
             target: [
                 {
-                    target: 'nsis',
+                    target: 'squirrel',
                     arch: 'x64'
                 }
             ]
+        },
+        squirrelWindows: {
+            artifactName: 'songs-of-war-launcher-setup-${version}.exe',
+            name: 'Songs of War Game',
+            remoteReleases: false,
         },
         nsis: {
             oneClick: true,
@@ -49,7 +54,11 @@ builder.build({
         },
         linux: {
             target: [
-                'AppImage', // Only AppImage supports auto updating
+                {
+                    target: 'AppImage', // Only AppImage supports auto updating
+                    arch: 'x64'
+                }
+
             ],
             maintainer: 'Songs of War Server',
             vendor: 'Songs of War Server',
