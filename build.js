@@ -30,15 +30,10 @@ builder.build({
             compression: 'maximum',
             target: [
                 {
-                    target: 'squirrel',
+                    target: 'nsis',
                     arch: 'x64'
                 }
             ]
-        },
-        squirrelWindows: {
-            artifactName: 'songs-of-war-launcher-setup-${version}.exe',
-            name: 'Songs of War Game',
-            remoteReleases: false,
         },
         nsis: {
             oneClick: true,
