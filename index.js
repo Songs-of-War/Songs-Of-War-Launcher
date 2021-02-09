@@ -153,7 +153,7 @@ function createWindow() {
 
     win = new BrowserWindow({
         darkTheme: true,
-        width: 980,
+        width: 1400,
         height: 552,
         icon: getPlatformIcon('SealCircle'),
         frame: false,
@@ -180,6 +180,8 @@ function createWindow() {
     /*win.once('ready-to-show', () => {
         win.show()
     })*/
+
+    win.openDevTools()
 
     win.removeMenu()
 

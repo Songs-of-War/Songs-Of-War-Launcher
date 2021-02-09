@@ -238,14 +238,16 @@ function XboxLiveError(XErr) {
 
     if(XErr === 2148916233) {
         msgString = 'Your Microsoft account is yet to become an Xbox account. Sign in with Microsoft at minecraft.net to create one.'
-    } else if(XErr === 2148916238) {
+    } else if (XErr === 2148916238) {
         msgString = 'It seems that this account belongs to a minor. Ask an adult to add your account to a Family.'
+    } else if (XErr === 111555) {
+        msgString = 'Your account does not seem to own Minecraft: Java Edition'
     }
 
 
     setOverlayContent(
         'Xbox Live Authentication Error',
-        'Something went wrong connecting to Xbox Live services. Please try again later.',
+        msgString,
         'Okay'
     )
     setOverlayHandler(null)
@@ -260,6 +262,9 @@ async function handleAuthProcedures(initialLink) {
     let RpsToken = await got.post(link, {
         throwHttpErrors: false
     })
+
+    console.log(RpsToken.body)
+
     RpsToken = JSON.parse(RpsToken.body)['Ticket']
 
 
@@ -356,6 +361,8 @@ async function handleAuthProcedures(initialLink) {
         }
     })
 
+    console.log('Caca')
+
     if(minecraftOwnershipConfirmation2 && minecraftOwnershipConfirmation1) {
         let minecraftProfile = await got('https://api.minecraftservices.com/minecraft/profile', {
             headers: {
@@ -368,7 +375,7 @@ async function handleAuthProcedures(initialLink) {
             let minecraftUUID = minecraftProfileData.id
         }
     } else {
-        XboxLiveError(undefined)
+        XboxLiveError(111555)
     }
 
 
@@ -421,6 +428,7 @@ microsoftLoginButton.addEventListener('click', async () => {
 
             handleAuthProcedures(loginWindow.webContents.getURL())
             loginWindow.webContents.removeAllListeners()
+            loginWindow.destroy()
 
 
         }
