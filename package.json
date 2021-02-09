@@ -1,9 +1,9 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.9.0",
-  "productName": "Songs of War Launcher",
-  "description": "Songs of War Minecraft Server",
-  "author": "lucasboss45",
+  "version": "1.10.3",
+  "productName": "Songs of War Game",
+  "description": "Songs of War Game Launcher",
+  "author": "Dexiam",
   "license": "UNLICENSED",
   "homepage": "https://songs-of-war.com",
   "private": true,
@@ -27,7 +27,6 @@
     "discord-rpc": "^3.1.4",
     "ejs": "^3.1.5",
     "ejs-electron": "^2.1.1",
-    "electron-builder-squirrel-windows": "^22.10.4",
     "electron-unhandled": "^3.0.2",
     "electron-updater": "^4.3.6",
     "electron-util": "^0.14.2",
@@ -50,10 +49,9 @@
     "cross-env": "^7.0.3",
     "electron": "^11.0.5",
     "electron-builder": "^22.9.1",
+    "eslint": "^7.15.0",
     "jest": "^26.4.2",
-    "jest-electron": "^0.1.11",
-    "spectron": "^11.1.0",
-    "eslint": "^7.15.0"
+    "spectron": "^11.1.0"
   },
   "repository": {
     "type": "git",

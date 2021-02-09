@@ -1,5 +1,5 @@
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu, Tray } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, Tray, dialog, shell } = require('electron')
 const autoUpdater                   = require('electron-updater').autoUpdater
 const ejse                          = require('ejs-electron')
 const fs                            = require('fs')
@@ -23,6 +23,10 @@ unhandled({
 
 let myWindow = null
 
+let updateWin
+
+let isOnMainUpdateScreen = false
+
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
@@ -36,9 +40,111 @@ if (!gotTheLock) {
         }
     })
 
+    // Start checking for updates screen
+
+    app.on('ready', async () => {
+        updateWin = new BrowserWindow({
+            darkTheme: true,
+            width: 400,
+            height: 300,
+            icon: getPlatformIcon('SealCircle'),
+            frame: false,
+            resizable: true,
+            fullscreenable: false,
+            simpleFullscreen: false,
+            fullscreen: false,
+            maximizable: false,
+            closable: false,
+            webPreferences: {
+                devTools: false,
+                nodeIntegration: true,
+                contextIsolation: false,
+                enableRemoteModule: true,
+                worldSafeExecuteJavaScript: true,
+
+            },
+            backgroundColor: '#171614'
+        })
+
+        updateWin.loadURL(url.format({
+            pathname: path.join(__dirname, 'app', 'updatecheck.ejs'),
+            protocol: 'file:',
+            slashes: true
+        }))
+
+        ipcMain.on('updateDownloadStatusUpdate', async (event, args) => {
+            if(args === 'readyToStartUpdate') {
+                console.log('Ready for update')
+
+                // Setup events
+
+                // https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg
+
+                // Shitty mac "support"
+                autoUpdater.on('update-available', (info) => {
+                    if(process.platform === 'darwin') {
+                        dialog.showMessageBox(updateWin, {
+                            title: 'Cannot automatically update on MacOS',
+                            detail: 'The program cannot automatically update on MacOS, please do so manually',
+                            type: 'error'
+                        }).then(buttonid => {
+                            shell.openExternal(`https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg`)
+                            app.exit()
+                        })
+                    }
+                })
+
+                autoUpdater.on('download-progress', (progress) => {
+                    console.log('Downloading progress ' + progress.percent)
+                    event.sender.send('updateDownloadStatusUpdate', 'downloading', progress.percent)
+                })
+
+                autoUpdater.on('update-not-available', (info) => {
+                    if(isOnMainUpdateScreen) {
+                        createWindow()
+                        createMenu()
+                        autoUpdater.removeAllListeners(event)
+                        isOnMainUpdateScreen = false
+                        updateWin.destroy()
+                    }
+                })
+
+                autoUpdater.on('update-downloaded', (info) => {
+                    if (isOnMainUpdateScreen) {
+                        autoUpdater.quitAndInstall(false, true)
+                        app.exit(0)
+                    }
+                })
+
+                autoUpdater.on('error', args => {
+                    dialog.showMessageBox(updateWin, {
+                        title: 'Update check failed',
+                        detail: 'The update checking failed, the program cannot proceed, please check your network connection.\n\n' + args.toString(),
+                        type: 'error',
+                        cancelId: 0,
+                        defaultId: 0,
+                    }).then(buttonPressed => {
+                        app.exit()
+                    })
+                })
+
+
+                // Check the updates after the events have been registered
+
+                let data = await autoUpdater.checkForUpdates()
+                console.log(data)
+            }
+        })
+
+        isOnMainUpdateScreen = true
+
+    })
+
+
+
     // Create myWindow, load the rest of the app, etc...
-    app.on('ready', createWindow)
-    app.on('ready', createMenu)
+    //app.on('ready', createWindow)
+    //app.on('ready', createMenu)
 }
 
 // Setup auto updater.
@@ -46,7 +152,7 @@ function initAutoUpdater(event, data) {
 
 
     autoUpdater.allowPrerelease = false
-    autoUpdater.autoInstallOnAppQuit = true
+    autoUpdater.autoInstallOnAppQuit = false
     
     if(isDev){
         autoUpdater.autoInstallOnAppQuit = false
@@ -80,6 +186,11 @@ function initAutoUpdater(event, data) {
             })*/
         }
     })
+
+    autoUpdater.on('download-progress', (progress) => {
+        event.sender.send('updateDownloadStatusUpdate', 'downloading', progress.percent)
+    })
+
     autoUpdater.on('update-downloaded', (info) => {
         event.sender.send('autoUpdateNotification', 'update-downloaded', info)
         if(process.platform === 'win32') {
@@ -102,6 +213,12 @@ function initAutoUpdater(event, data) {
         }
     })
     autoUpdater.on('update-not-available', (info) => {
+        if(isOnMainUpdateScreen) {
+            createWindow()
+            createMenu()
+            isOnMainUpdateScreen = false
+            updateWin.destroy()
+        }
         event.sender.send('autoUpdateNotification', 'update-not-available', info)
     })
     autoUpdater.on('checking-for-update', () => {
@@ -209,6 +326,7 @@ async function createWindow() {
 
 }
 
+// eslint-disable-next-line no-unused-vars
 function createMenu() {
     
     if(process.platform === 'darwin') {
