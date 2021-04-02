@@ -18,21 +18,41 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
     }
 
     activity = {
+        buttons: [
+            { label: '🌐 Check us out', url: 'https://songs-of-war.com' },
+            /*
+            Adding a start game option would require adding a new protocol which is different on every OS
+            on linux specifically it is different on every Desktop Environment and I'm not willing to support so many different versions.
+
+            Pull requests are welcome if you wish to implement this.
+            https://www.electronjs.org/docs/api/app#appsetasdefaultprotocolclientprotocol-path-args
+            https://stackoverflow.com/a/19771330
+             */
+            //{ label: '🎮 Start the game', url: 'songsofwar://start' },
+
+            { label: '🤖 Join our discord server', url: 'https://discord.songs-of-war.com'}
+        ],
         details: initialDetails,
         state: 'Server', //Server name
-        largeImageKey: 'sealcircle',
-        largeImageText: 'songs-of-war.com',
-        smallImageKey: genSettings.smallImageKey,
-        smallImageText: genSettings.smallImageText,
-        partySize: null,
-        partyMax: null,
-        startTimestamp: LastDate,
-        instance: false
+        assets: {
+            large_image: 'sealcircle',
+            large_text: 'songs-of-war.com',
+            small_image: genSettings.smallImageKey,
+            small_text: genSettings.smallImageText
+        },
+        // We can have a party of 0 so we only ad the object whenever there is people online
+        /*party: {
+            size: [0, 150],
+        },*/
+        timestamps: {
+            start: LastDate,
+        }
     }
 
     client.on('ready', () => {
         logger.log('Discord RPC Connected')
-        client.setActivity(activity)
+        client.request('SET_ACTIVITY', { pid: process.pid, activity})
+        //client.setActivity(activity, process.pid)
         isRPCEnabled = true
        
     })
@@ -48,21 +68,23 @@ exports.initRPC = function(genSettings, initialDetails = 'In the Launcher', star
         }
     })
 
+
     
 }
 
+
 exports.updateOC = function(ocName, ocSpecies, imageKey) {
     if(!isRPCEnabled) return
-    activity.smallImageKey = imageKey
-    activity.smallImageText = ocSpecies + ' OC: ' + ocName
-    client.setActivity(activity)
+    activity.assets.small_image = imageKey
+    activity.assets.small_text = ocSpecies + ' OC: ' + ocName
+    client.request('SET_ACTIVITY', { pid: process.pid, activity})
 }
 
 exports.resetOC = function() {
     if(!isRPCEnabled) return
-    activity.smallImageKey = 'mainlogo'
-    activity.smallImageText = 'Songs of War'
-    client.setActivity(activity)
+    activity.assets.small_image = 'mainlogo'
+    activity.assets.small_text = 'Songs of War'
+    client.request('SET_ACTIVITY', { pid: process.pid, activity})
 }
 
 exports.updateDetails = function(details, startimestamp = null){
@@ -74,18 +96,17 @@ exports.updateDetails = function(details, startimestamp = null){
     if(details == 'In the Launcher') {
         exports.resetOC()
     }
-    activity.startTimestamp = LastDate
-    client.setActivity(activity)
+    activity.timestamps.start = LastDate
+    client.request('SET_ACTIVITY', { pid: process.pid, activity})
 }
 
 exports.updatePartySize = function(curPlayers = 0, maxPlayers = 0){
     if(!isRPCEnabled) return
     if(curPlayers != 0) {
-        activity.partyMax = maxPlayers
-        activity.partySize = curPlayers
+        // The size is an array
+        activity.party.size = [curPlayers, maxPlayers]
     }
-    
-    client.setActivity(activity)
+    client.request('SET_ACTIVITY', { pid: process.pid, activity})
 }
 
 exports.shutdownRPC = function(){
