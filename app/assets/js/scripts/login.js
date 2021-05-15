@@ -416,7 +416,17 @@ microsoftLoginButton.addEventListener('click', async () => {
 
     loginWindow.setMenu(null)
     loginWindow.resizable = false
-    await loginWindow.loadURL('https://login.live.com/oauth20_authorize.srf%20?client_id=34be85e8-151d-45f2-8241-3954da296908%20&response_type=code&redirect_uri=https%3A%2F%2Fsongs-of-war.com%2Fxbox%2Fauthenticate.php%20&scope=XboxLive.signin Xboxlive.offline_access')
+
+    try {
+        await loginWindow.loadURL('https://login.live.com/oauth20_authorize.srf%20?client_id=34be85e8-151d-45f2-8241-3954da296908%20&response_type=code&redirect_uri=https%3A%2F%2Fsongs-of-war.com%2Fxbox%2Fauthenticate.php%20&scope=XboxLive.signin Xboxlive.offline_access')
+    } catch(e) {
+        loginWindow.destroy()
+        setOverlayContent('An error occurred', 'An error occurred while trying to contact Microsoft servers, check your internet connection and try again.', 'Ok')
+        setOverlayHandler(null)
+        toggleOverlay(true)
+
+        return
+    }
 
     let URLUpdateEvent = loginWindow.webContents.on('update-target-url', () => {
         if(loginWindow.webContents.getURL().startsWith('https://songs-of-war.com/xbox/authenticate.php')) {
