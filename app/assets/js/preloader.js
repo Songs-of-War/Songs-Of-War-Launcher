@@ -60,7 +60,7 @@ async function onDistroLoad(data){
 
 try {
     got('https://mysql.songs-of-war.com/maintenance').then(result => {
-        if(result.body == 'true') {
+        if(result.body.includes("true")) {
             onDistroLoad(null)
             console.log('Server maintenance true')
         } else {

@@ -411,7 +411,7 @@ document.addEventListener('readystatechange', function(){
             } else {
                 try {
                     got('https://mysql.songs-of-war.com/maintenance').then(result => {
-                        if(result.body == 'true') {
+                        if(result.body.includes('true')) {
                             showFatalStartupErrorServerMaintenance()
                             console.log('Server maintenance true')
                         } else {
@@ -444,7 +444,7 @@ ipcRenderer.on('distributionIndexDone', (event, res) => {
         if(document.readyState === 'interactive' || document.readyState === 'complete'){
             try {
                 got('https://mysql.songs-of-war.com/maintenance').then(result => {
-                    if(result.body == 'true') {
+                    if(result.body.includes('true')) {
                         showFatalStartupErrorServerMaintenance()
                         console.log('Server maintenance true')
                     } else {
