@@ -52,8 +52,10 @@ async function onDistroLoad(data){
     }
     ipcRenderer.send('distributionIndexDone', data != null)
     const distro = DistroManager.getDistribution()
-    if(distro.discord != null) {
-        DiscordWrapper.initRPC(distro.discord, 'In the Launcher', new Date().getTime())
+    if(distro != null) {
+        if (distro.discord != null) {
+            DiscordWrapper.initRPC(distro.discord, 'In the Launcher', new Date().getTime())
+        }
     }
 }
 
