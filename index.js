@@ -1,3 +1,5 @@
+require('@electron/remote/main').initialize()
+
 // Requirements
 const { app, BrowserWindow, ipcMain, Menu, Tray, dialog, shell } = require('electron')
 const { autoUpdater }               = require('@imjs/electron-differential-updater')

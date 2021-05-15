@@ -23,6 +23,9 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+**Log file**
+The launcher log file, please upload it using pastebin or a similar service
+
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
  - Launcher version [e.g. 22]
