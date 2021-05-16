@@ -50,10 +50,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
-      - name: Setup node 12
+      - name: Setup node 14
         uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: 14.x
       - name: package-version
         uses: nyaa8/package-version@v1.0.3
       - name: Install JS Modules
@@ -89,10 +89,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check GitHub Status
         uses: crazy-max/ghaction-github-status@v1
-      - name: Setup node 12
+      - name: Setup node 14
         uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: 14.x
       - name: package-version
         uses: nyaa8/package-version@v1.0.3
       - name: Install JS Modules
