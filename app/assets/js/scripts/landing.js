@@ -640,11 +640,12 @@ let progressListener
  * 
  * @param {string} optionsPath - Path to instance options.txt
  */
-function useDefaultOptions(optionsPath) {
-    let setting = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).isMainServer() ? 'normal' : 'high'
+function useDefaultOptions(optionsPath, optifineOnly = false) {
 
-    fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'options.txt'), optionsPath)
-    fs.copyFileSync(path.join(__dirname, 'assets/txt', setting, 'optionsof.txt'), path.join(path.dirname(optionsPath), 'optionsof.txt'))
+    if(!optifineOnly) {
+        fs.copyFileSync(path.join(__dirname, 'assets/txt', 'defaults', 'options.txt'), optionsPath)
+    }
+    fs.copyFileSync(path.join(__dirname, 'assets/txt', 'defaults', 'optionsof.txt'), path.join(path.dirname(optionsPath), 'optionsof.txt'))
 }
 
 
@@ -1097,7 +1098,7 @@ function dlAsync(login = true){
                                     fs.readdirSync(paths.mods).forEach((file) => {
                                         // Prevent optifine to be deleted here because of Java Path issues
                                         // Shit patch but honestly I don't care, I don't have time to implement something better
-                                        if(file !== 'OptiFine_1.15.2.jar' && file !== 'MixinBootstrap.jar') {
+                                        if(file !== 'OptiFine.jar' && file !== 'MixinBootstrap.jar') {
                                             fs.unlinkSync(path.join(paths.mods, file))
                                         }
                                     })
@@ -1107,7 +1108,7 @@ function dlAsync(login = true){
         
                                 // If there aren't any options set so far
                                 if(!fs.existsSync(paths.options) || !fs.existsSync(path.join(gamePath, 'optionsof.txt'))) {
-                                    loggerLaunchSuite.log('Could not find options.txt in instance directory.')
+                                    loggerLaunchSuite.log('Could not find options in instance directory.')
         
                                     // Try to grab .minecraft/options.txt                 
                                     const oldOptionsPath = path.join(ConfigManager.getMinecraftDirectory(), 'options.txt')
@@ -1115,6 +1116,7 @@ function dlAsync(login = true){
                                     if(fs.existsSync(oldOptionsPath)) {
                                         loggerLaunchSuite.log('Found! Attempting to copy.')
                                         fs.copyFileSync(oldOptionsPath, paths.options)
+                                        useDefaultOptions(paths.options, true)
         
                                     // If it doesn't exist
                                     } else {
