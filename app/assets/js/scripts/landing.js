@@ -1326,7 +1326,8 @@ function dlAsync(login = true){
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    if(filename === "nicephore" || filename.startsWith("nicephore\\")) {
+                                    // TODO: Yes this is retarded, I will add SHA256 verification later
+                                    if(filename === "nicephore" || filename.startsWith("nicephore\\") || filename === "OptiFine.jar") {
                                         return
                                     }
                                     if(!joinedServer) {
