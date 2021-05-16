@@ -1326,7 +1326,7 @@ function dlAsync(login = true){
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    if(filename === "nicephore") {
+                                    if(filename === "nicephore" || filename.startsWith("nicephore\\")) {
                                         return
                                     }
                                     if(!joinedServer) {
