@@ -43,7 +43,6 @@ builder.build({
         mac: {
             target: [
                 'dmg',
-                'zip'
             ],
             category: 'public.app-category.games',
             compression: 'maximum'
@@ -76,8 +75,3 @@ builder.build({
 }).catch(err => {
     console.error('Error during build!', err)
 })
-
-const {
-    generateZipandBlockmap
-} = require("@imjs/electron-differential-updater");
-generateZipandBlockmap();
