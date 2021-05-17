@@ -1206,10 +1206,6 @@ function dlAsync(login = true){
                                     encoding: 'utf-8',
                                     recursive: true
                                 })
-                                const CustomAssetsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/customassets'), {
-                                    encoding: 'utf-8',
-                                    recursive: true
-                                })
 
                                 // Build Minecraft process.
                                 // Minecraft process needs to be built after the asset checking is done, prevents game from starting with launcher errors
@@ -1253,7 +1249,6 @@ function dlAsync(login = true){
 
                                         //Shutdown all the file watchers
                                         ModsWatcher.close()
-                                        CustomAssetsWatcher.close()
                                         remote.getCurrentWindow().show()
                                         
                                         if(process.platform === 'win32') TrayObject.destroy(); loggerLanding.log('Open window, trigger')
@@ -1326,7 +1321,7 @@ function dlAsync(login = true){
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    // TODO: Yes this is retarded, I will add SHA256 verification later
+                                    // TODO: Yes this is retarded, I will add MD5 verification later
                                     if(filename === 'nicephore' || filename.startsWith('nicephore\\') || filename === 'OptiFine.jar') {
                                         return
                                     }
@@ -1334,11 +1329,6 @@ function dlAsync(login = true){
                                         ModifyError = true
                                         proc.kill()
                                     }
-                                })
-                                CustomAssetsWatcher.on('change', (event, filename) => {
-                                    loggerLanding.log('File edit: ' + filename)
-                                    ModifyError = true
-                                    proc.kill()
                                 })
 
                                 
