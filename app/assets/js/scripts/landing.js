@@ -1193,6 +1193,12 @@ function dlAsync(login = true){
                                 } else {
                                     loggerLaunchSuite.log('Shader mirroring disabled in launcher config')
                                 }
+
+                                let watcherRecurse = true
+                                // Watcher recursiveness is not supported in Linux
+                                if(process.platform === 'linux') {
+                                    watcherRecurse = false
+                                }
                                 
                                 // Updated as of late: We want to delete the mods / edit the configuration right before the game is launched, so that the launcher gets the change to synchronise the files with the distribution
                                 // Fixes ENOENT error without a .songsofwar folder
@@ -1204,7 +1210,7 @@ function dlAsync(login = true){
                                 // Note: I have no idea if there's a better way to do this so eh.
                                 const ModsWatcher = fs.watch(path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods'), {
                                     encoding: 'utf-8',
-                                    recursive: true
+                                    recursive: watcherRecurse
                                 })
 
                                 // Build Minecraft process.
