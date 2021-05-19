@@ -142,6 +142,7 @@ if (!gotTheLock) {
                         setTimeout(async () => {
                             await autoUpdater.checkForUpdates()
                         }, 2000)
+                        return
                     } else if(args == 'Error: Could not get code signature for running application') {
                         // We just ignore that error and use my own install script
                         if(isOnMainUpdateScreen) {
@@ -149,12 +150,10 @@ if (!gotTheLock) {
                                 process.noAsar = true // https://stackoverflow.com/a/44611396
 
                                 let file = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending/Songs-of-War-Game-mac-${nextAppVersion}.zip`
-                                let extractPath = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending`
-
-                                let alreadyExtracted = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending/Songs of War Game.app`
+                                let extractPath = `/Applications/SoWTempInstall`
 
                                 const fs = require('fs')
-                                fs.rmSync(alreadyExtracted, {
+                                fs.rmdirSync(extractPath, {
                                     force: true,
                                     recursive: true,
                                 })
@@ -173,12 +172,14 @@ if (!gotTheLock) {
                                 // When it's done extracting
                                 unzip.on('extract', async () => {
                                     process.noAsar = false
-                                    //const sudoprompt = require('sudo-prompt')
+                                    const sudoprompt = require('sudo-prompt')
 
                                     // Just as a precaution
-                                    child_process.execSync('chmod +x ./updateMac.sh')
+                                    child_process.execSync('chmod +x "' + path.join(__dirname, 'app', 'assets', 'updateMac.sh') + '"')
                                     // Shitty shell script to install the new version on Mac
-                                    //child_process.spawn(`./updateMac.sh`, { detached: true })
+                                    child_process.spawn(`${path.join(__dirname, 'app', 'assets', 'updateMac.sh')}`, { detached: true }, function(err, stdout, stderr) {
+                                        console.log(stdout)
+                                    })
 
                                     app.exit(0)
                                     

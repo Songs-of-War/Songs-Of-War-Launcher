@@ -1,0 +1,1 @@
+sleep 2 && rm -R -f /Applications/Songs of\ War\ Game.app && cp -L -R /Applications/SoWTempInstall/Songs\ of\ War\ Game.app/ /Applications/Songs\ of\ War\ Game.app && sleep 1 && rm -R -f ~/Library/Application\ Support/Caches/Songs\ of\ War\ Game/pending/ && rm -R -f /Applications/SoWTempInstall && open /Applications/Songs of\ War\ Game.app
