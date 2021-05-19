@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.10.12",
+  "version": "1.10.13",
   "productName": "Songs of War Game",
   "description": "Songs of War Game Launcher",
   "author": "Dexiam",
@@ -14,7 +14,7 @@
     "cidarwin": "node build.js MAC",
     "dist": "cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true node build.js",
     "dist:win": "npm run dist -- WINDOWS",
-    "dist:mac": "npm run dist -- MAC",
+    "dist:mac": "npm run dist -- MAC && node macZip.js",
     "dist:linux": "npm run dist -- LINUX",
     "lint": "eslint --config .eslintrc.json ."
   },
@@ -22,13 +22,15 @@
     "node": "14.x.x"
   },
   "build": {
+    "productName": "Songs of War Game",
     "afterPack": "./build/scripts/afterPackHook.js"
   },
   "dependencies": {
-    "@imjs/electron-differential-updater": "^5.1.4",
     "@electron/remote": "^1.1.0",
+    "@imjs/electron-differential-updater": "^5.1.4",
     "adm-zip": "^0.5.1",
     "async": "^3.2.0",
+    "decompress-zip": "^0.3.3",
     "discord-rpc": "^3.2.0",
     "ejs": "^3.1.6",
     "ejs-electron": "^2.1.1",
@@ -44,9 +46,10 @@
     "http-parser-js": "^0.5.3",
     "jquery": "^3.6.0",
     "request": "^2.88.2",
-    "shelljs": "^0.8.4",
-    "systeminformation": "^5.3.4",
     "semver": "^7.3.5",
+    "shelljs": "^0.8.4",
+    "sudo-prompt": "^9.2.1",
+    "systeminformation": "^5.3.4",
     "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
   },

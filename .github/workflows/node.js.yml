@@ -40,23 +40,8 @@ jobs:
       - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage
-      - name: Upload deb package
-        uses: actions/upload-artifact@v2
-        with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.deb
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.deb
-      - name: Upload rpm package
-        uses: actions/upload-artifact@v2
-        with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.rpm
-      - name: Upload freedbsd package
-        uses: actions/upload-artifact@v2
-        with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.freebsd
+          name: Songs-of-War-Game-linux-${{ env.PACKAGE_VERSION }}.AppImage
+          path: dist/Songs-of-War-Game-linux-${{ env.PACKAGE_VERSION }}.AppImage
       - name: Upload latest-linux file
         uses: actions/upload-artifact@v2
         with:
@@ -86,18 +71,23 @@ jobs:
       - name: Upload dmg
         uses: actions/upload-artifact@v2
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-      - name: Upload pkg
-        uses: actions/upload-artifact@v2
-        with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.pkg
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg
       - name: Upload blockmap
         uses: actions/upload-artifact@v2
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+      - name: Upload zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip
+      - name: Upload zip blockmap
+        uses: actions/upload-artifact@v2
+        with:
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip.blockmap
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip.blockmap
       - name: Upload latest-mac file
         uses: actions/upload-artifact@v2
         with:

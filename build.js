@@ -20,7 +20,7 @@ builder.build({
     config: {
         appId: 'SoWLauncher',
         productName: 'Songs of War Game',
-        artifactName: 'songs-of-war-launcher-setup-${version}.${ext}',
+        artifactName: 'Songs-of-War-Game-${os}-${version}.${ext}',
         copyright: 'Copyright © 2020-2021 Dexiam',
         directories: {
             buildResources: 'build',
@@ -43,16 +43,17 @@ builder.build({
         mac: {
             target: [
                 'dmg',
+                'zip'
             ],
             category: 'public.app-category.games',
-            compression: 'maximum'
+            compression: 'maximum',
         },
         linux: {
             target: [
                 {
                     target: 'AppImage', // Only AppImage supports auto updating
                     arch: 'x64'
-                }
+                },
 
             ],
             maintainer: 'Songs of War Server',

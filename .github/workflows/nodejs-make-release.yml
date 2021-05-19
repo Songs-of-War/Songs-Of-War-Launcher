@@ -32,7 +32,7 @@ jobs:
       - name: Upload AppImage
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.AppImage xdg/shared-mime-info
+          args: dist/Songs-of-War-Game-linux-${{ env.PACKAGE_VERSION }}.AppImage xdg/shared-mime-info
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Linux File
@@ -65,14 +65,26 @@ jobs:
       - name: Upload Dmg
         uses: Shopify/upload-to-release@1.0.0
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
         uses: Shopify/upload-to-release@1.0.0
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.dmg.blockmap
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Zip
+        uses: Shopify/upload-to-release@1.0.0
+        with:
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip
+          repo-token: ${{ secrets.GIT_TOKEN }}
+      - name: Upload Zip Blockmap
+        uses: Shopify/upload-to-release@1.0.0
+        with:
+          name: Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip.blockmap
+          path: dist/Songs-of-War-Game-mac-${{ env.PACKAGE_VERSION }}.zip.blockmap
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest Mac File
         uses: Shopify/upload-to-release@1.0.0
@@ -105,14 +117,14 @@ jobs:
       - name: Upload Exe
         uses: Shopify/upload-to-release@1.0.0
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          name: Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Blockmap
         uses: Shopify/upload-to-release@1.0.0
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          name: Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe.blockmap
           repo-token: ${{ secrets.GIT_TOKEN }}
       - name: Upload Latest File
         uses: Shopify/upload-to-release@1.0.0

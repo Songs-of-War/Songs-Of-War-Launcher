@@ -11,6 +11,10 @@ ipcRenderer.on('updateDownloadStatusUpdate', (event, args, percentage) => {
             progressBar.value = percentage
             messageText.textContent = 'Downloading update'
             break
+        case 'extracting':
+            progressBar.value = percentage
+            messageText.textContent = 'Extracting package'
+            break
     }
 })
 

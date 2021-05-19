@@ -1,7 +1,7 @@
 require('@electron/remote/main').initialize()
 
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu, Tray, dialog, shell } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, Tray, dialog } = require('electron')
 const { autoUpdater }               = require('@imjs/electron-differential-updater')
 const ejse                          = require('ejs-electron')
 const fs                            = require('fs')
@@ -9,6 +9,8 @@ const isDev                         = require('./app/assets/js/isdev')
 const path                          = require('path')
 const semver                        = require('semver')
 const url                           = require('url')
+const child_process                 = require('child_process')
+const DecompressZip = require('decompress-zip')
 /*const unhandled                     = require('electron-unhandled')
 const {openNewGitHubIssue, debugInfo} = require('electron-util')
 
@@ -22,6 +24,8 @@ unhandled({
     },
     showDialog: true
 })*/
+
+let nextAppVersion = null
 
 let myWindow = null
 
@@ -82,18 +86,23 @@ if (!gotTheLock) {
 
                 // https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg
 
-                // Shitty mac "support"
-                autoUpdater.on('update-available', (info) => {
+                // Shitty mac "support", I am not paying apple for a certificate
+                /*autoUpdater.on('update-available', (info) => {
                     if(process.platform === 'darwin') {
                         dialog.showMessageBox(updateWin, {
-                            title: 'Cannot automatically update on MacOS',
-                            detail: 'The program cannot automatically update on MacOS, please do so manually',
+                            title: 'An update is available but...',
+                            detail: 'The program cannot automatically update on MacOS (unless we pay money to apple), please do so manually. \n\nPressing "OK" will open a browser tab to download it.',
                             type: 'error'
                         }).then(buttonid => {
-                            shell.openExternal(`https://github.com/lucasboss45/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Launcher-setup-${info.version}.dmg`)
+                            shell.openExternal(`https://github.com/Songs-of-War/Songs-Of-War-Launcher/releases/download/v${info.version}/Songs-of-War-Game-mac-${info.version}.dmg`)
                             app.exit()
                         })
                     }
+                })*/
+
+                autoUpdater.on('update-available', update => {
+                    console.log('New update: ' + update.version)
+                    nextAppVersion = update.version
                 })
 
                 autoUpdater.on('download-progress', (progress) => {
@@ -129,6 +138,61 @@ if (!gotTheLock) {
                             isOnMainUpdateScreen = false
                             updateWin.destroy()
                         }
+                    } else if(args == 'Configuring update for differential download. Please try after some time') {
+                        setTimeout(async () => {
+                            await autoUpdater.checkForUpdates()
+                        }, 2000)
+                    } else if(args == 'Error: Could not get code signature for running application') {
+                        // We just ignore that error and use my own install script
+                        if(isOnMainUpdateScreen) {
+                            if(process.platform === 'darwin') {
+                                process.noAsar = true // https://stackoverflow.com/a/44611396
+
+                                let file = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending/Songs-of-War-Game-mac-${nextAppVersion}.zip`
+                                let extractPath = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending`
+
+                                let alreadyExtracted = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending/Songs of War Game.app`
+
+                                const fs = require('fs')
+                                fs.rmSync(alreadyExtracted, {
+                                    force: true,
+                                    recursive: true,
+                                })
+
+                                const unzip = new DecompressZip(file)
+
+                                unzip.on('progress', (index, files) => {
+                                    console.log(`${index} / ${files} - ${(index/files)*100}`)
+                                    event.sender.send('updateDownloadStatusUpdate', 'extracting', (index / files) * 100)
+                                })
+
+                                unzip.on('error', e => {
+                                    console.error(e)
+                                })
+
+                                // When it's done extracting
+                                unzip.on('extract', async () => {
+                                    process.noAsar = false
+                                    //const sudoprompt = require('sudo-prompt')
+
+                                    // Just as a precaution
+                                    child_process.execSync('chmod +x ./updateMac.sh')
+                                    // Shitty shell script to install the new version on Mac
+                                    //child_process.spawn(`./updateMac.sh`, { detached: true })
+
+                                    app.exit(0)
+                                    
+                                })
+
+                                unzip.extract({
+                                    path: extractPath,
+                                    restrict: false
+                                })
+                                
+                                return
+                            }
+                        }                        
+                        return
                     }
 
                     dialog.showMessageBox(updateWin, {
@@ -145,9 +209,10 @@ if (!gotTheLock) {
 
                 // Check the updates after the events have been registered
 
-                let data = await autoUpdater.checkForUpdates()
-                console.log(data)
+
+                await autoUpdater.checkForUpdates()
             }
+            
         })
 
         isOnMainUpdateScreen = true
@@ -174,6 +239,7 @@ function initAutoUpdater(event, data) {
     }
     if(process.platform === 'darwin'){
         autoUpdater.autoDownload = false
+        autoUpdater.autoInstallOnAppQuit = false
     }
     autoUpdater.on('update-available', (info) => {
         event.sender.send('autoUpdateNotification', 'update-available', info)
@@ -424,11 +490,7 @@ function getPlatformIcon(filename){
 
 
 app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+    app.quit()
 })
 
 app.on('activate', () => {
