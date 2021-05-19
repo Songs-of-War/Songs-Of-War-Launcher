@@ -67,7 +67,7 @@ jobs:
       - name: Checking code syntax
         run: yarn lint
       #- run: npm test
-      - run: npm run dist -- MAC
+      - run: npm run dist:mac
       - name: Upload dmg
         uses: actions/upload-artifact@v2
         with:
@@ -117,13 +117,13 @@ jobs:
       - name: Upload Artifact 1
         uses: actions/upload-artifact@v2
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe
+          name: Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe
+          path: dist/Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe
       - name: Upload Artifact 2
         uses: actions/upload-artifact@v2
         with:
-          name: songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
-          path: dist/songs-of-war-launcher-setup-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          name: Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe.blockmap
+          path: dist/Songs-of-War-Game-win-${{ env.PACKAGE_VERSION }}.exe.blockmap
       - name: Upload Artifact 3
         uses: actions/upload-artifact@v2
         with:
