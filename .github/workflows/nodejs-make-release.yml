@@ -61,7 +61,7 @@ jobs:
       - name: Checking code syntax
         run: yarn lint
       #- run: npm test
-      - run: npm run dist -- MAC
+      - run: npm run dist:mac
       - name: Upload Dmg
         uses: Shopify/upload-to-release@1.0.0
         with:
