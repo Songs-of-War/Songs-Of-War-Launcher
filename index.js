@@ -150,7 +150,7 @@ if (!gotTheLock) {
                                 process.noAsar = true // https://stackoverflow.com/a/44611396
 
                                 let file = `${autoUpdater.getAppSupportCacheDir()}/../Caches/Songs of War Game/pending/Songs-of-War-Game-mac-${nextAppVersion}.zip`
-                                let extractPath = `/Applications/SoWTempInstall`
+                                let extractPath = '/Applications/SoWTempInstall'
 
                                 const fs = require('fs')
                                 fs.rmdirSync(extractPath, {
@@ -172,7 +172,7 @@ if (!gotTheLock) {
                                 // When it's done extracting
                                 unzip.on('extract', async () => {
                                     process.noAsar = false
-                                    const sudoprompt = require('sudo-prompt')
+                                    //const sudoprompt = require('sudo-prompt')
 
                                     // Just as a precaution
                                     child_process.execSync('chmod +x "' + path.join(__dirname, 'app', 'assets', 'updateMac.sh') + '"')
