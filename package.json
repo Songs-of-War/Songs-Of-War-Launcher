@@ -1,6 +1,6 @@
 {
   "name": "songs-of-war-launcher",
-  "version": "1.10.13",
+  "version": "1.10.13-alpha",
   "productName": "Songs of War Game",
   "description": "Songs of War Game Launcher",
   "author": "Dexiam",
@@ -49,7 +49,7 @@
     "semver": "^7.3.5",
     "shelljs": "^0.8.4",
     "sudo-prompt": "^9.2.1",
-    "systeminformation": "^5.3.4",
+    "systeminformation": "^5.7.1",
     "tar-fs": "^2.1.1",
     "winreg": "^1.2.4"
   },

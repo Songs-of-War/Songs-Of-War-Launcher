@@ -122,23 +122,24 @@ exports.initCompatibilityMode = async function () {
                 console.info('Done! Got MacOS')
                 break
             case 'win32': {
-                const wsi = require('wmic-sys-info')
-                let wmicRequest = await wsi.getVideoController()
+
+                let graphicData = await si.graphics()
 
                 // Primary graphics device
-                let graphicsDevice
+                let graphicsDeviceData = null
+                let graphicVendor = null
                 for (let i = 0; i < 10; i++) {
-                    graphicsDevice = wmicRequest[i]
-                    if (graphicsDevice === undefined) {
+                    graphicsDeviceData = graphicData.controllers[i]
+                    if (graphicsDeviceData == null) {
                         break
                     }
-                    console.log('Found graphic device: ' + graphicsDevice.VideoProcessor)
+                    console.log('Found graphic device: ' + graphicsDeviceData.model)
+                    graphicVendor = graphicsDeviceData.vendor
+                    console.log(graphicVendor)
                 }
 
-                graphicsDevice = wmicRequest[0].VideoProcessor
 
-
-                if ((graphicsDevice.toLowerCase().includes('intel') || graphicsDevice.toLowerCase().includes('hd graphics')) && wmicRequest.length < 2) {
+                if ((graphicVendor.toLowerCase().includes('intel') || graphicVendor.toLowerCase().includes('hd graphics')) && graphicData.controllers.size < 2) {
                     compatibilityMode = true
                     warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
                 }
@@ -147,7 +148,7 @@ exports.initCompatibilityMode = async function () {
             }
             case 'linux': {
                 let graphics = await si.graphics()
-                if (graphics.controllers[0] === undefined) {
+                if (graphics.controllers[0] == null) {
                     compatibilityMode = true
                     warnUserOfCompatiblity('Unable to detect graphics device')
                     console.info('Done! Got Linux')
@@ -156,9 +157,10 @@ exports.initCompatibilityMode = async function () {
                 // Intel HD graphics is shit and causes so many problems it's unbelievable
                 // so I'm marking it as incompatible
                 let graphicss = graphics.controllers[0].model.toLowerCase()
+                let vendor = graphics.controllers[0].vendor.toLowerCase()
                 console.log('Linux: Got graphics! ' + graphicss)
 
-                if ((graphicss.includes('intel') || graphicss.includes('hd graphics')) && graphics.controllers.length < 2) {
+                if ((vendor.includes('intel') || vendor.includes('hd graphics')) && graphics.controllers.length < 2) {
                     compatibilityMode = true
                     warnUserOfCompatiblity('Detected Intel HD Graphics as primary graphics device')
                 }
