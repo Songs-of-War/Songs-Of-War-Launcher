@@ -1678,7 +1678,7 @@ class AssetGuard extends EventEmitter {
                         let fileName = /(?<=\/).+/gm.exec(key)
 
                         if(javamanifest[key]['downloads'] !== undefined) {
-                            JavaAssets.push(new Asset(fileName, null, javamanifest[key]['downloads']['raw']['size'], javamanifest[key]['downloads']['raw']['url'], path.join(dataDir + '/' + key)))
+                            JavaAssets.push(new Asset(fileName, null, javamanifest[key]['downloads']['raw']['size'], javamanifest[key]['downloads']['raw']['url'], path.join(dataDir + '/' + key.replace('jre.bundle/', ''))))
                         }
 
 

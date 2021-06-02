@@ -1328,6 +1328,22 @@ function dlAsync(login = true){
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
                                     // TODO: Yes this is retarded, I will add MD5 verification later
+
+
+                                    // Unfinished
+                                    let distroData = DistroManager.getDistribution()
+
+                                    let modFolder = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods')
+
+
+                                    if(distroData.getServer(ConfigManager.getSelectedServer()).getModules().find(e => e.artifact.path == path.join(modFolder, filename)) == null) {
+                                        // TODO
+                                    }
+
+
+
+                                    console.log(distroData)
+
                                     if(filename === 'nicephore' || filename.startsWith('nicephore\\') || filename === 'OptiFine.jar') {
                                         return
                                     }
