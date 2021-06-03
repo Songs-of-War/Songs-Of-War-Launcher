@@ -46,7 +46,7 @@ builder.build({
                 'zip'
             ],
             category: 'public.app-category.games',
-            compression: 'store',
+            compression: 'maximum',
         },
         linux: {
             target: [
