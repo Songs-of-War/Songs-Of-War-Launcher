@@ -1328,12 +1328,32 @@ function dlAsync(login = true){
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
                                     // TODO: Yes this is retarded, I will add MD5 verification later
-                                    if(filename === 'nicephore' || filename.startsWith('nicephore\\') || filename === 'OptiFine.jar') {
-                                        return
-                                    }
-                                    if(!joinedServer) {
-                                        ModifyError = true
-                                        proc.kill()
+
+
+                                    // Unfinished
+                                    let distroData = DistroManager.getDistribution()
+
+                                    let modFolder = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods')
+
+                                    let currentArtifact = distroData.getServer(ConfigManager.getSelectedServer()).getModules().filter((e) => {
+                                        if (e.artifact.path != null && e.artifact.path == `mods/${filename}`) {
+                                            currentArtifact = e.artifact
+                                            return true
+                                        }
+                                        return false
+                                    })[0]
+
+                                    if(currentArtifact == null) {
+                                        if(filename.endsWith('.jar')) {
+                                            ModifyError = true
+                                            proc.kill()
+                                        }
+                                    } else {
+                                        let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
+                                        if(currentArtifact.artifact.md5 != hash) {
+                                            ModifyError = true
+                                            proc.kill()
+                                        }
                                     }
                                 })
 
