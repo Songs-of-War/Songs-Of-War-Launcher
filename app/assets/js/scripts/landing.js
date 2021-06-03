@@ -1335,21 +1335,25 @@ function dlAsync(login = true){
 
                                     let modFolder = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods')
 
+                                    let currentArtifact = distroData.getServer(ConfigManager.getSelectedServer()).getModules().filter((e) => {
+                                        if (e.artifact.path != null && e.artifact.path == `mods/${filename}`) {
+                                            currentArtifact = e.artifact
+                                            return true
+                                        }
+                                        return false
+                                    })[0]
 
-                                    if(distroData.getServer(ConfigManager.getSelectedServer()).getModules().find(e => e.artifact.path == path.join(modFolder, filename)) == null) {
-                                        // TODO
-                                    }
-
-
-
-                                    console.log(distroData)
-
-                                    if(filename === 'nicephore' || filename.startsWith('nicephore\\') || filename === 'OptiFine.jar') {
-                                        return
-                                    }
-                                    if(!joinedServer) {
-                                        ModifyError = true
-                                        proc.kill()
+                                    if(currentArtifact == null) {
+                                        if(filename.endsWith('.jar')) {
+                                            ModifyError = true
+                                            proc.kill()
+                                        }
+                                    } else {
+                                        let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
+                                        if(currentArtifact.artifact.md5 != hash) {
+                                            ModifyError = true
+                                            proc.kill()
+                                        }
                                     }
                                 })
 
