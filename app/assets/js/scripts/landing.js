@@ -1340,7 +1340,7 @@ function dlAsync(login = true){
 
                                     let currentArtifact
                                     currentArtifact = distroData.getServer(ConfigManager.getSelectedServer()).getModules().filter((e) => {
-                                        if (e.artifact.path != null && e.artifact.path == path.join(modFolder, `OptiFine.jar`).toString()) {
+                                        if (e.artifact.path != null && e.artifact.path == path.join(modFolder, 'OptiFine.jar').toString()) {
                                             currentArtifact = e.artifact
                                             return true
                                         }
@@ -1355,8 +1355,8 @@ function dlAsync(login = true){
                                     } else {
                                         let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
 
-                                        console.log("File hash on system: " + hash)
-                                        console.log("File hash in distribution: " + currentArtifact.artifact.md5)
+                                        console.log('File hash on system: ' + hash)
+                                        console.log('File hash in distribution: ' + currentArtifact.artifact.md5)
                                         if(currentArtifact.artifact.md5 != hash) {
                                             ModifyError = true
                                             proc.kill()
