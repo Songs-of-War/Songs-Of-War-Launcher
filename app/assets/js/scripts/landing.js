@@ -1338,7 +1338,7 @@ function dlAsync(login = true){
                                     let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
 
 
-                                    let currentArtifact
+                                    let currentArtifact = null
                                     currentArtifact = distroData.getServer(ConfigManager.getSelectedServer()).getModules().filter((e) => {
                                         if (e.artifact.path != null && e.artifact.path == path.join(modFolder, 'OptiFine.jar').toString()) {
                                             currentArtifact = e.artifact
@@ -1357,7 +1357,7 @@ function dlAsync(login = true){
 
                                         console.log('File hash on system: ' + hash)
                                         console.log('File hash in distribution: ' + currentArtifact.artifact.md5)
-                                        if(currentArtifact.artifact.md5 != hash) {
+                                        if(currentArtifact.artifact.md5 != null && currentArtifact.artifact.md5 != hash) {
                                             ModifyError = true
                                             proc.kill()
                                         }
