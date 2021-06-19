@@ -1330,7 +1330,7 @@ function dlAsync(login = true){
 
                                     // This checks and verifies if after a file edit it's hash still matches the one in the distro
                                     // This is not a foolproof protection but should prevent kiddies from injecting their mods easily
-                                    // Also this fixes the fuck ton of unjustified runtime errors that happen on 1.10.2 and below
+                                    // Also this fixes the fuck ton of unjustified runtime errors that happen on 1.10.12 and below
                                     let distroData = DistroManager.getDistribution()
 
                                     let modFolder = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods')
