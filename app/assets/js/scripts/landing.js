@@ -1327,25 +1327,25 @@ function dlAsync(login = true){
                                 // Kill the process if the files get changed at runtime
                                 ModsWatcher.on('change', (event, filename) => {
                                     loggerLanding.log('File edit: ' + filename)
-                                    // TODO: Yes this is retarded, I will add MD5 verification later
 
-
-                                    // Unfinished
+                                    // This checks and verifies if after a file edit it's hash still matches the one in the distro
+                                    // This is not a foolproof protection but should prevent kiddies from injecting their mods easily
+                                    // Also this fixes the fuck ton of unjustified runtime errors that happen on 1.10.2 and below
                                     let distroData = DistroManager.getDistribution()
 
                                     let modFolder = path.join(ConfigManager.getInstanceDirectory(), DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getID() + '/mods')
 
-                                    let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
-
-
-                                    let currentArtifact = null
+                                    let currentArtifact
                                     currentArtifact = distroData.getServer(ConfigManager.getSelectedServer()).getModules().filter((e) => {
-                                        if (e.artifact.path != null && e.artifact.path == path.join(modFolder, 'OptiFine.jar').toString()) {
+                                        if (e.artifact.path != null && e.artifact.path == path.join(modFolder, filename).toString()) {
                                             currentArtifact = e.artifact
                                             return true
                                         }
                                         return false
                                     })[0]
+
+                                    console.log("Artifact:")
+                                    console.log(currentArtifact)
 
                                     if(currentArtifact == null) {
                                         if(filename.endsWith('.jar')) {
@@ -1353,14 +1353,18 @@ function dlAsync(login = true){
                                             proc.kill()
                                         }
                                     } else {
-                                        let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
+                                        if(fs.existsSync(path.join(modFolder, filename)) && !fs.lstatSync(path.join(modFolder, filename)).isDirectory()) {
+                                            let hash = crypto.createHash('md5').setEncoding('hex').update(fs.readFileSync(path.join(modFolder, filename))).digest('hex')
 
-                                        console.log('File hash on system: ' + hash)
-                                        console.log('File hash in distribution: ' + currentArtifact.artifact.md5)
-                                        if(currentArtifact.artifact.md5 != null && currentArtifact.artifact.md5 != hash) {
-                                            ModifyError = true
-                                            proc.kill()
+                                            console.log('File hash on system: ' + hash)
+                                            // "MD5" is case sensitive, I hate myself for not realizing that earlier
+                                            console.log('File hash in distribution: ' + currentArtifact.artifact.MD5)
+                                            if(currentArtifact.artifact.MD5 != null && currentArtifact.artifact.MD5 != hash) {
+                                                ModifyError = true
+                                                proc.kill()
+                                            }
                                         }
+
                                     }
                                 })
 
