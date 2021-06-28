@@ -18,7 +18,7 @@
         ],
         "linebreak-style": "off",
         "quotes": [
-            "error",
+            "warning",
             "single"
         ],
         "semi": [
