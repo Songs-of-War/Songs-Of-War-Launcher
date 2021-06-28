@@ -14,7 +14,7 @@ const DecompressZip = require('decompress-zip')
 
 
 const redirectUriPrefix = 'https://login.microsoftonline.com/common/oauth2/nativeclient?'
-const clientID = 'client id here'
+const clientID = 'd23ff5a0-2a35-43f5-b3e9-d26e37a913a7'
 /*const unhandled                     = require('electron-unhandled')
 const {openNewGitHubIssue, debugInfo} = require('electron-util')
 
@@ -81,6 +81,7 @@ if (!gotTheLock) {
             protocol: 'file:',
             slashes: true
         }))
+
 
         ipcMain.on('updateDownloadStatusUpdate', async (event, args) => {
             if(args === 'readyToStartUpdate') {
@@ -378,6 +379,7 @@ ipcMain.on('openMSALoginWindow', (ipcEvent, args) => {
 
     MSALoginWindow.on('closed', () => {
 
+        MSALoginWindow.destroy()
         MSALoginWindow = null
     })
 
@@ -419,7 +421,7 @@ ipcMain.on('openMSALogoutWindow', (ipcEvent, args) => {
             frame: true,
             icon: getPlatformIcon('SealCircle')
         })
-        MSALogoutWindow.loadURL('https://login.microsoftonline.com/common/oauth2/v2.0/logout')
+        MSALogoutWindow.loadURL('https://login.microsoftonline.com/22d104b8-8486-46d6-8e92-f1b5bec275f3/oauth2/v2.0/logout?')
         MSALogoutWindow.webContents.on('did-navigate', (e) => {
             setTimeout(() => {
                 ipcEvent.reply('MSALogoutWindowReply')
@@ -455,6 +457,8 @@ async function createWindow() {
         backgroundColor: '#171614'
     })
 
+    //win.webContents.openDevTools();
+
     console.log(path.join(__dirname, 'app', 'assets', 'js', 'preloader.js').toString())
 
     myWindow = win
@@ -466,6 +470,8 @@ async function createWindow() {
         protocol: 'file:',
         slashes: true
     }))
+
+
 
     /*win.once('ready-to-show', () => {
         win.show()

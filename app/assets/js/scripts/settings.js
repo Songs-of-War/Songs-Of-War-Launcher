@@ -443,6 +443,7 @@ function processLogOut(val, isLastAccount, skip = false) {
         if (account.type === 'microsoft') {
             toggleOverlay(true, false, 'msOverlay')
             ipcRenderer.send('openMSALogoutWindow', 'open')
+            return
         }
     }
     const prevSelAcc = ConfigManager.getSelectedAccount()

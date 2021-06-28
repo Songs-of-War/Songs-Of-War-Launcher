@@ -2,7 +2,7 @@
 const request = require('request')
 
 // Constants
-const clientId = 'client id here'
+const clientId = 'd23ff5a0-2a35-43f5-b3e9-d26e37a913a7'
 
 const tokenUri = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token'
 const authXBLUri = 'https://user.auth.xboxlive.com/user/authenticate'
@@ -12,6 +12,7 @@ const profileURI = 'https://api.minecraftservices.com/minecraft/profile'
 
 // Functions
 function requestPromise(uri, options) {
+    console.log(options)
     return new Promise((resolve, reject) => {
         request(uri, options, (error, response, body) => {
             if (error) {
@@ -78,7 +79,7 @@ function getXSTSToken(XBLToken) {
         
                     case 2148916238: 
                         reject({
-                            message: 'Since you are not yet 18 years old, an adult must add you to a family in order for you to use Helios Launcher!'
+                            message: 'Since you are not yet 18 years old, an adult must add you to a family in order for you to use Songs of War!'
                         })
                         return
                 

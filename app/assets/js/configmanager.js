@@ -122,7 +122,7 @@ const DEFAULT_CONFIG = {
         compatibility: {
             disableCheck : false
         }
-    }
+    },
     microsoftAuth: {}
 }
 
